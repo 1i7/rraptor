@@ -14,8 +14,8 @@ task_t *taskY;
 
 timer_t timer;
 
-step_data datx={100,1,0,1<<0,1<<1,1<<2,1<<3,0};
-step_data daty={100,10,0,1<<10,1<<5,1<<6,1<<7,0};
+step_data datx={500,1,0,1<<0,1<<1,1<<2,1<<3,0};
+step_data daty={500,10,0,1<<10,1<<5,1<<6,1<<7,0};
 
 void step_motor (step_data*, task_t*);
 
@@ -46,7 +46,7 @@ void uos_init (void)
     timer_init (&timer, KHZ, 1);
     
     taskX=task_create(step_motor42_x,0, "MotorX", 1,stack1, sizeof(stack1));
-    taskY=task_create(step_motor42_y,0, "MotorY", 2,stack2, sizeof(stack2));
+    taskY=task_create(step_motor42_y,0, "MotorY", 1,stack2, sizeof(stack2));
 
     
 }
