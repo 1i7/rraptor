@@ -17,16 +17,16 @@ timer_t timer;
 step_data datx={500,1,0,1<<0,1<<1,1<<2,1<<3,0};
 step_data daty={500,10,0,1<<10,1<<5,1<<6,1<<7,0};
 
-void step_motor (step_data*, task_t*);
+void step_motor (step_data*);
 
 void step_motor42_x (void *arg)
 {
-   step_motor(&datx, taskY);
+   step_motor(&datx);
 }
 
 void step_motor42_y (void *arg)
 {
-    step_motor(&daty, taskX);
+    step_motor(&data);
 }
 
 
@@ -51,7 +51,7 @@ void uos_init (void)
     
 }
 
-void step_motor (step_data* data, task_t *task)
+void step_motor (step_data* data)
 {
 
 int i=0;
