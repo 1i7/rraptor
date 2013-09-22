@@ -22,11 +22,13 @@ void step_motor (step_data*);
 void step_motor42_x (void *arg)
 {
    step_motor(&datx);
+   task_exit("MotorX finish");
 }
 
 void step_motor42_y (void *arg)
 {
     step_motor(&data);
+    task_exit("MotorY finish");
 }
 
 
