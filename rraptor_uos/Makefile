@@ -5,7 +5,7 @@ include target.cfg
 CFLAGS          += -g
 PROGTOOL        = $(AVRDUDE) -c stk500v2 -p pic32 -b 115200
 
-TEST		= OS2
+TEST		= rraptor_init
 
 TESTS		= $(TEST).srec
 

@@ -38,7 +38,7 @@ void rraptor_main(void);
 /**
  * Step motor, connected with 4 pins.
  */
-void step_motor_4pin (step_data* sdata);
+void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt);
 
 /**
  * Step motor.
@@ -51,7 +51,7 @@ void step_motor(step_data* sdata);
  * dl (delta length) - shift to destination point, micrometre.
  * dt (delta time) - time for movement, millis,
  */
-void move_dim(motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt, char* stack);
+void move_dim(motor_info* minfo, int dl, int dt, char* stack, int stacksz);
 
 /**
  * Move head from its current position to destination point 
@@ -79,7 +79,7 @@ void uos_init (void) {
     // uos
     timer_init (&timer, KHZ, 1);
 
-    //taskMain = task_create(rraptor_main,0, "Main", 1, stackMain, sizeof(stackMain));
+    //taskMain = task_create(rraptor_main,0, "Main", 2, stackMain, sizeof(stackMain));
     rraptor_main();
 }
 
@@ -100,27 +100,29 @@ void rraptor_main(void) {
 /*}*/
 
 void step_motor(step_data* sdata) {
-    step_motor_4pin(sdata);
+    if(sdata->minfo->conn_type == CONNECTION_4PIN) {
+        step_motor_4pin(sdata, (motor_conn_4pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
 
-    task_exit(sdata->minfo->name);
+        task_exit(sdata->minfo->name);
+    }
 }
 
-void move_dim(motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt, char* stack) {
+void move_dim(motor_info* minfo, int dl, int dt, char* stack, int stacksz) {
     step_data sdata;
     sdata.minfo = minfo;
     sdata.mconn = mconn;
     sdata.dl = dl;
     sdata.dt = dt;
     
-	task_create(step_motor, &sdata, minfo->name, 1, stack, sizeof(stack));
+	task_create(step_motor, &sdata, minfo->name, 1, stack, stacksz);
 }
 
 int move_head(int dx, int dy, int dz, int dt) {
 	//printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
 
-	move_dim(motor_info_x, motor_4pin_x, dx, time, stackX);
-	move_dim(motor_info_y, motor_4pin_y, dy, time, stackY);
-	move_dim(motor_info_z, motor_4pin_z, dz, time, stackZ);
+	move_dim(motor_info_x, motor_4pin_x, dx, time, stackX, sizeof(stackX));
+	move_dim(motor_info_y, motor_4pin_y, dy, time, stackY, sizeof(stackY));
+	move_dim(motor_info_z, motor_4pin_z, dz, time, stackZ, sizeof(stackZ));
 }
 
 void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt) {

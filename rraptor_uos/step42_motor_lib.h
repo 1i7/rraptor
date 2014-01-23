@@ -2,16 +2,12 @@
 #ifndef _step42_motor_lib_
 #define _step42_motor_lib_
 
-typedef struct motor_info {
-    /* Motor name */
-    char* name;
-    
-    /* Movement distance per movement cycle, micrometre */
-    int distance_per_cycle;
-    
-    /* Time spent for movement cycle, millis */
-    int time_per_cycle;
-} motor_info;
+/**
+ * Enumerate supported step motor connection optoins.
+ */
+enum motor_conn_type {
+    CONNECTION_4PIN
+};
 
 typedef struct motor_conn_4pin {
     int MOTOR_PIN1;
@@ -28,9 +24,23 @@ typedef struct motor_conn_4pin {
     
 } motor_conn_4pin;
 
+typedef struct motor_info {
+    /* Motor name */
+    char* name;
+    
+    /* Movement distance per movement cycle, micrometre */
+    int distance_per_cycle;
+    
+    /* Time spent for movement cycle, millis */
+    int time_per_cycle;
+
+    motor_conn_type conn_type;
+    void* conn_info;
+    
+} motor_info;
+
 typedef struct step_data {
     motor_info* minfo;
-    motor_conn_4pin* mconn;
     int dl;
     int dt;
 } step_data;
