@@ -1,12 +1,11 @@
 TARGET		= $(CURDIR)
-OS		= $(shell cd /home/benderamp/Documents/MIPS/RTOS/uOS/uos-embedded; pwd)
+OS		= $(shell cd /Users/tomilovandrej/Desktop/uos-embedded-read-only; pwd)
 include target.cfg
 
 CFLAGS          += -g
 PROGTOOL        = $(AVRDUDE) -c stk500v2 -p pic32 -b 115200
 
 TEST		= rraptor_init
-
 TESTS		= $(TEST).srec
 
 OUTS		= $(TESTS:%.srec=%.elf)

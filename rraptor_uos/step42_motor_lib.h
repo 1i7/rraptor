@@ -5,9 +5,13 @@
 /**
  * Enumerate supported step motor connection optoins.
  */
-enum motor_conn_type {
+/*enum motor_conn_type {
     CONNECTION_4PIN
 };
+ */
+
+const int CONNECTION_4PIN=1;
+const int CONNECTION_3PIN=2;
 
 typedef struct motor_conn_4pin {
     int MOTOR_PIN1;
@@ -24,6 +28,16 @@ typedef struct motor_conn_4pin {
     
 } motor_conn_4pin;
 
+typedef struct motor_conn_3pin {
+    int MOTOR_DIR;
+    int MOTOR_PULSE;
+    int MOTOR_EN;
+    
+    /* Delay between 2 steps */
+    int step_delay;
+    
+} motor_conn_3pin;
+
 typedef struct motor_info {
     /* Motor name */
     char* name;
@@ -34,7 +48,7 @@ typedef struct motor_info {
     /* Time spent for movement cycle, millis */
     int time_per_cycle;
 
-    motor_conn_type conn_type;
+    int conn_type;
     void* conn_info;
     
 } motor_info;
