@@ -11,6 +11,10 @@ ARRAY (stackY,1000);
 ARRAY (stackZ, 1000);
 ARRAY (stackEXT1,1000);
 
+step_data sdataX;
+step_data sdataY;
+step_data sdataZ;
+
 task_t *taskMain;
 task_t *taskX;
 task_t *taskY;
@@ -20,20 +24,22 @@ task_t *taskExt1;
 
 timer_t timer;
 
-motor_conn_4pin mconn_4pin_x = {1<<0,1<<1,1<<2,1<<3,0};
-motor_conn_4pin mconn_4pin_y = {1<<10,1<<5,1<<6,1<<7,0};
+motor_conn_4pin mconn_4pin_x = {1<<10,1<<5,1<<6,1<<7,0};
+motor_conn_4pin mconn_4pin_y = {1<<0,1<<1,1<<2,1<<3,0};
 motor_conn_4pin mconn_4pin_z = {1<<10,1<<5,1<<6,1<<7,0};
 motor_conn_4pin mconn_4pin_ext1 = {1<<10,1<<5,1<<6,1<<7,0};
 
-motor_conn_3pin mconn_3pin_x = {1<<1, 1<<2, 0, 1};
-motor_conn_3pin mconn_3pin_y = {1<<3, 1<<4, 0, 1};
-motor_conn_3pin mconn_3pin_z = {1<<10, 1<<5, 1<<6, 1};
-motor_conn_3pin mconn_3pin_ext1 = {1<<10, 1<<5, 1<<6, 1};
+motor_conn_3pin mconn_3pin_x = {1<<3, 1<<4, 0, 200};
+motor_conn_3pin mconn_3pin_y = {1<<1, 1<<2, 0, 200};
+motor_conn_3pin mconn_3pin_z = {1<<10, 1<<5, 0, 200};
+motor_conn_3pin mconn_3pin_ext1 = {0, 0, 0, 200};
 
-motor_info motor_info_x;// = {"X", 15, 2, CONNECTION_3PIN, &mconn_3pin_z};
-motor_info motor_info_y;// = {"Y", 15, 2, CONNECTION_3PIN, &mconn_3pin_z};
+motor_info motor_info_x;// = {"X", 15, 2, CONNECTION_3PIN, &mconn_3pin_x};
+motor_info motor_info_y;// = {"Y", 15, 2, CONNECTION_3PIN, &mconn_3pin_y};
 motor_info motor_info_z;// = {"Z", 15, 2, CONNECTION_3PIN, &mconn_3pin_z};
 motor_info motor_info_ext1;// = {"Ext1", 15, 2, CONNECTION_3PIN, &mconn_3pin_ext1};
+
+
 
 /**
  * Program main cycle.
@@ -61,7 +67,7 @@ void step_motor(void* arg);
  * dl (delta length) - shift to destination point, micrometre.
  * dt (delta time) - time for movement, millis,
  */
-void move_dim(motor_info* minfo, int dl, int dt, array_t* stack, int stacksz);
+void move_dim(motor_info* minfo, int dl, int dt, step_data* sdata, array_t* stack, int stacksz);
 
 /**
  * Move head from its current position to destination point 
@@ -72,86 +78,111 @@ void move_dim(motor_info* minfo, int dl, int dt, array_t* stack, int stacksz);
 void move_head(int dx, int dy, int dz, int dt);
 
 
-void init_motors_3pin() {
+void init_motors() {
     motor_info_x.name = "X";
     motor_info_x.distance_per_cycle = 15;
-    motor_info_x.time_per_cycle = 2;
+    motor_info_x.time_per_cycle = 4;
     motor_info_x.conn_type = CONNECTION_3PIN;
     motor_info_x.conn_info = &mconn_3pin_x;
     
     motor_info_y.name = "Y";
     motor_info_y.distance_per_cycle = 15;
-    motor_info_y.time_per_cycle = 2;
+    motor_info_y.time_per_cycle = 4;
     motor_info_y.conn_type = CONNECTION_3PIN;
     motor_info_y.conn_info = &mconn_3pin_y;
     
     motor_info_z.name = "Z";
     motor_info_z.distance_per_cycle = 15;
-    motor_info_z.time_per_cycle = 2;
+    motor_info_z.time_per_cycle = 4;
     motor_info_z.conn_type = CONNECTION_3PIN;
     motor_info_z.conn_info = &mconn_3pin_z;
     
     motor_info_ext1.name = "Ext1";
     motor_info_ext1.distance_per_cycle = 15;
-    motor_info_ext1.time_per_cycle = 2;
+    motor_info_ext1.time_per_cycle = 4;
     motor_info_ext1.conn_type = CONNECTION_3PIN;
     motor_info_ext1.conn_info = &mconn_3pin_ext1;
-    
-    TRISDSET=mconn_3pin_x.MOTOR_DIR;
-    TRISDCLR=mconn_3pin_x.MOTOR_PULSE;
-    
-    TRISDSET=mconn_3pin_y.MOTOR_DIR;
-    TRISDCLR=mconn_3pin_y.MOTOR_PULSE;
-    
-}
-
-void init_motors_4pin() {
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN1;
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN2;
-
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN3;
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN4;
-    
-
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN1;
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN2;
-
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN3;
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN4;
 }
 
 void test1(motor_conn_3pin* mconn) {
+    LATDCLR=mconn->MOTOR_DIR;
+    //LATDSET=mconn->MOTOR_DIR;
+    
     while (1) {
         LATDSET=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDSET=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         
+        //timer_delay(&timer, cdelay - mconn->step_delay * 4);
         //timer_delay(&timer, cdelay - mconn->step_delay * 4);
     }
 }
 
 
 void uos_init (void) {
-    init_motors_3pin();
+    TRISDCLR=mconn_3pin_x.MOTOR_DIR;
+    TRISDCLR=mconn_3pin_x.MOTOR_PULSE;
+    
+    TRISDCLR=mconn_3pin_y.MOTOR_DIR;
+    TRISDCLR=mconn_3pin_y.MOTOR_PULSE;
+    
+    TRISDCLR=mconn_3pin_z.MOTOR_DIR;
+    TRISDCLR=mconn_3pin_z.MOTOR_PULSE;
+    
+    //debug
+    //TRISGCLR=1<<6;
+    //LATGCLR=1<<6;
+    
+    
+    
+    /*TRISDCLR=1<<1;
+    TRISDCLR=1<<2;
+    
+    while (1) {
+        LATDSET=1<<2;
+        mdelay(1000);//mconn->step_delay);
+        LATDCLR=1<<2;
+        mdelay(1000);//mconn->step_delay);
+        LATDSET=1<<2;
+        mdelay(1000);//mconn->step_delay);
+        LATDCLR=1<<2;
+        mdelay(1000);//mconn->step_delay);
+        
+        //timer_delay(&timer, cdelay - mconn->step_delay * 4);
+    }*/
+    
+    
+    init_motors();
+    // motors
+    /*TRISDCLR=mconn_4pin_x.MOTOR_PIN1;
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN2;
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN3;
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN4;
+    
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN1;
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN2;
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN3;
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN4;*/
 
     // uos
     timer_init (&timer, KHZ, 1);
 
     //taskMain = task_create(rraptor_main,0, "Main", 2, stackMain, sizeof(stackMain));
-    //rraptor_main();
-    test1(&mconn_3pin_y);
+    rraptor_main();
+    //test1(&mconn_3pin_y);
 }
 
 void rraptor_main(void) {
-    move_head(50000, 50000, 100000, 10000);
-    move_head(0, 50000, 0, 10000);
-    move_head(50000, 0, 0, 10000);
-    move_head(50000, 100000, 0, 10000);
+    //move_head(50000, 20000, -20000, 10000);
+    move_head(-20000, 90000, -20000, 10000);
+    //move_head(0, 50000, 0, 10000);
+    //move_head(50000, 0, 0, 10000);
+    //move_head(50000, 100000, 0, 10000);
 }
 
 
@@ -168,42 +199,45 @@ void rraptor_main(void) {
 
 void step_motor(void* arg) {
     step_data* sdata = (step_data*) arg;
+    
     if(sdata->minfo->conn_type == CONNECTION_4PIN) {
         step_motor_4pin(sdata->minfo, (motor_conn_4pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
 
         task_exit(sdata->minfo->name);
     } else if(sdata->minfo->conn_type == CONNECTION_3PIN) {
+        
         step_motor_3pin(sdata->minfo, (motor_conn_3pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
         
         task_exit(sdata->minfo->name);
+    } else {
+        
     }
 }
 
-void move_dim(motor_info* minfo, int dl, int dt, array_t* stack, int stacksz) {
-    step_data sdata;
-    sdata.minfo = minfo;
-    sdata.dl = dl;
-    sdata.dt = dt;
+void move_dim(motor_info* minfo, int dl, int dt, step_data* sdata, array_t* stack, int stacksz) {
     
-	task_create(step_motor, &sdata, minfo->name, 1, stack, stacksz);
+    sdata->minfo = minfo;
+    sdata->dl = dl;
+    sdata->dt = dt;
+	
+    task_create(step_motor, sdata, minfo->name, 1, stack, stacksz);
 }
 
 void move_head(int dx, int dy, int dz, int dt) {
 	//printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
 
-	move_dim(&motor_info_x, dx, dt, stackX, sizeof(stackX));
-	move_dim(&motor_info_y, dy, dt, stackY, sizeof(stackY));
-	move_dim(&motor_info_z, dz, dt, stackZ, sizeof(stackZ));
+	move_dim(&motor_info_x, dx, dt, &sdataX, stackX, sizeof(stackX));
+	move_dim(&motor_info_y, dy, dt, &sdataY, stackY, sizeof(stackY));
+	move_dim(&motor_info_z, dz, dt, &sdataZ, stackZ, sizeof(stackZ));
 }
 
 void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt) {
-    if(dl == 0)
-        return;
     // calculate number of steps
     int step = dl / minfo->distance_per_cycle;
+    step = step >= 0 ? step : -step;
     
     // calculate cycle delay
-    int cdelay = dt / minfo->time_per_cycle;
+    //int cdelay = dt / step;//minfo->time_per_cycle;
     
     // set direction
     if(dl > 0) {
@@ -214,16 +248,20 @@ void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt)
     
     int i=0;
     while (i < step) {
-        timer_delay(&timer, cdelay - mconn->step_delay * 4);
-    
+        //timer_delay
+        //timer_delay(&timer, cdelay - mconn->step_delay * 4);
+        timer_delay(&timer, 2);
+        
         LATDSET=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDSET=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
-        mdelay(mconn->step_delay);
+        udelay(mconn->step_delay);
+        
+        i++;
     }
 }
 
