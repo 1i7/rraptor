@@ -29,15 +29,15 @@ motor_conn_4pin mconn_4pin_y = {1<<0,1<<1,1<<2,1<<3,0};
 motor_conn_4pin mconn_4pin_z = {1<<10,1<<5,1<<6,1<<7,0};
 motor_conn_4pin mconn_4pin_ext1 = {1<<10,1<<5,1<<6,1<<7,0};
 
-motor_conn_stb57 mconn_stb57_x;// = {1<<3, 1<<4, 0, 200};
-motor_conn_stb57 mconn_stb57_y;// = {1<<1, 1<<2, 0, 200};
-motor_conn_stb57 mconn_stb57_z;// = {1<<10, 1<<5, 0, 200};
-motor_conn_stb57 mconn_stb57_ext1;// = {0, 0, 0, 200};
+motor_conn_stb57 mconn_stb57_x;
+motor_conn_stb57 mconn_stb57_y;
+motor_conn_stb57 mconn_stb57_z;
+motor_conn_stb57 mconn_stb57_ext1;
 
-motor_info motor_info_x;// = {"X", 15, 2, CONNECTION_STB57, &mconn_stb57_x};
-motor_info motor_info_y;// = {"Y", 15, 2, CONNECTION_STB57, &mconn_stb57_y};
-motor_info motor_info_z;// = {"Z", 15, 2, CONNECTION_STB57, &mconn_stb57_z};
-motor_info motor_info_ext1;// = {"Ext1", 15, 2, CONNECTION_STB57, &mconn_stb57_ext1};
+motor_info motor_info_x;
+motor_info motor_info_y;
+motor_info motor_info_z;
+motor_info motor_info_ext1;
 
 
 
@@ -48,11 +48,6 @@ void rraptor_main(void);
 
 
 void init_motors() {
-    //mconn_stb57_x = {1<<3, 1<<4, 0, 200};
-    //mconn_stb57_y = {1<<1, 1<<2, 0, 200};
-    //mconn_stb57_z = {1<<10, 1<<5, 0, 200};
-    //mconn_stb57_ext1 = {0, 0, 0, 200};
-
     // Connection info
     mconn_stb57_x.MOTOR_DIR = 1<<3;
     mconn_stb57_x.MOTOR_PULSE = 1<<4;
@@ -99,6 +94,33 @@ void init_motors() {
     motor_info_ext1.time_per_cycle = mconn_stb57_ext1.step_delay * 4;
     motor_info_ext1.conn_type = CONNECTION_STB57;
     motor_info_ext1.conn_info = &mconn_stb57_ext1;
+
+    // Init motors pinout
+    TRISDCLR=mconn_stb57_x.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_x.MOTOR_PULSE;
+    
+    TRISDCLR=mconn_stb57_y.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_y.MOTOR_PULSE;
+    
+    TRISDCLR=mconn_stb57_z.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_z.MOTOR_PULSE;
+
+    /*TRISDCLR=mconn_4pin_x.MOTOR_PIN1;
+
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN2;
+
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN3;
+
+    TRISDCLR=mconn_4pin_x.MOTOR_PIN4;
+
+    
+
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN1;
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN2;
+
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN3;
+
+    TRISDCLR=mconn_4pin_y.MOTOR_PIN4;*/
 }
 
 void test1(motor_conn_stb57* mconn) {
@@ -121,54 +143,17 @@ void test1(motor_conn_stb57* mconn) {
 }
 
 
-void uos_init (void) {
-    TRISDCLR=mconn_stb57_x.MOTOR_DIR;
-    TRISDCLR=mconn_stb57_x.MOTOR_PULSE;
-    
-    TRISDCLR=mconn_stb57_y.MOTOR_DIR;
-    TRISDCLR=mconn_stb57_y.MOTOR_PULSE;
-    
-    TRISDCLR=mconn_stb57_z.MOTOR_DIR;
-    TRISDCLR=mconn_stb57_z.MOTOR_PULSE;
-    
+void uos_init (void) {    
     //debug
     //TRISGCLR=1<<6;
-    //LATGCLR=1<<6;
-    
-    
-    
-    /*TRISDCLR=1<<1;
-    TRISDCLR=1<<2;
-    
-    while (1) {
-        LATDSET=1<<2;
-        mdelay(1000);//mconn->step_delay);
-        LATDCLR=1<<2;
-        mdelay(1000);//mconn->step_delay);
-        LATDSET=1<<2;
-        mdelay(1000);//mconn->step_delay);
-        LATDCLR=1<<2;
-        mdelay(1000);//mconn->step_delay);
-        
-        //timer_delay(&timer, cdelay - mconn->step_delay * 4);
-    }*/
-    
-    
-    init_motors();
+
     // motors
-    /*TRISDCLR=mconn_4pin_x.MOTOR_PIN1;
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN2;
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN3;
-    TRISDCLR=mconn_4pin_x.MOTOR_PIN4;
-    
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN1;
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN2;
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN3;
-    TRISDCLR=mconn_4pin_y.MOTOR_PIN4;*/
+    init_motors();
 
     // uos
     timer_init (&timer, KHZ, 1);
 
+    // start main task
     taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
     //rraptor_main();
     //test1(&mconn_stb57_y);
@@ -218,6 +203,8 @@ task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data*
 
 void error(char* msg) {
     //printf("Error: %s\n", msg);
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
 }
 
 void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt) {
