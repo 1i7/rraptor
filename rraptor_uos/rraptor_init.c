@@ -29,15 +29,15 @@ motor_conn_4pin mconn_4pin_y = {1<<0,1<<1,1<<2,1<<3,0};
 motor_conn_4pin mconn_4pin_z = {1<<10,1<<5,1<<6,1<<7,0};
 motor_conn_4pin mconn_4pin_ext1 = {1<<10,1<<5,1<<6,1<<7,0};
 
-motor_conn_3pin mconn_3pin_x = {1<<3, 1<<4, 0, 200};
-motor_conn_3pin mconn_3pin_y = {1<<1, 1<<2, 0, 200};
-motor_conn_3pin mconn_3pin_z = {1<<10, 1<<5, 0, 200};
-motor_conn_3pin mconn_3pin_ext1 = {0, 0, 0, 200};
+motor_conn_stb57 mconn_stb57_x;// = {1<<3, 1<<4, 0, 200};
+motor_conn_stb57 mconn_stb57_y;// = {1<<1, 1<<2, 0, 200};
+motor_conn_stb57 mconn_stb57_z;// = {1<<10, 1<<5, 0, 200};
+motor_conn_stb57 mconn_stb57_ext1;// = {0, 0, 0, 200};
 
-motor_info motor_info_x;// = {"X", 15, 2, CONNECTION_3PIN, &mconn_3pin_x};
-motor_info motor_info_y;// = {"Y", 15, 2, CONNECTION_3PIN, &mconn_3pin_y};
-motor_info motor_info_z;// = {"Z", 15, 2, CONNECTION_3PIN, &mconn_3pin_z};
-motor_info motor_info_ext1;// = {"Ext1", 15, 2, CONNECTION_3PIN, &mconn_3pin_ext1};
+motor_info motor_info_x;// = {"X", 15, 2, CONNECTION_STB57, &mconn_stb57_x};
+motor_info motor_info_y;// = {"Y", 15, 2, CONNECTION_STB57, &mconn_stb57_y};
+motor_info motor_info_z;// = {"Z", 15, 2, CONNECTION_STB57, &mconn_stb57_z};
+motor_info motor_info_ext1;// = {"Ext1", 15, 2, CONNECTION_STB57, &mconn_stb57_ext1};
 
 
 
@@ -49,12 +49,12 @@ void rraptor_main(void);
 /**
  * Step motor, connected with 4 pins with L293D driver.
  */
-void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt);
+void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, unsigned int dl, unsigned int dt);
 
 /**
  * Step motor, connected with 3 pins.
  */
-void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt);
+void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int dl, unsigned int dt);
 
 /**
  * Step motor.
@@ -65,46 +65,74 @@ void step_motor(void* arg);
  * Move dimension defined by motor to destination 
  * for the provided period of time.
  * dl (delta length) - shift to destination point, micrometre.
- * dt (delta time) - time for movement, millis,
+ * dt (delta time) - time for movement, microseconds.
  */
-void move_dim(motor_info* minfo, int dl, int dt, step_data* sdata, array_t* stack, int stacksz);
+void move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz);
 
 /**
  * Move head from its current position to destination point 
  * for the provided period of time.
  * dx, dy, dz - shift to destination point, micrometre.
- * dt - time for moving, millis.
+ * dt - time for moving, microseconds.
  */
-void move_head(int dx, int dy, int dz, int dt);
+void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt);
 
 
 void init_motors() {
+    //mconn_stb57_x = {1<<3, 1<<4, 0, 200};
+    //mconn_stb57_y = {1<<1, 1<<2, 0, 200};
+    //mconn_stb57_z = {1<<10, 1<<5, 0, 200};
+    //mconn_stb57_ext1 = {0, 0, 0, 200};
+
+    // Connection info
+    mconn_stb57_x.MOTOR_DIR = 1<<3;
+    mconn_stb57_x.MOTOR_PULSE = 1<<4;
+    mconn_stb57_x.MOTOR_EN = 0;
+    mconn_stb57_x.step_delay = 250;
+
+    mconn_stb57_y.MOTOR_DIR = 1<<1;
+    mconn_stb57_y.MOTOR_PULSE = 1<<2;
+    mconn_stb57_y.MOTOR_EN = 0;
+    mconn_stb57_y.step_delay = 250;
+
+    mconn_stb57_z.MOTOR_DIR = 1<<10;
+    mconn_stb57_z.MOTOR_PULSE = 1<<5;
+    mconn_stb57_z.MOTOR_EN = 0;
+    mconn_stb57_z.step_delay = 250;
+
+    mconn_stb57_ext1.MOTOR_DIR = 0;
+    mconn_stb57_ext1.MOTOR_PULSE = 0;
+    mconn_stb57_ext1.MOTOR_EN = 0;
+    mconn_stb57_ext1.step_delay = 250;
+
+    // Motor info
     motor_info_x.name = "X";
     motor_info_x.distance_per_cycle = 15;
-    motor_info_x.time_per_cycle = 4;
-    motor_info_x.conn_type = CONNECTION_3PIN;
-    motor_info_x.conn_info = &mconn_3pin_x;
+    // with step_delay=250 1 cycle=1 mls
+    motor_info_x.time_per_cycle = mconn_stb57_x.step_delay * 4;
+    motor_info_x.conn_type = CONNECTION_STB57;
+    motor_info_x.conn_info = &mconn_stb57_x;
     
     motor_info_y.name = "Y";
     motor_info_y.distance_per_cycle = 15;
-    motor_info_y.time_per_cycle = 4;
-    motor_info_y.conn_type = CONNECTION_3PIN;
-    motor_info_y.conn_info = &mconn_3pin_y;
+    motor_info_y.time_per_cycle = mconn_stb57_y.step_delay * 4;
+    motor_info_y.conn_type = CONNECTION_STB57;
+    motor_info_y.conn_info = &mconn_stb57_y;
     
     motor_info_z.name = "Z";
     motor_info_z.distance_per_cycle = 15;
-    motor_info_z.time_per_cycle = 4;
-    motor_info_z.conn_type = CONNECTION_3PIN;
-    motor_info_z.conn_info = &mconn_3pin_z;
+    motor_info_z.time_per_cycle = mconn_stb57_z.step_delay * 4;
+    motor_info_z.conn_type = CONNECTION_STB57;
+    motor_info_z.conn_info = &mconn_stb57_z;
     
     motor_info_ext1.name = "Ext1";
     motor_info_ext1.distance_per_cycle = 15;
-    motor_info_ext1.time_per_cycle = 4;
-    motor_info_ext1.conn_type = CONNECTION_3PIN;
-    motor_info_ext1.conn_info = &mconn_3pin_ext1;
+    motor_info_ext1.time_per_cycle = mconn_stb57_ext1.step_delay * 4;
+    motor_info_ext1.conn_type = CONNECTION_STB57;
+    motor_info_ext1.conn_info = &mconn_stb57_ext1;
 }
 
-void test1(motor_conn_3pin* mconn) {
+void test1(motor_conn_stb57* mconn) {
     LATDCLR=mconn->MOTOR_DIR;
     //LATDSET=mconn->MOTOR_DIR;
     
@@ -125,14 +153,14 @@ void test1(motor_conn_3pin* mconn) {
 
 
 void uos_init (void) {
-    TRISDCLR=mconn_3pin_x.MOTOR_DIR;
-    TRISDCLR=mconn_3pin_x.MOTOR_PULSE;
+    TRISDCLR=mconn_stb57_x.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_x.MOTOR_PULSE;
     
-    TRISDCLR=mconn_3pin_y.MOTOR_DIR;
-    TRISDCLR=mconn_3pin_y.MOTOR_PULSE;
+    TRISDCLR=mconn_stb57_y.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_y.MOTOR_PULSE;
     
-    TRISDCLR=mconn_3pin_z.MOTOR_DIR;
-    TRISDCLR=mconn_3pin_z.MOTOR_PULSE;
+    TRISDCLR=mconn_stb57_z.MOTOR_DIR;
+    TRISDCLR=mconn_stb57_z.MOTOR_PULSE;
     
     //debug
     //TRISGCLR=1<<6;
@@ -174,12 +202,12 @@ void uos_init (void) {
 
     //taskMain = task_create(rraptor_main,0, "Main", 2, stackMain, sizeof(stackMain));
     rraptor_main();
-    //test1(&mconn_3pin_y);
+    //test1(&mconn_stb57_y);
 }
 
 void rraptor_main(void) {
     //move_head(50000, 20000, -20000, 10000);
-    move_head(-20000, 90000, -20000, 10000);
+    move_head(-20000, 40000, -20000, 10000000);
     //move_head(0, 50000, 0, 10000);
     //move_head(50000, 0, 0, 10000);
     //move_head(50000, 100000, 0, 10000);
@@ -199,46 +227,72 @@ void rraptor_main(void) {
 
 void step_motor(void* arg) {
     step_data* sdata = (step_data*) arg;
-    
-    if(sdata->minfo->conn_type == CONNECTION_4PIN) {
-        step_motor_4pin(sdata->minfo, (motor_conn_4pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
 
-        task_exit(sdata->minfo->name);
-    } else if(sdata->minfo->conn_type == CONNECTION_3PIN) {
-        
-        step_motor_3pin(sdata->minfo, (motor_conn_3pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
-        
-        task_exit(sdata->minfo->name);
-    } else {
-        
+    if(sdata->minfo->conn_type == CONNECTION_4PIN) {
+        // step motor with 4-pin l294d driver
+        step_motor_4pin(sdata->minfo, (motor_conn_4pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
+    } else if(sdata->minfo->conn_type == CONNECTION_STB57) {  
+        // step motor with 3-pin stb57 driver
+        step_motor_stb57(sdata->minfo, (motor_conn_stb57*)sdata->minfo->conn_info, sdata->dl, sdata->dt);        
     }
+    task_exit(sdata->minfo->name);
 }
 
-void move_dim(motor_info* minfo, int dl, int dt, step_data* sdata, array_t* stack, int stacksz) {
+task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz) {
     
     sdata->minfo = minfo;
     sdata->dl = dl;
     sdata->dt = dt;
 	
-    task_create(step_motor, sdata, minfo->name, 1, stack, stacksz);
+    return task_create(step_motor, sdata, minfo->name, 1, stack, stacksz);
 }
 
-void move_head(int dx, int dy, int dz, int dt) {
+void error(char* msg) {
+    //printf("Error: %s\n", msg);
+}
+
+void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt) {
+    // with current precision max dl (dx,dy,dy) ~ 1300000um (1m 30cm for unsigned int),
+    // max dt ~ 250000000us (4min for unsigned int)
+    
 	//printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
 
-	move_dim(&motor_info_x, dx, dt, &sdataX, stackX, sizeof(stackX));
-	move_dim(&motor_info_y, dy, dt, &sdataY, stackY, sizeof(stackY));
-	move_dim(&motor_info_z, dz, dt, &sdataZ, stackZ, sizeof(stackZ));
+	// validate values - calculate maximum speed for 3 motors:
+	//int max_speed_x = motor_info_x.distance_per_cycle / 
+	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
+	//int max_speed_y = motor_info_y.distance_per_cycle / 
+	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
+	//int max_speed_z = motor_info_z.distance_per_cycle / 
+	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
+
+    // wait for old movement tasks to complete
+	task_wait(taskX);
+	task_wait(taskY);
+	task_wait(taskZ);
+
+    // start new movement tasks
+	taskX = move_dim(&motor_info_x, dx, dt, &sdataX, stackX, sizeof(stackX));
+	taskY = move_dim(&motor_info_y, dy, dt, &sdataY, stackY, sizeof(stackY));
+	taskZ = move_dim(&motor_info_z, dz, dt, &sdataZ, stackZ, sizeof(stackZ));
 }
 
-void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt) {
+void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int dl, unsigned int dt) {
     // calculate number of steps
     int step = dl / minfo->distance_per_cycle;
     step = step >= 0 ? step : -step;
     
     // calculate cycle delay
-    //int cdelay = dt / step;//minfo->time_per_cycle;
-    
+    unsigned int cdelay = dt / step;
+
+    // calculate timer delay - in millis
+    // time_per_cycle = step_delay * 4
+    int tdelay = (cdelay - minfo->time_per_cycle) / 1000;
+    if(tdelay <= 0) {
+//        printf("Error: timer delay < 0 [motor=%s]", minfo->name);
+        error("Error: timer delay < 0");
+        return;
+    }
+      
     // set direction
     if(dl > 0) {
         LATDSET = mconn->MOTOR_DIR;
@@ -247,11 +301,7 @@ void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt)
     }
     
     int i=0;
-    while (i < step) {
-        //timer_delay
-        //timer_delay(&timer, cdelay - mconn->step_delay * 4);
-        timer_delay(&timer, 2);
-        
+    while (i < step) {        
         LATDSET=mconn->MOTOR_PULSE;
         udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
@@ -262,10 +312,14 @@ void step_motor_3pin (motor_info* minfo, motor_conn_3pin* mconn, int dl, int dt)
         udelay(mconn->step_delay);
         
         i++;
+
+        // timer delay - let other motors to work a bit too
+        timer_delay(&timer, tdelay);
+        //timer_delay(&timer, 2);
     }
 }
 
-void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, int dt) {
+void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, unsigned int dl, unsigned int dt) {
     // calculate number of steps
     int step = dl / minfo->distance_per_cycle;
 

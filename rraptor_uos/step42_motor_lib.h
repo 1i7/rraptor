@@ -11,7 +11,7 @@
  */
 
 const int CONNECTION_4PIN=1;
-const int CONNECTION_3PIN=2;
+const int CONNECTION_STB57=2;
 
 typedef struct motor_conn_4pin {
     int MOTOR_PIN1;
@@ -19,24 +19,24 @@ typedef struct motor_conn_4pin {
     int MOTOR_PIN3;
     int MOTOR_PIN4;
 
-    /* Delay between 2 steps */
+    /* Delay between 2 steps, microseconds */
     int step_delay;
 
-    /* true (1): motor in microstem mode, 
+    /* true (1): motor in microstep mode, 
      * false (0): motor in non-microstep mode */
     int microstep;
     
 } motor_conn_4pin;
 
-typedef struct motor_conn_3pin {
+typedef struct motor_conn_stb57 {
     int MOTOR_DIR;
     int MOTOR_PULSE;
     int MOTOR_EN;
     
-    /* Delay between 2 steps */
+    /* Delay between 2 steps, microseconds */
     int step_delay;
     
-} motor_conn_3pin;
+} motor_conn_stb57;
 
 typedef struct motor_info {
     /* Motor name */
@@ -45,7 +45,7 @@ typedef struct motor_info {
     /* Movement distance per movement cycle, micrometre */
     int distance_per_cycle;
     
-    /* Time spent for movement cycle, millis */
+    /* Time spent for movement cycle, microseconds */
     int time_per_cycle;
 
     int conn_type;
