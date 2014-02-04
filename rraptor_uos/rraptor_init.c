@@ -46,37 +46,6 @@ motor_info motor_info_ext1;// = {"Ext1", 15, 2, CONNECTION_STB57, &mconn_stb57_e
  */
 void rraptor_main(void);
 
-/**
- * Step motor, connected with 4 pins with L293D driver.
- */
-void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, unsigned int dl, unsigned int dt);
-
-/**
- * Step motor, connected with 3 pins.
- */
-void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int dl, unsigned int dt);
-
-/**
- * Step motor.
- */
-void step_motor(void* arg);
-
-/** 
- * Move dimension defined by motor to destination 
- * for the provided period of time.
- * dl (delta length) - shift to destination point, micrometre.
- * dt (delta time) - time for movement, microseconds.
- */
-void move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz);
-
-/**
- * Move head from its current position to destination point 
- * for the provided period of time.
- * dx, dy, dz - shift to destination point, micrometre.
- * dt - time for moving, microseconds.
- */
-void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt);
-
 
 void init_motors() {
     //mconn_stb57_x = {1<<3, 1<<4, 0, 200};
@@ -200,8 +169,8 @@ void uos_init (void) {
     // uos
     timer_init (&timer, KHZ, 1);
 
-    //taskMain = task_create(rraptor_main,0, "Main", 2, stackMain, sizeof(stackMain));
-    rraptor_main();
+    taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
+    //rraptor_main();
     //test1(&mconn_stb57_y);
 }
 
