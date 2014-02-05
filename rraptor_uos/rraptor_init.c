@@ -168,8 +168,6 @@ void rraptor_main(void) {
 }
 
 
-
-
 /*void handle_command_stream(char* file_path) {*/
 /*	f=fopen(file_path, "r");*/
 
@@ -207,21 +205,59 @@ void error(char* msg) {
     //LATGSET=1<<6; // light on
 }
 
+void warn(char* msg) {
+    //printf("Error: %s\n", msg);
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
+}
+
+
+
 void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt) {
-    // with current precision max dl (dx,dy,dy) ~ 1300000um (1m 30cm for unsigned int),
-    // max dt ~ 250000000us (4min for unsigned int)
+    // printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
+
+    // for 3 motors with dpc=15um, tpc=250*4us=1ms max speed is 5mm/sec
     
-	//printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
+    // with current precision:
+    // max dl (dx,dy,dy) ~ 1300000um (1300mm=130cm=1m 30cm for unsigned int),
+    // max dt ~ 250000000us (250sec~4min for unsigned int)
 
-	// validate values - calculate maximum speed for 3 motors:
-	//int max_speed_x = motor_info_x.distance_per_cycle / 
-	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
-	//int max_speed_y = motor_info_y.distance_per_cycle / 
-	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
-	//int max_speed_z = motor_info_z.distance_per_cycle / 
-	//    (motor_info_x.time_per_cycle + motor_info_y.time_per_cycle + motor_info_z.time_per_cycle);
+	// validate values - check maximum speed for 3 motors:
+	// dx/dt <= dpc_x/(tpc_x+tpc_y+tpc_z)
+	// dy/dt <= dpc_y/(tpc_x+tpc_y+tpc_z)
+	// dz/dt <= dpc_z/(tpc_x+tpc_y+tpc_z)
 
-    // wait for old movement tasks to complete
+    int reset_time = FALSE;
+	
+	int min_tpc = 
+	    motor_info_x.time_per_cycle + 
+	    motor_info_y.time_per_cycle + 
+	    motor_info_z.time_per_cycle;
+
+	if(dx * min_tpc > motor_info_x.distance_per_cycle * dt) {
+	    reset_time = TRUE;
+	    warn("Speed is too high for dx, reset dt to min possible value");
+	}
+	if(dy * min_tpc > motor_info_y.distance_per_cycle * dt) {
+	    reset_time = TRUE;
+	    warn("Speed is too high for dy, reset dt to min possible value");
+	}
+	if(dz * min_tpc > motor_info_z.distance_per_cycle * dt) {
+	    reset_time = TRUE;
+	    warn("Speed is too high for dz, reset dt to min possible value");
+	}
+
+    // reset time to min value (for max speed)
+	if(dt == 0 || reset_time) {
+	    int min_dt_x = dx * min_tpc / motor_info_x.distance_per_cycle;
+	    int min_dt_y = dy * min_tpc / motor_info_y.distance_per_cycle;
+	    int min_dt_z = dz * min_tpc / motor_info_z.distance_per_cycle;
+
+	    int min1 = min_dt_x < min_dt_y ? min_dt_x : min_dt_y;
+	    dt = min1 < min_dt_z ? min1 : min_dt_z;
+	}
+	
+    // wait for previous movement tasks to complete
 	task_wait(taskX);
 	task_wait(taskY);
 	task_wait(taskZ);

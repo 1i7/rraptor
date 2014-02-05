@@ -2,6 +2,9 @@
 #ifndef _step42_motor_lib_
 #define _step42_motor_lib_
 
+#define TRUE 1
+#define FALSE 0
+
 /**
  * Enumerate supported step motor connection optoins.
  */
@@ -82,7 +85,7 @@ task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data*
  * Move head from its current position to destination point 
  * for the provided period of time.
  * dx, dy, dz - shift to destination point, micrometre.
- * dt - time for moving, microseconds.
+ * dt - time for moving, microseconds (autoset to min possible value for max speed if dt=0).
  */
 void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt);
 
