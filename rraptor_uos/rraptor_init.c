@@ -219,8 +219,11 @@ void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int d
     // for 3 motors with dpc=15um, tpc=250*4us=1ms max speed is 5mm/sec
     
     // with current precision:
-    // max dl (dx,dy,dy) ~ 1300000um (1300mm=130cm=1m 30cm for unsigned int),
-    // max dt ~ 250000000us (250sec~4min for unsigned int)
+    // max dl (dx,dy,dy) ~ 1300000um (1300mm=130cm=1m 30cm for unsigned int);
+    // max dt ~ 260000000us (260sec~4min 20 sec for unsigned int);
+    // max distance for min time:
+    //     ~ 1300mm/260sec (ok for unsigned int),
+    //     ~ 650mm/130sec (ok for signed int)
 
 	// validate values - check maximum speed for 3 motors:
 	// dx/dt <= dpc_x/(tpc_x+tpc_y+tpc_z)
