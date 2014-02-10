@@ -44,7 +44,7 @@ motor_info motor_info_ext1;
 /**
  * Program main cycle.
  */
-void rraptor_main(void);
+void rraptor_main(void*);
 
 
 void init_motors() {
@@ -159,7 +159,7 @@ void uos_init (void) {
     //test1(&mconn_stb57_y);
 }
 
-void rraptor_main(void) {
+void rraptor_main(void* arg) {
     //move_head(50000, 20000, -20000, 10000);
     move_head(-20000, 40000, -20000, 10000000);
     //move_head(0, 50000, 0, 10000);
