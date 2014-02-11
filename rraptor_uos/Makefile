@@ -1,5 +1,6 @@
 TARGET		= $(CURDIR)
-OS		= $(shell cd /Users/tomilovandrej/Desktop/uos-embedded-read-only; pwd)
+#OS		= $(shell cd /Users/tomilovandrej/Desktop/uos-embedded-read-only; pwd)
+OS		= $(shell cd ../../local/uos-embedded-read-only; pwd)
 include target.cfg
 
 CFLAGS          += -g
