@@ -123,7 +123,7 @@ void init_motors() {
     TRISDCLR=mconn_4pin_y.MOTOR_PIN4;*/
 }
 
-void test1(motor_conn_stb57* mconn) {
+void test_motor(motor_conn_stb57* mconn) {
     LATDCLR=mconn->MOTOR_DIR;
     //LATDSET=mconn->MOTOR_DIR;
     
@@ -142,10 +142,22 @@ void test1(motor_conn_stb57* mconn) {
     }
 }
 
+void test_blink() {
+    // blink led on PORTG#8 (ChipKIT#pin13)
+    while(1) {
+        LATGCLR=1<<6; // light off
+        mdelay(1000);
+        LATGSET=1<<6; // light on
+        mdelay(1000);
+    }
+}
+
 
 void uos_init (void) {    
     //debug
-    //TRISGCLR=1<<6;
+    TRISGCLR=1<<6;
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
 
     // motors
     init_motors();
@@ -154,9 +166,11 @@ void uos_init (void) {
     timer_init (&timer, KHZ, 1);
 
     // start main task
-    taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
+    //taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
     //rraptor_main();
-    //test1(&mconn_stb57_y);
+    
+    //test_motor(&mconn_stb57_y);
+    test_blink();
 }
 
 void rraptor_main(void* arg) {
