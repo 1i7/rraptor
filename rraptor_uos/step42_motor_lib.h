@@ -54,19 +54,19 @@ typedef struct motor_info {
 typedef struct step_data {
     motor_info* minfo;
     int dl;
-    int dt;
+    unsigned int dt;
 } step_data;
 
 
 /**
  * Step motor, connected with 4 pins with L293D driver.
  */
-void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, unsigned int dl, unsigned int dt);
+void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, unsigned int dt);
 
 /**
  * Step motor, connected with 3 pins.
  */
-void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int dl, unsigned int dt);
+void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, int dl, unsigned int dt);
 
 /**
  * Step motor.
@@ -79,7 +79,7 @@ void step_motor(void* arg);
  * dl (delta length) - shift to destination point, micrometre.
  * dt (delta time) - time for movement, microseconds.
  */
-task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz);
+task_t* move_dim(motor_info* minfo, int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz);
 
 /**
  * Move head from its current position to destination point 
@@ -87,7 +87,7 @@ task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data*
  * dx, dy, dz - shift to destination point, micrometre.
  * dt - time for moving, microseconds (autoset to min possible value for max speed if dt=0).
  */
-void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt);
+void move_head(int dx, int dy, int dz, unsigned int dt);
 
 #endif
 

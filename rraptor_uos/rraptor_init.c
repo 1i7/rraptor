@@ -16,9 +16,9 @@ step_data sdataY;
 step_data sdataZ;
 
 task_t *taskMain;
-task_t *taskX;
-task_t *taskY;
-task_t *taskZ;
+task_t* taskX;
+task_t* taskY;
+task_t* taskZ;
 task_t *taskExt1;
 
 
@@ -39,13 +39,29 @@ motor_info motor_info_y;
 motor_info motor_info_z;
 motor_info motor_info_ext1;
 
-
-
 /**
  * Program main cycle.
+
  */
 void rraptor_main(void*);
 
+void error(char* msg) {
+    debug_printf("Error: %s\n", msg);
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
+}
+
+void warn(char* msg) {
+    debug_printf("Warning: %s\n", msg);
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
+}
+
+void info(char* msg) {
+    debug_printf("Info: %s\n", msg);
+    //LATGCLR=1<<6; // light off
+    //LATGSET=1<<6; // light on
+}
 
 void init_motors() {
     // Connection info
@@ -142,6 +158,7 @@ void test_motor(motor_conn_stb57* mconn) {
     }
 }
 
+int blink = 0;
 void test_blink() {
     // blink led on PORTG#8 (ChipKIT#pin13)
     while(1) {
@@ -149,16 +166,21 @@ void test_blink() {
         mdelay(1000);
         LATGSET=1<<6; // light on
         mdelay(1000);
+
+        debug_printf("blink %d\n", blink);
+        blink++;
     }
 }
 
 
-void uos_init (void) {    
+void uos_init (void) {
+    info("Starting system...");    
     //debug
     TRISGCLR=1<<6;
     //LATGCLR=1<<6; // light off
     //LATGSET=1<<6; // light on
 
+    info("Setup pinout and timers");
     // motors
     init_motors();
 
@@ -166,19 +188,31 @@ void uos_init (void) {
     timer_init (&timer, KHZ, 1);
 
     // start main task
-    //taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
+    info("Start main task");
+    taskMain = task_create(rraptor_main, 0, "Main", 2, stackMain, sizeof(stackMain));
     //rraptor_main();
-    
+/*
+while(1) {
+    debug_printf(" timer delay=%dms\n", 0);
+    mdelay(10);
+    }*/
     //test_motor(&mconn_stb57_y);
-    test_blink();
+    //test_blink();
 }
 
 void rraptor_main(void* arg) {
-    //move_head(50000, 20000, -20000, 10000);
-    move_head(-20000, 40000, -20000, 10000000);
-    //move_head(0, 50000, 0, 10000);
-    //move_head(50000, 0, 0, 10000);
-    //move_head(50000, 100000, 0, 10000);
+    move_head(50000, 20000, -20000, 10000);
+    move_head(-20000, 40000, -20000, 10000);
+    move_head(20000, 50000, 30000, 10000);
+    move_head(50000, 50000, 20000, 10000);
+    move_head(50000, 100000, 10000, 10000);
+
+    info("Drawing finished\n");
+    test_blink();
+    /*while(1) {
+        info("ping");
+        mdelay(2000);
+    }*/
 }
 
 
@@ -193,18 +227,25 @@ void rraptor_main(void* arg) {
 
 void step_motor(void* arg) {
     step_data* sdata = (step_data*) arg;
+    
+    debug_printf("Info: Step motor name=%s", sdata->minfo->name);
 
     if(sdata->minfo->conn_type == CONNECTION_4PIN) {
         // step motor with 4-pin l294d driver
+        debug_printf(", driver=%s\n", "l294d");
         step_motor_4pin(sdata->minfo, (motor_conn_4pin*)sdata->minfo->conn_info, sdata->dl, sdata->dt);
     } else if(sdata->minfo->conn_type == CONNECTION_STB57) {  
         // step motor with 3-pin stb57 driver
+        debug_printf(", driver=%s\n", "stb57");
         step_motor_stb57(sdata->minfo, (motor_conn_stb57*)sdata->minfo->conn_info, sdata->dl, sdata->dt);        
+    } else {
+        warn("Unknown motor driver\n");
     }
+    debug_printf("Info: Exit step motor task, name=%s\n", sdata->minfo->name);
     task_exit(sdata->minfo->name);
 }
 
-task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz) {
+task_t* move_dim(motor_info* minfo, int dl, unsigned int dt, step_data* sdata, array_t* stack, int stacksz) {
     
     sdata->minfo = minfo;
     sdata->dl = dl;
@@ -213,30 +254,17 @@ task_t* move_dim(motor_info* minfo, unsigned int dl, unsigned int dt, step_data*
     return task_create(step_motor, sdata, minfo->name, 1, stack, stacksz);
 }
 
-void error(char* msg) {
-    //printf("Error: %s\n", msg);
-    //LATGCLR=1<<6; // light off
-    //LATGSET=1<<6; // light on
-}
 
-void warn(char* msg) {
-    //printf("Error: %s\n", msg);
-    //LATGCLR=1<<6; // light off
-    //LATGSET=1<<6; // light on
-}
-
-
-
-void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int dt) {
+void move_head(int dx, int dy, int dz, unsigned int dt) {
+    debug_printf("Info: Move head: dx=%d, dy=%d, dz=%d, dt=%u\n", dx, dy, dz, dt);
     // printf("move(%d, %d, %d, %d)\n", dx, dy, dz, dt);
 
     // for 3 motors with dpc=15um, tpc=250*4us=1ms max speed is 5mm/sec
     
     // with current precision:
-    // max dl (dx,dy,dy) ~ 1300000um (1300mm=130cm=1m 30cm for unsigned int);
+    // max dl (dx,dy,dy) ~ 650000um (650mm=65cm for signed int);
     // max dt ~ 260000000us (260sec~4min 20 sec for unsigned int);
     // max distance for min time:
-    //     ~ 1300mm/260sec (ok for unsigned int),
     //     ~ 650mm/130sec (ok for signed int)
 
 	// validate values - check maximum speed for 3 motors:
@@ -264,41 +292,53 @@ void move_head(unsigned int dx, unsigned int dy, unsigned int dz, unsigned int d
 	    warn("Speed is too high for dz, reset dt to min possible value");
 	}
 
-    // reset time to min value (for max speed)
+    // reset time to minimum possible value (for max speed) - maximum of minimums
 	if(dt == 0 || reset_time) {
-	    int min_dt_x = dx * min_tpc / motor_info_x.distance_per_cycle;
-	    int min_dt_y = dy * min_tpc / motor_info_y.distance_per_cycle;
-	    int min_dt_z = dz * min_tpc / motor_info_z.distance_per_cycle;
+	    int min_dt_x = abs(dx) * min_tpc / motor_info_x.distance_per_cycle;
+	    int min_dt_y = abs(dy) * min_tpc / motor_info_y.distance_per_cycle;
+	    int min_dt_z = abs(dz) * min_tpc / motor_info_z.distance_per_cycle;
 
-	    int min1 = min_dt_x < min_dt_y ? min_dt_x : min_dt_y;
-	    dt = min1 < min_dt_z ? min1 : min_dt_z;
+	    int max_min1 = min_dt_x > min_dt_y ? min_dt_x : min_dt_y;
+	    dt = max_min1 > min_dt_z ? max_min1 : min_dt_z;
+
+	    debug_printf("Warning: Reset dt=%d\n", dt);
 	}
 	
-    // wait for previous movement tasks to complete
-	task_wait(taskX);
-	task_wait(taskY);
-	task_wait(taskZ);
-
     // start new movement tasks
+    info("Moving motors...");
 	taskX = move_dim(&motor_info_x, dx, dt, &sdataX, stackX, sizeof(stackX));
 	taskY = move_dim(&motor_info_y, dy, dt, &sdataY, stackY, sizeof(stackY));
 	taskZ = move_dim(&motor_info_z, dz, dt, &sdataZ, stackZ, sizeof(stackZ));
+
+	// wait for movement tasks to complete
+    task_wait(taskX);
+    task_wait(taskY);
+	task_wait(taskZ);	
+	info("Moving motors done");
 }
 
-void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int dl, unsigned int dt) {
+void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, int dl, unsigned int dt) {
+    debug_printf("Info: Stepping motor [name=%s, driver=%s, dl=%d, dt=%d]: ", minfo->name, "stb57", dl, dt);
+
+    if(dl == 0) {
+        debug_printf("skip\n");
+        return;
+    }
+
     // calculate number of steps
-    int step = dl / minfo->distance_per_cycle;
-    step = step >= 0 ? step : -step;
+    int step = abs(dl) / minfo->distance_per_cycle;
+    debug_printf("step count=%d, ", step);
     
     // calculate cycle delay
     unsigned int cdelay = dt / step;
+    debug_printf("cycle delay=%dus, ", cdelay);
 
     // calculate timer delay - in millis
     // time_per_cycle = step_delay * 4
     int tdelay = (cdelay - minfo->time_per_cycle) / 1000;
+    debug_printf(" timer delay=%dms\n", tdelay);
     if(tdelay <= 0) {
-//        printf("Error: timer delay < 0 [motor=%s]", minfo->name);
-        error("Error: timer delay < 0");
+        debug_printf("Error: timer delay <= 0 [motor=%s]\n", minfo->name);
         return;
     }
       
@@ -310,7 +350,11 @@ void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int 
     }
     
     int i=0;
-    while (i < step) {        
+    while (i < step) {
+        // timer delay - let other motors to work a bit too
+        timer_delay(&timer, tdelay);
+        //timer_delay(&timer, 2);
+                
         LATDSET=mconn->MOTOR_PULSE;
         udelay(mconn->step_delay);
         LATDCLR=mconn->MOTOR_PULSE;
@@ -321,14 +365,10 @@ void step_motor_stb57 (motor_info* minfo, motor_conn_stb57* mconn, unsigned int 
         udelay(mconn->step_delay);
         
         i++;
-
-        // timer delay - let other motors to work a bit too
-        timer_delay(&timer, tdelay);
-        //timer_delay(&timer, 2);
     }
 }
 
-void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, unsigned int dl, unsigned int dt) {
+void step_motor_4pin (motor_info* minfo, motor_conn_4pin* mconn, int dl, unsigned int dt) {
     // calculate number of steps
     int step = dl / minfo->distance_per_cycle;
 
