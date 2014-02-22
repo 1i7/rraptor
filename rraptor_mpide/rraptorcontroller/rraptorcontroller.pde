@@ -179,8 +179,8 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
  */
 void shift_coord_um(smotor* sm, int dl, int dt) {
     Serial.print(String("") + "Info: Shifting coord [name=" + sm->name + ", dl=" + dl + "um, dt=" + dt + "us" + "]: ");
-    if(dl == 0) {
-         Serial.println("skip");
+    if(dl == 0 || abs(dl) < sm->distance_per_cycle) {
+        Serial.println("skip");
         return;
     }
     
@@ -259,7 +259,7 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
     Serial.print(String("") + "Info: Exec G01 [" 
         + "dest pos=(" + x + "um" + ", " + y + "um" + ", " + z + "um)" + ", f=" + f + "" + "]: ");
     Serial.println(String("") + 
-         + ", current pos=(" + _sm_x->current_pos + "um, " + ", " + _sm_y->current_pos + "um" + ", " + _sm_z->current_pos + "um)");
+         + " current pos=(" + _sm_x->current_pos + "um, " + _sm_y->current_pos + "um" + ", " + _sm_z->current_pos + "um)");
          
     // В этой реализации перемещение по координате z обрабатывается отдельно от x и y - за один шаг, 
     // перемещение по плоскости (x,y) осуществляется маленькими шажками по алгоритму Брезенхама.
