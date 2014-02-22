@@ -16,6 +16,8 @@ namespace rraptor {
   const char* CMD_SHIFT = "shift";
   /* Запустить мотор с заданной скоростью на непрерывное вращение */
   const char* CMD_GO = "go";
+  /* Калибровать станок - установить начальную точку (0,0,0) в текущем положении */
+  const char* CMD_CALIBRATE = "calibrate";
   
   const int REPLY_STATUS_OK = 0;
   const int REPLY_STATUS_ERROR = 1;
@@ -31,13 +33,18 @@ typedef struct {
     /* Time spent for movement cycle, microseconds */
     int time_per_cycle;
   
-    int MOTOR_DIR_PIN;
-    int MOTOR_PULSE_PIN;
-    int MOTOR_EN_PIN;    
+    int PULSE_PIN;
+    int DIR_PIN;   
+    int EN_PIN;
+    
+    /* With dir_inv=1 and dir_pin=1 direction is 0->1, with dir_inv=-1 and dir_pin=1 direction 1->0 */
+    int dir_inv;
 
     /* Задержка между 2 шагами, микросекунды */
     int step_delay;
     
+    /* Максимальное значение положения */
+    int MAX_POS;
     /* Текущее положение */
     int current_pos;
 } smotor;
@@ -56,16 +63,19 @@ int reply_status = REPLY_STATUS_OK;
 
 
 void init_smotor(smotor* sm, char* name, int distance_per_cycle, int time_per_cycle,
-    int step_delay, int dir_pin, int pulse_pin, int en_pin) {
+    int step_delay, int pulse_pin, int dir_pin, int en_pin, int max_pos, int dir_inv) {
   
   sm->name = name;
   sm->distance_per_cycle = distance_per_cycle;
   sm->time_per_cycle = time_per_cycle;
-  
   sm->step_delay = step_delay;  
-  sm->MOTOR_DIR_PIN = dir_pin;
-  sm->MOTOR_PULSE_PIN = pulse_pin;
-  sm->MOTOR_EN_PIN = en_pin;
+  
+  sm->PULSE_PIN = pulse_pin;
+  sm->DIR_PIN = dir_pin;
+  sm->EN_PIN = en_pin;
+  
+  sm->MAX_POS = max_pos;
+  sm->dir_inv = dir_inv;
 }
 
 /**
@@ -83,6 +93,15 @@ smotor* smotor_by_id(char* id) {
   }
 }
 
+/**
+ * Установить начальную точку (0,0,0) в текущем положении.
+ */
+void reset_start_pos() {
+  sm_x.current_pos = 0;
+  sm_y.current_pos = 0;
+  sm_z.current_pos = 0;
+}
+
 void enable_motors() {
   GLOBAL_DISABLE_MOTORS = 0;
 }
@@ -98,16 +117,10 @@ void disable_motors() {
  */
 void step_motor(smotor* sm, int cnum, int cdelay) {
     Serial.print(String("") + "Info: Stepping motor [name=" + sm->name + ", cycle count=" + cnum + ", cycle delay=" + cdelay + "us" + "]: ");
-    Serial.print(String("") + "step=" + sm->MOTOR_PULSE_PIN + ", dir=" + sm->MOTOR_DIR_PIN + ",  ");
+    Serial.print(String("") + "step=" + sm->PULSE_PIN + ", dir=" + sm->DIR_PIN + ",  ");
     // задать направление в зависиомости от знака
-    int dir = 0;
-    if(cnum > 0) {
-        digitalWrite(sm->MOTOR_DIR_PIN, HIGH);
-        dir = 1;
-    } else {
-        digitalWrite(sm->MOTOR_DIR_PIN, LOW);
-        dir = -1;
-    }
+    int dir = (cnum > 0 ? 1 : -1);
+    digitalWrite(sm->DIR_PIN, (dir * sm->dir_inv > 0 ? HIGH : LOW));
     
     cnum = abs(cnum);
     
@@ -124,18 +137,21 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
     Serial.println(String("") + "estimated time=" + est_time + "us");
 
     int i=0;
-    while (i < cnum && !GLOBAL_DISABLE_MOTORS) {
+    // Считаем шаги и не забываем проверять выход за границы рабочей области
+    while (i < cnum && !GLOBAL_DISABLE_MOTORS && 
+            (dir > 0 ? sm->current_pos + sm->distance_per_cycle <= sm->MAX_POS : 
+                       sm->current_pos - sm->distance_per_cycle >= 0)) {
       // пусть будет 2 шага в одном цикле
-        digitalWrite(sm->MOTOR_PULSE_PIN, HIGH);
+        digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, LOW);
+        digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, HIGH);
+        digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, LOW);
+        digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
         
-        if(dir >0) {
+        if(dir > 0) {
           sm->current_pos += sm->distance_per_cycle;
         } else {
           sm->current_pos -= sm->distance_per_cycle;
@@ -144,6 +160,8 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
         delay(tdelay);
         i++;
     }
+    
+    Serial.println(String("") + "Current position=" + sm->current_pos + ", motor=" + sm->name);
 }
 
 /**
@@ -181,25 +199,22 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
     Serial.println(String("") + ", estimated time=" + est_time + "us");
   
     // задать направление в зависиомости от знака
-    int dir = 0;
-    if(dl > 0) {
-        digitalWrite(sm->MOTOR_DIR_PIN, HIGH);
-        dir = 1;
-    } else {
-        digitalWrite(sm->MOTOR_DIR_PIN, LOW);
-        dir = -1; 
-    }
+    int dir = (dl > 0 ? 1 : -1);
+    digitalWrite(sm->DIR_PIN, (dir * sm->dir_inv > 0 ? HIGH : LOW));
 
     int i=0;
-    while (i < cnum && !GLOBAL_DISABLE_MOTORS) {
+    // Считаем шаги и не забываем проверять выход за границы рабочей области
+    while (i < cnum && !GLOBAL_DISABLE_MOTORS && 
+            (dir > 0 ? sm->current_pos + sm->distance_per_cycle <= sm->MAX_POS : 
+                       sm->current_pos - sm->distance_per_cycle >= 0)) {
       // пусть будет 2 шага в одном цикле
-        digitalWrite(sm->MOTOR_PULSE_PIN, HIGH);
+        digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, LOW);
+        digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, HIGH);
+        digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
-        digitalWrite(sm->MOTOR_PULSE_PIN, LOW);
+        digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
         
         if(dir > 0) {
@@ -450,6 +465,11 @@ int handle_command(char* cmd_line) {
         }
       }
     }
+  } else if(cmd_line_str.startsWith(CMD_CALIBRATE)) {
+    // Команда корректна
+    success = 1;
+    Serial.println("Handle command: [cmd=calibrate]");
+    reset_start_pos();
   }
   
   if(!success) {
@@ -519,18 +539,18 @@ void setup()
   Serial.begin(9600);
   
   // init stepper motors
-  int step_delay = 1000;
+  int step_delay = 500;
   // with step_delay=250 1 cycle=1 mls
-  rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 3, 2, 4); // синий драйвер
-  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 7, 6, 8); // черный драйвер
-  rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 11, 10, 12); // желтый драйвер
+  rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 2, 3, 4, 216000, 1); // X - синий драйвер
+  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, 1); // Y - желтый драйвер
+  rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 10, 11, 12, 100000, 1); // Z - черный драйвер
   
-  pinMode(rraptor::sm_x.MOTOR_DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_x.MOTOR_PULSE_PIN, OUTPUT);
-  pinMode(rraptor::sm_y.MOTOR_DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_y.MOTOR_PULSE_PIN, OUTPUT);
-  pinMode(rraptor::sm_z.MOTOR_DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_z.MOTOR_PULSE_PIN, OUTPUT);
+  pinMode(rraptor::sm_x.DIR_PIN, OUTPUT);
+  pinMode(rraptor::sm_x.PULSE_PIN, OUTPUT);
+  pinMode(rraptor::sm_y.DIR_PIN, OUTPUT);
+  pinMode(rraptor::sm_y.PULSE_PIN, OUTPUT);
+  pinMode(rraptor::sm_z.DIR_PIN, OUTPUT);
+  pinMode(rraptor::sm_z.PULSE_PIN, OUTPUT);
   
   // Wifi
     int conID = DWIFIcK::INVALID_CONNECTION_ID;
@@ -640,7 +660,7 @@ void loop()
             Serial.println("Writing: ");
             Serial.println(rraptor::reply_status, DEC);  
 
-            //tcpClient.writeStream(rraptor::reply_status);
+            tcpClient.writeByte((byte)rraptor::reply_status);
             state = READ;
             tStart = (unsigned) millis();
         } else {
