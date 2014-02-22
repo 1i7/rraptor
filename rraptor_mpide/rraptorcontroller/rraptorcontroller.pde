@@ -19,6 +19,13 @@ namespace rraptor {
   /* Калибровать станок - установить начальную точку (0,0,0) в текущем положении */
   const char* CMD_CALIBRATE = "calibrate";
   
+  /* Команда G-code G01 - прямая линия */
+  const char* CMD_GCODE_G01 = "G01";
+  /* Команда G-code G02 - дуга по часовой стрелке */
+  const char* CMD_GCODE_G02 = "G02";
+  /* Команда G-code G03 - дуга против часовой стрелки */
+  const char* CMD_GCODE_G03 = "G03";
+  
   const int REPLY_STATUS_OK = 0;
   const int REPLY_STATUS_ERROR = 1;
   
@@ -50,6 +57,7 @@ typedef struct {
 } smotor;
 
 smotor sm_x, sm_y, sm_z;
+
 /* Текущая скорость моторов, запущенных командой go:
  * 1 - вперед
  * 0 - стоит на месте
@@ -226,6 +234,8 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
         delay(tdelay);
         i++;
     }
+    
+    Serial.println(String("") + "Current position=" + sm->current_pos + ", motor=" + sm->name);
 }
 
 /**
@@ -236,9 +246,62 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
 void move_coord_um(smotor* sm, int pos) {
     Serial.print(String("") + "Info: Moving coord [name=" + sm->name + ", pos=" + pos + "um" + "]: ");
     
-    int dl = sm->current_pos - pos;
+    int dl = pos - sm->current_pos;
     Serial.println(String("") + "shift=" + dl + "um");
     shift_coord_um(sm, dl, 0);
+}
+
+/**
+ * Реализация команды g-code G01 - переместить текущее положение рабочего блока в 
+ * указанную позицию по прямой линии с заданной скоростью.
+ */
+void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z, int f) {
+    Serial.print(String("") + "Info: Exec G01 [" 
+        + "dest pos=(" + x + "um" + ", " + y + "um" + ", " + z + "um)" + ", f=" + f + "" + "]: ");
+    Serial.println(String("") + 
+         + ", current pos=(" + _sm_x->current_pos + "um, " + ", " + _sm_y->current_pos + "um" + ", " + _sm_z->current_pos + "um)");
+         
+    // В этой реализации перемещение по координате z обрабатывается отдельно от x и y - за один шаг, 
+    // перемещение по плоскости (x,y) осуществляется маленькими шажками по алгоритму Брезенхама.
+    // TODO: добавить реализацию работы со скоростью.
+    
+    // Сначала переместимся по Z:
+    if(z != _sm_z->current_pos) {
+      int dl_z = z - _sm_z->current_pos;
+      Serial.println(String("") + "Move Z, shift=" + dl_z + "um");
+      shift_coord_um(_sm_z, dl_z, 0);
+    }
+    
+    // Переместимся по плоскости (x,y) по лесенке.
+    
+    // минимальное количество циклов в одной "ступеньке"
+    int precision = 10;
+    
+    int dl_x= x - _sm_x->current_pos;
+    int dl_y= y - _sm_y->current_pos;
+    
+    // Проверить крайние ситуации
+    if(dl_x == 0) {
+      if(dl_y != 0) {
+        shift_coord_um(_sm_y, dl_y, 0);
+      }
+    } else if (dl_y == 0) {
+      shift_coord_um(_sm_x, dl_x, 0);
+    } else {
+      // пошли лесенкой
+      int stairstep_count = abs(dl_x) < abs(dl_y) ? 
+          abs(dl_x) / (_sm_x->distance_per_cycle * precision) :
+          abs(dl_y) / (_sm_y->distance_per_cycle * precision);
+    
+      // длина ступеньки - мкм
+      int stairstep_x = dl_x / stairstep_count;
+      int stairstep_y = dl_y / stairstep_count;
+    
+      for(int i = 0; i < stairstep_count; i++) {
+        shift_coord_um(_sm_x, stairstep_x, 0);
+        shift_coord_um(_sm_y, stairstep_y, 0);
+      }
+    }
 }
 
 void go_cycle_motor(smotor* sm, int spd) {
@@ -465,6 +528,63 @@ int handle_command(char* cmd_line) {
         }
       }
     }
+  } else if(cmd_line_str.startsWith(CMD_GCODE_G01)) {
+    // command 'G01' syntax:
+    //     G01 x y z [f]
+    String x_str;
+    String y_str;
+    String z_str;
+    String f_str;
+    int x;
+    int y;
+    int z;
+    int f;
+    
+    int space1 = -1;
+    int space2 = -1;
+    
+    space1 = cmd_line_str.indexOf(' ');
+    if(space1 != -1) {
+      space2 = cmd_line_str.indexOf(' ', space1 + 1);
+      if(space2 != -1) {
+        x_str = cmd_line_str.substring(space1 + 1, space2);
+        x = x_str.toInt();//atoi(cnum_str.toCharArray());
+        
+        space1 = space2;
+        space2 = cmd_line_str.indexOf(' ', space1 + 1);
+        if(space2 != -1) {
+          y_str = cmd_line_str.substring(space1 + 1, space2);
+          y = y_str.toInt();//atoi(cnum_str.toCharArray());
+          
+          space1 = space2;
+          space2 = cmd_line_str.indexOf(' ', space1 + 1);
+          if(space2 != -1) {
+            z_str = cmd_line_str.substring(space1 + 1, space2);            
+          } else {
+            z_str = cmd_line_str.substring(space1 + 1);
+          }
+          
+          z = z_str.toInt();//atoi(cnum_str.toCharArray());
+          
+          // Необязательный параметр - f
+          if(space2 != -1) {
+            f_str = cmd_line_str.substring(space2 + 1);
+            f = f_str.toInt();//atoi(cnum_str.toCharArray());
+          }
+          
+          // Команда корректна
+          success = 1;
+          Serial.println(String("") + "Handle command: [cmd=G01, dest pos=(" + x + ", " + y + ", " + z + ")");
+          
+          // Выполнить команду
+          gcode_g01(&sm_x, &sm_y, &sm_z, x, y, z, f);        
+        }
+      }
+    }
+  } else if(cmd_line_str.startsWith(CMD_GCODE_G02)) {
+    // TODO: implement G02
+  } else if(cmd_line_str.startsWith(CMD_GCODE_G03)) {
+    // TODO: implement G03
   } else if(cmd_line_str.startsWith(CMD_CALIBRATE)) {
     // Команда корректна
     success = 1;
