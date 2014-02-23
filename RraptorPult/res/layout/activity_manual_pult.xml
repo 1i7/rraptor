@@ -93,4 +93,14 @@
         android:minWidth="100dip"
         android:text=">" />
 
+    <Button
+        android:id="@+id/calibrate_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/z_forward_btn"
+        android:layout_marginRight="28dp"
+        android:layout_marginTop="94dp"
+        android:text="Калибровать" />
+
 </RelativeLayout>

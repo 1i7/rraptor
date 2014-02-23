@@ -37,13 +37,14 @@ public class DeviceConnectionWifi implements DeviceConnection {
 		in = new InputStreamReader(socket.getInputStream());
 	}
 
-	public void writeToDevice(final Context context, final Handler handler,
-			final String address, final int port, final String cmd) {
+	synchronized public void sendToDevice(final Context context,
+			final Handler handler, final String address, final int port,
+			final String cmd) {
 		boolean connected = false;
 		if (out != null) {
 			try {
 				System.out.println(cmd);
-				writeToDeviceLocked(cmd);
+				writeToDevice(cmd);
 				connected = true;
 			} catch (IOException e) {
 				System.out.println("Failed connection, try reconnect.");
@@ -67,38 +68,75 @@ public class DeviceConnectionWifi implements DeviceConnection {
 	}
 
 	@Override
-	synchronized public void writeToDevice(String cmd) throws IOException {
-		out.write(cmd);
-		out.flush();
-	}
-
-	@Override
-	public void writeToDeviceBackground(final Context context,
+	public void sendToDeviceBackground(final Context context,
 			final Handler handler, final String cmd) {
-		writeToDeviceBackground(context, handler, ADDRESS_DEFAULT,
-				PORT_DEFAULT, cmd);
+		sendToDeviceBackground(context, handler, ADDRESS_DEFAULT, PORT_DEFAULT,
+				cmd);
 	}
 
-	public void writeToDeviceBackground(final Context context,
+	public void sendToDeviceBackground(final Context context,
 			final Handler handler, final String address, final int port,
 			final String cmd) {
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				writeToDevice(context, handler, address, port, cmd);
+				sendToDevice(context, handler, address, port, cmd);
 			}
 		}).start();
 	}
 
+	public int sendToDeviceBlocked(final String address, final int port,
+			String cmd, UnblockHook unblockHook) throws Exception {
+		int returnCode = -1;
+		if (out != null) {
+			try {
+				System.out.println(cmd);
+				returnCode = writeToDeviceBlocked(cmd, unblockHook);
+			} catch (IOException e) {
+				System.out.println("Failed connection, try reconnect.");
+				connectToDevice(address, port);
+				returnCode = writeToDeviceBlocked(cmd, unblockHook);
+			}
+		}
+		return returnCode;
+	}
+
 	@Override
-	public int writeToDeviceLocked(String cmd) throws IOException {
+	public int sendToDeviceBlocked(String cmd, UnblockHook unblockHook)
+			throws Exception {
+		return sendToDeviceBlocked(ADDRESS_DEFAULT, PORT_DEFAULT, cmd,
+				unblockHook);
+	}
+
+	@Override
+	synchronized public void writeToDevice(String cmd) throws IOException {
+		out.write(cmd);
+		out.flush();
+	}
+
+	@Override
+	synchronized public int writeToDeviceBlocked(String cmd,
+			final UnblockHook unblockHook) throws IOException {
 		out.write(cmd);
 		out.flush();
 
 		// wait for reply
-		int replyStatus = in.read();
-		System.out.println("CMD status: " + replyStatus);
+		while (!in.ready()
+				&& (unblockHook != null ? unblockHook.isWaitingBlock() : true)) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		int replyStatus;
+		if (in.ready()) {
+			replyStatus = in.read();
+			System.out.println("CMD status: " + replyStatus);
+		} else {
+			throw new IOException("Interrupted");
+		}
 		return replyStatus;
 	}
 }

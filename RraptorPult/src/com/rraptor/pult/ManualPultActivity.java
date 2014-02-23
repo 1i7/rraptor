@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 
@@ -26,37 +27,49 @@ public class ManualPultActivity extends Activity {
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
 				switch (v.getId()) {
 				case R.id.x_forward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_X_FORWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_X_FORWARD);
 					break;
 				case R.id.x_backward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_X_BACKWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_X_BACKWARD);
 					break;
 				case R.id.y_forward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_Y_FORWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_Y_FORWARD);
 					break;
 				case R.id.y_backward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_Y_BACKWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_Y_BACKWARD);
 					break;
 				case R.id.z_forward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_Z_FORWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_Z_FORWARD);
 					break;
 				case R.id.z_backward_btn:
-					deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-							handler, DeviceConnection.CMD_Z_BACKWARD);
+					deviceConnection.sendToDeviceBackground(
+							ManualPultActivity.this, handler,
+							DeviceConnection.CMD_Z_BACKWARD);
 					break;
 				}
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-				deviceConnection.writeToDeviceBackground(ManualPultActivity.this,
-						handler, DeviceConnection.CMD_STOP);
+				deviceConnection.sendToDeviceBackground(
+						ManualPultActivity.this, handler,
+						DeviceConnection.CMD_STOP);
 			}
 			return false;
 		}
 	};
+
+	private void calibrateDevice() {
+		deviceConnection.sendToDeviceBackground(ManualPultActivity.this,
+				handler, DeviceConnection.CMD_CALIBRATE);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +88,14 @@ public class ManualPultActivity extends Activity {
 		btnZF.setOnTouchListener(onTouchListener);
 		final Button btnZB = (Button) findViewById(R.id.z_backward_btn);
 		btnZB.setOnTouchListener(onTouchListener);
+
+		final Button btnCalibrate = (Button) findViewById(R.id.calibrate_btn);
+		btnCalibrate.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				calibrateDevice();
+			}
+		});
 	}
 
 	@Override
