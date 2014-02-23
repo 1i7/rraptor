@@ -281,17 +281,16 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
     int dl_y= y - _sm_y->current_pos;
     
     // Проверить крайние ситуации
-    if(dl_x == 0) {
-      if(dl_y != 0) {
-        shift_coord_um(_sm_y, dl_y, 0);
-      }
-    } else if (dl_y == 0) {
+    if(abs(dl_x) < (_sm_x->distance_per_cycle * precision) ||
+        abs(dl_y) < (_sm_y->distance_per_cycle * precision)) {
       shift_coord_um(_sm_x, dl_x, 0);
+      shift_coord_um(_sm_y, dl_y, 0);
     } else {
       // пошли лесенкой
       int stairstep_count = abs(dl_x) < abs(dl_y) ? 
           abs(dl_x) / (_sm_x->distance_per_cycle * precision) :
           abs(dl_y) / (_sm_y->distance_per_cycle * precision);
+      Serial.println(String("") + "Go X-Y stairs, stair step count=" + stairstep_count);
     
       // длина ступеньки - мкм
       int stairstep_x = dl_x / stairstep_count;
@@ -301,6 +300,10 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
         shift_coord_um(_sm_x, stairstep_x, 0);
         shift_coord_um(_sm_y, stairstep_y, 0);
       }
+      
+      // добить оставшийся путь
+      shift_coord_um(_sm_x, x - _sm_x->current_pos, 0);
+      shift_coord_um(_sm_y, y - _sm_y->current_pos, 0);
     }
 }
 
