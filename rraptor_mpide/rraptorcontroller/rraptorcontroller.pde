@@ -296,7 +296,7 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
     // Переместимся по плоскости (x,y) по лесенке.
     
     // минимальное количество циклов в одной "ступеньке"
-    int precision = 10;
+    int precision = 100;
     
     int dl_x= x - _sm_x->current_pos;
     int dl_y= y - _sm_y->current_pos;
@@ -720,8 +720,8 @@ void setup()
   int step_delay = 500;
   // with step_delay=250 1 cycle=1 mls
   rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 2, 3, 4, 216000, 1); // X - синий драйвер
-  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, 1); // Y - желтый драйвер
-  rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 10, 11, 12, 100000, 1); // Z - черный драйвер
+  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, -1); // Y - желтый драйвер
+  rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 10, 11, 12, 100000, -1); // Z - черный драйвер
   
   pinMode(rraptor::sm_x.DIR_PIN, OUTPUT);
   pinMode(rraptor::sm_x.PULSE_PIN, OUTPUT);
