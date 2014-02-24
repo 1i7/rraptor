@@ -16,7 +16,10 @@ namespace rraptor {
   const char* CMD_SHIFT = "shift";
   /* Запустить мотор с заданной скоростью на непрерывное вращение */
   const char* CMD_GO = "go";
-  /* Калибровать станок - установить начальную точку (0,0,0) в текущем положении */
+  /** 
+   * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
+   * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
+   */
   const char* CMD_CALIBRATE = "calibrate";
   
   /* Команда G-code G01 - прямая линия */
@@ -58,7 +61,8 @@ typedef struct {
 
 smotor sm_x, sm_y, sm_z;
 
-/* Текущая скорость моторов, запущенных командой go:
+/** 
+ * Текущая скорость моторов, запущенных командой go:
  * 1 - вперед
  * 0 - стоит на месте
  * -1 - назад
@@ -66,6 +70,13 @@ smotor sm_x, sm_y, sm_z;
 int speed_x = 0;
 int speed_y = 0;
 int speed_z = 0;
+
+/** 
+ * calibrate:
+ * 1 - в режиме калибровки не проверяется выход за границы рабочей области.
+ * 0 - обычный режим, при перемещении рабочего блока перемещаются границы рабочей области.
+ */
+int calibrate_mode = 0;
 
 int reply_status = REPLY_STATUS_OK;
 
@@ -121,7 +132,7 @@ void disable_motors() {
 /**
  * Повернуть двигатель на нужное количество циклов с нужной скоростью.
  * cnum - количество циклов - знаковое целое: если > 0, шагаем вперед, если < 0 - назад.
- * cdelay - время выполнения цикла, микросекунды.
+ * cdelay - время выполнения цикла, микросекунды.  
  */
 void step_motor(smotor* sm, int cnum, int cdelay) {
     Serial.print(String("") + "Info: Stepping motor [name=" + sm->name + ", cycle count=" + cnum + ", cycle delay=" + cdelay + "us" + "]: ");
@@ -147,8 +158,9 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
     int i=0;
     // Считаем шаги и не забываем проверять выход за границы рабочей области
     while (i < cnum && !GLOBAL_DISABLE_MOTORS && 
+            (calibrate_mode ? 1 : 
             (dir > 0 ? sm->current_pos + sm->distance_per_cycle <= sm->MAX_POS : 
-                       sm->current_pos - sm->distance_per_cycle >= 0)) {
+                       sm->current_pos - sm->distance_per_cycle >= 0))) {
       // пусть будет 2 шага в одном цикле
         digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
@@ -159,10 +171,14 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
         digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
         
-        if(dir > 0) {
-          sm->current_pos += sm->distance_per_cycle;
+        if(calibrate_mode) {
+          sm->current_pos = 0;
         } else {
-          sm->current_pos -= sm->distance_per_cycle;
+          if(dir > 0) {
+            sm->current_pos += sm->distance_per_cycle;
+          } else {
+            sm->current_pos -= sm->distance_per_cycle;
+          }
         }
         
         delay(tdelay);
@@ -178,15 +194,15 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
  * dt - время сдвига, микросекунды.
  */
 void shift_coord_um(smotor* sm, int dl, int dt) {
-    Serial.print(String("") + "Info: Shifting coord [name=" + sm->name + ", dl=" + dl + "um, dt=" + dt + "us" + "]: ");
+    //Serial.print(String("") + "Info: Shifting coord [name=" + sm->name + ", dl=" + dl + "um, dt=" + dt + "us" + "]: ");
     if(dl == 0 || abs(dl) < sm->distance_per_cycle) {
-        Serial.println("skip");
+    //    Serial.println("skip");
         return;
     }
     
     // calculate number of steps
     int cnum = abs(dl) / sm->distance_per_cycle;
-    Serial.print(String("") + "cycle count=" + cnum);
+    //Serial.print(String("") + "cycle count=" + cnum);
     // calculate cycle delay
     int cdelay = dt / cnum;
 
@@ -194,17 +210,17 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
     // calculate timer delay - in millis
     // time_per_cycle = step_delay * 4
     int tdelay = (cdelay - sm->time_per_cycle) / 1000;
-    Serial.println(String("") + ", timer delay=" + tdelay);
+    //Serial.println(String("") + ", timer delay=" + tdelay);
     if(tdelay < 0) {
         if(cdelay != 0) {
-            Serial.println(String("") + "Waring: timer delay < 0 [motor=" + sm->name + "], reset to 0");
+      //      Serial.println(String("") + "Waring: timer delay < 0 [motor=" + sm->name + "], reset to 0");
         }
         tdelay=0;
     }
     
     // Ожидаемое время (для отладки):
     int est_time = (sm->step_delay * 4 + tdelay) * cnum;
-    Serial.println(String("") + ", estimated time=" + est_time + "us");
+    //Serial.println(String("") + ", estimated time=" + est_time + "us");
   
     // задать направление в зависиомости от знака
     int dir = (dl > 0 ? 1 : -1);
@@ -213,8 +229,9 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
     int i=0;
     // Считаем шаги и не забываем проверять выход за границы рабочей области
     while (i < cnum && !GLOBAL_DISABLE_MOTORS && 
+            (calibrate_mode ? 1 :
             (dir > 0 ? sm->current_pos + sm->distance_per_cycle <= sm->MAX_POS : 
-                       sm->current_pos - sm->distance_per_cycle >= 0)) {
+                       sm->current_pos - sm->distance_per_cycle >= 0))) {
       // пусть будет 2 шага в одном цикле
         digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
@@ -225,17 +242,21 @@ void shift_coord_um(smotor* sm, int dl, int dt) {
         digitalWrite(sm->PULSE_PIN, LOW);
         delayMicroseconds(sm->step_delay);
         
-        if(dir > 0) {
-          sm->current_pos += sm->distance_per_cycle;
+        if(calibrate_mode) {
+          sm->current_pos = 0;
         } else {
-          sm->current_pos -= sm->distance_per_cycle;
+          if(dir > 0) {
+            sm->current_pos += sm->distance_per_cycle;
+          } else {
+            sm->current_pos -= sm->distance_per_cycle;
+          }
         }
         
         delay(tdelay);
         i++;
     }
     
-    Serial.println(String("") + "Current position=" + sm->current_pos + ", motor=" + sm->name);
+    //Serial.println(String("") + "Current position=" + sm->current_pos + ", motor=" + sm->name);
 }
 
 /**
@@ -338,13 +359,15 @@ void stop_motors() {
   speed_x = 0;
   speed_y = 0;
   speed_z = 0;
+  
+  calibrate_mode = 0;
 }
 
 
 int handle_command(char* cmd_line) {
   // новая команда остановит моторы, находящиеся в режиме 
-  // постоянной работы
-  stop_motors();
+  // постоянной работы и сбросит режим калибровки
+  stop_motors();  
   
   String cmd_line_str = String(cmd_line).trim();
   
@@ -519,7 +542,44 @@ int handle_command(char* cmd_line) {
         success = 1;
         Serial.println("Handle command: [cmd=go, motor=" + motor_name + ", speed=" + spd + "]");
           
-        // Выполнить команду
+        // Выполнить команду - запустить моторы в постоянную работу до прихода команды на остановку
+        if(motor_name.equalsIgnoreCase("x")) {
+          speed_x = spd;
+        } else if(motor_name.equalsIgnoreCase("y")) {
+          speed_y = spd;
+        } else if(motor_name.equalsIgnoreCase("z")) {
+          speed_z = spd;
+        } else {
+          Serial.println("Error: Unknown motor: " + motor_name);
+        }
+      }
+    }
+  } else if(cmd_line_str.startsWith(CMD_CALIBRATE)) {
+    // command 'calibrate' syntax:
+    //     calibrate motor_name speed
+    String motor_name;
+    String spd_str;
+    int spd;
+    
+    int space1 = -1;
+    int space2 = -1;
+    
+    space1 = cmd_line_str.indexOf(' ');
+    if(space1 != -1) {
+      space2 = cmd_line_str.indexOf(' ', space1 + 1);
+      if(space2 != -1) {
+        motor_name = cmd_line_str.substring(space1 + 1, space2);
+        
+        spd_str = cmd_line_str.substring(space2 + 1);
+        spd = spd_str.toInt();//atoi(cnum_str.toCharArray());
+          
+        // Команда корректна
+        success = 1;
+        Serial.println("Handle command: [cmd=calibrate, motor=" + motor_name + ", speed=" + spd + "]");
+          
+        // Выполнить команду - запустить моторы в постоянную работу до прихода команды на остановку
+        // в режиме калибровки
+        calibrate_mode = 1;
         if(motor_name.equalsIgnoreCase("x")) {
           speed_x = spd;
         } else if(motor_name.equalsIgnoreCase("y")) {
@@ -588,11 +648,6 @@ int handle_command(char* cmd_line) {
     // TODO: implement G02
   } else if(cmd_line_str.startsWith(CMD_GCODE_G03)) {
     // TODO: implement G03
-  } else if(cmd_line_str.startsWith(CMD_CALIBRATE)) {
-    // Команда корректна
-    success = 1;
-    Serial.println("Handle command: [cmd=calibrate]");
-    reset_start_pos();
   }
   
   if(!success) {
