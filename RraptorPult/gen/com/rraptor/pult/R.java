@@ -19,7 +19,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int buttonBarStyle=0x7f010000;
     }
     public static final class color {
-        public static final int black_overlay=0x7f040000;
+        public static final int black_overlay=0x7f050000;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -28,17 +28,26 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int btn_left=0x7f020000;
+        public static final int btn_left_focused=0x7f020001;
+        public static final int btn_left_normal=0x7f020002;
+        public static final int btn_left_pressed=0x7f020003;
+        public static final int btn_right=0x7f020004;
+        public static final int btn_right_focused=0x7f020005;
+        public static final int btn_right_normal=0x7f020006;
+        public static final int btn_right_pressed=0x7f020007;
+        public static final int ic_launcher=0x7f020008;
+        public static final int logo2=0x7f020009;
     }
     public static final class id {
-        public static final int action_settings=0x7f090015;
-        public static final int checkedTextView1=0x7f090002;
+        public static final int action_settings=0x7f090016;
+        public static final int checkedTextView1=0x7f090000;
         public static final int checkedTextView2=0x7f090003;
-        public static final int checkedTextView3=0x7f090004;
+        public static final int checkedTextView3=0x7f090006;
         public static final int clear_btn=0x7f09000d;
         public static final int draw_btn=0x7f090010;
         public static final int drawing_progress=0x7f09000b;
@@ -46,13 +55,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int goto_calibrate_btn=0x7f090014;
         public static final int goto_manual_pult_btn=0x7f090012;
         public static final int goto_plotter_2d=0x7f090013;
+        public static final int imageView1=0x7f090015;
         public static final int open_file_btn=0x7f09000c;
         public static final int plotter_canvas=0x7f09000a;
         public static final int stop_btn=0x7f090011;
         public static final int x_backward_btn=0x7f090001;
-        public static final int x_forward_btn=0x7f090000;
-        public static final int y_backward_btn=0x7f090005;
-        public static final int y_forward_btn=0x7f090006;
+        public static final int x_forward_btn=0x7f090002;
+        public static final int y_backward_btn=0x7f090004;
+        public static final int y_forward_btn=0x7f090005;
         public static final int z_backward_btn=0x7f090007;
         public static final int z_down_btn=0x7f09000f;
         public static final int z_forward_btn=0x7f090008;
@@ -69,12 +79,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int rraptor_pult=0x7f080001;
     }
     public static final class string {
-        public static final int action_settings=0x7f060001;
-        public static final int app_name=0x7f060000;
-        public static final int title_activity_calibrate=0x7f060005;
-        public static final int title_activity_manual=0x7f060004;
-        public static final int title_activity_plotter2_d=0x7f060003;
-        public static final int title_activity_rraptor=0x7f060002;
+        public static final int action_settings=0x7f040002;
+        public static final int app_name=0x7f040001;
+        public static final int projest_name=0x7f040000;
+        public static final int title_activity_calibrate=0x7f040006;
+        public static final int title_activity_manual=0x7f040005;
+        public static final int title_activity_plotter2_d=0x7f040004;
+        public static final int title_activity_rraptor=0x7f040003;
     }
     public static final class style {
         /** 

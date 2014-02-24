@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.comm.DeviceConnectionWifi;
@@ -70,17 +70,17 @@ public class ManualPultActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_manual_pult);
 
-		final Button btnXF = (Button) findViewById(R.id.x_forward_btn);
+		final ImageButton btnXF = (ImageButton) findViewById(R.id.x_forward_btn);
 		btnXF.setOnTouchListener(onTouchListener);
-		final Button btnXB = (Button) findViewById(R.id.x_backward_btn);
+		final ImageButton btnXB = (ImageButton) findViewById(R.id.x_backward_btn);
 		btnXB.setOnTouchListener(onTouchListener);
-		final Button btnYF = (Button) findViewById(R.id.y_forward_btn);
+		final ImageButton btnYF = (ImageButton) findViewById(R.id.y_forward_btn);
 		btnYF.setOnTouchListener(onTouchListener);
-		final Button btnYB = (Button) findViewById(R.id.y_backward_btn);
+		final ImageButton btnYB = (ImageButton) findViewById(R.id.y_backward_btn);
 		btnYB.setOnTouchListener(onTouchListener);
-		final Button btnZF = (Button) findViewById(R.id.z_forward_btn);
+		final ImageButton btnZF = (ImageButton) findViewById(R.id.z_forward_btn);
 		btnZF.setOnTouchListener(onTouchListener);
-		final Button btnZB = (Button) findViewById(R.id.z_backward_btn);
+		final ImageButton btnZB = (ImageButton) findViewById(R.id.z_backward_btn);
 		btnZB.setOnTouchListener(onTouchListener);
 	}
 

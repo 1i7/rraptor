@@ -30,7 +30,7 @@
             android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="130dip"
             android:layout_height="match_parent"
             android:layout_weight="0"
             android:gravity="bottom"
@@ -38,43 +38,43 @@
 
             <ProgressBar
                 android:id="@+id/drawing_progress"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="invisible" />
 
             <Button
                 android:id="@+id/open_file_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Я.Диск" />
 
             <Button
                 android:id="@+id/clear_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Очистить" />
 
             <Button
                 android:id="@+id/z_up_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="⇈" />
 
             <Button
                 android:id="@+id/z_down_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="⇊" />
 
             <Button
                 android:id="@+id/draw_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Рисовать" />
 
             <Button
                 android:id="@+id/stop_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Остановить" />
         </LinearLayout>
