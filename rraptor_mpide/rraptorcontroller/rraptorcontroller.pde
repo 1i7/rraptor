@@ -3,6 +3,18 @@
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
+// Глобальные настройки для станка
+
+/* Минимальное количество циклов внутри одной "ступеньки" 
+ * для линейной интерполяции G01 */
+#define G01_PRECISION 100
+
+/* Количество циклов в одной интерации команды "go" */
+#define CMD_GO_CYCLE_COUNT 100
+
+/* Количество циклов в одной интерации команды "calibrate" */
+#define CMD_CALIBRATE_CYCLE_COUNT 50
+
 namespace rraptor {
   int GLOBAL_DISABLE_MOTORS = 0;
   
@@ -295,22 +307,19 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
     
     // Переместимся по плоскости (x,y) по лесенке.
     
-    // минимальное количество циклов в одной "ступеньке"
-    int precision = 100;
-    
     int dl_x= x - _sm_x->current_pos;
     int dl_y= y - _sm_y->current_pos;
     
     // Проверить крайние ситуации
-    if(abs(dl_x) < (_sm_x->distance_per_cycle * precision) ||
-        abs(dl_y) < (_sm_y->distance_per_cycle * precision)) {
+    if(abs(dl_x) < (_sm_x->distance_per_cycle * G01_PRECISION) ||
+        abs(dl_y) < (_sm_y->distance_per_cycle * G01_PRECISION)) {
       shift_coord_um(_sm_x, dl_x, 0);
       shift_coord_um(_sm_y, dl_y, 0);
     } else {
       // пошли лесенкой
       int stairstep_count = abs(dl_x) < abs(dl_y) ? 
-          abs(dl_x) / (_sm_x->distance_per_cycle * precision) :
-          abs(dl_y) / (_sm_y->distance_per_cycle * precision);
+          abs(dl_x) / (_sm_x->distance_per_cycle * G01_PRECISION) :
+          abs(dl_y) / (_sm_y->distance_per_cycle * G01_PRECISION);
       Serial.println(String("") + "Go X-Y stairs, stair step count=" + stairstep_count);
     
       // длина ступеньки - мкм
@@ -333,9 +342,9 @@ void go_cycle_motor(smotor* sm, int spd) {
     int cnum = 0;
     int cdelay = 0;
     if(spd > 0) {
-      cnum = 100;
+      cnum = (calibrate_mode ? CMD_CALIBRATE_CYCLE_COUNT : CMD_GO_CYCLE_COUNT);
     } else if (spd < 0) {
-      cnum = -100;
+      cnum = -1 * (calibrate_mode ? CMD_CALIBRATE_CYCLE_COUNT : CMD_GO_CYCLE_COUNT);
     }
     step_motor(sm, cnum, cdelay);
   }
