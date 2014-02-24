@@ -6,31 +6,22 @@ import android.content.Context;
 import android.os.Handler;
 
 public interface DeviceConnection {
-	public class UnblockHook {
-		private boolean wait = true;
-
-		public boolean isWaitingBlock() {
-			return wait;
-		}
-
-		public void reset() {
-			wait = true;
-		}
-
-		public void unblock() {
-			wait = false;
-		}
-	}
-
 	public static final String CMD_X_FORWARD = "go x 1";
 	public static final String CMD_X_BACKWARD = "go x -1";
 	public static final String CMD_Y_FORWARD = "go y 1";
 	public static final String CMD_Y_BACKWARD = "go y -1";
 	public static final String CMD_Z_FORWARD = "go z 1";
 	public static final String CMD_Z_BACKWARD = "go z -1";
+
+	public static final String CMD_X_FORWARD_CAL = "calibrate x 1";
+	public static final String CMD_X_BACKWARD_CAL = "calibrate x -1";
+	public static final String CMD_Y_FORWARD_CAL = "calibrate y 1";
+	public static final String CMD_Y_BACKWARD_CAL = "calibrate y -1";
+	public static final String CMD_Z_FORWARD_CAL = "calibrate z 1";
+	public static final String CMD_Z_BACKWARD_CAL = "calibrate z -1";
+
 	public static final String CMD_STOP = "stop";
 
-	public static final String CMD_CALIBRATE = "calibrate";
 	public static final String CMD_GCODE_G01 = "G01";
 	public static final String CMD_GCODE_G02 = "G02";
 
@@ -44,11 +35,13 @@ public interface DeviceConnection {
 	public void sendToDeviceBackground(final Context context,
 			final Handler handler, final String cmd);
 
-	public int sendToDeviceBlocked(String cmd, UnblockHook unblockHook)
-			throws Exception;
+	public int sendToDeviceBlocked(String cmd) throws Exception,
+			InterruptedException;
+
+	public void unblock();
 
 	public void writeToDevice(String cmd) throws IOException;
 
-	public int writeToDeviceBlocked(String cmd, UnblockHook unblockHook)
-			throws IOException;
+	public int writeToDeviceBlocked(String cmd) throws IOException,
+			InterruptedException;
 }

@@ -10,6 +10,10 @@ import android.widget.Button;
 
 public class RRaptorActivity extends Activity {
 
+	private void gotoCalibrate() {
+		startActivity(new Intent(this, CalibrateActivity.class));
+	}
+
 	private void gotoPlotter2D() {
 		startActivity(new Intent(this, Plotter2DActivity.class));
 	}
@@ -23,7 +27,7 @@ public class RRaptorActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_rraptor);
 
-		final Button btnGotoPult = (Button) findViewById(R.id.goto_pult_btn);
+		final Button btnGotoPult = (Button) findViewById(R.id.goto_manual_pult_btn);
 		btnGotoPult.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -35,6 +39,13 @@ public class RRaptorActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				gotoPlotter2D();
+			}
+		});
+		final Button btnGotoCalibrate = (Button) findViewById(R.id.goto_calibrate_btn);
+		btnGotoCalibrate.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				gotoCalibrate();
 			}
 		});
 	}

@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 
@@ -66,11 +65,6 @@ public class ManualPultActivity extends Activity {
 		}
 	};
 
-	private void calibrateDevice() {
-		deviceConnection.sendToDeviceBackground(ManualPultActivity.this,
-				handler, DeviceConnection.CMD_CALIBRATE);
-	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,14 +82,6 @@ public class ManualPultActivity extends Activity {
 		btnZF.setOnTouchListener(onTouchListener);
 		final Button btnZB = (Button) findViewById(R.id.z_backward_btn);
 		btnZB.setOnTouchListener(onTouchListener);
-
-		final Button btnCalibrate = (Button) findViewById(R.id.calibrate_btn);
-		btnCalibrate.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				calibrateDevice();
-			}
-		});
 	}
 
 	@Override

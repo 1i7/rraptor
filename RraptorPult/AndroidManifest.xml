@@ -20,10 +20,14 @@
             android:label="@string/title_activity_manual" android:screenOrientation="sensor" android:parentActivityName="@string/title_activity_rraptor">
         </activity>
         <activity
+            android:name="com.rraptor.pult.CalibrateActivity"
+            android:label="@string/title_activity_calibrate" android:screenOrientation="sensor" android:parentActivityName="@string/title_activity_rraptor">
+        </activity>
+        <activity
             android:name="com.rraptor.pult.Plotter2DActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_plotter2_d"
-            android:theme="@style/FullscreenTheme" android:screenOrientation="landscape" android:parentActivityName="@string/title_activity_rraptor">
+            android:theme="@style/FullscreenTheme" android:screenOrientation="sensor" android:parentActivityName="@string/title_activity_rraptor">
         </activity>
         <activity
             android:name="com.rraptor.pult.RRaptorActivity"

@@ -9,7 +9,7 @@
     tools:context=".RRaptorActivity" >
 
     <Button
-        android:id="@+id/goto_pult_btn"
+        android:id="@+id/goto_manual_pult_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -20,9 +20,17 @@
         android:id="@+id/goto_plotter_2d"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/goto_pult_btn"
+        android:layout_below="@+id/goto_manual_pult_btn"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="26dp"
         android:text="2D Плоттер" />
+
+    <Button
+        android:id="@+id/goto_calibrate_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/goto_plotter_2d"
+        android:layout_below="@+id/goto_plotter_2d"
+        android:text="Калибровка" />
 
 </RelativeLayout>

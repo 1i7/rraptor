@@ -27,6 +27,8 @@ public class DeviceConnectionWifi implements DeviceConnection {
 	private OutputStreamWriter out;
 	private InputStreamReader in;
 
+	private boolean wait = true;
+
 	private DeviceConnectionWifi() {
 	}
 
@@ -35,6 +37,14 @@ public class DeviceConnectionWifi implements DeviceConnection {
 		socket = new Socket(address, port);
 		out = new OutputStreamWriter(socket.getOutputStream());
 		in = new InputStreamReader(socket.getInputStream());
+	}
+
+	public boolean isWaitingBlock() {
+		return wait;
+	}
+
+	public void reset() {
+		wait = true;
 	}
 
 	synchronized public void sendToDevice(final Context context,
@@ -86,27 +96,37 @@ public class DeviceConnectionWifi implements DeviceConnection {
 		}).start();
 	}
 
+	@Override
+	public int sendToDeviceBlocked(String cmd) throws Exception {
+		return sendToDeviceBlocked(ADDRESS_DEFAULT, PORT_DEFAULT, cmd);
+	}
+
 	public int sendToDeviceBlocked(final String address, final int port,
-			String cmd, UnblockHook unblockHook) throws Exception {
+			String cmd) throws Exception, InterruptedException {
 		int returnCode = -1;
+
+		boolean connected = false;
 		if (out != null) {
 			try {
 				System.out.println(cmd);
-				returnCode = writeToDeviceBlocked(cmd, unblockHook);
+				returnCode = writeToDeviceBlocked(cmd);
+				connected = true;
 			} catch (IOException e) {
+				// Only catch IOException for the 2nd trial,
+				// InterruptedException will just go up
 				System.out.println("Failed connection, try reconnect.");
-				connectToDevice(address, port);
-				returnCode = writeToDeviceBlocked(cmd, unblockHook);
 			}
+		}
+		if (!connected) {
+			connectToDevice(address, port);
+			returnCode = writeToDeviceBlocked(cmd);
 		}
 		return returnCode;
 	}
 
 	@Override
-	public int sendToDeviceBlocked(String cmd, UnblockHook unblockHook)
-			throws Exception {
-		return sendToDeviceBlocked(ADDRESS_DEFAULT, PORT_DEFAULT, cmd,
-				unblockHook);
+	public void unblock() {
+		wait = false;
 	}
 
 	@Override
@@ -116,14 +136,15 @@ public class DeviceConnectionWifi implements DeviceConnection {
 	}
 
 	@Override
-	synchronized public int writeToDeviceBlocked(String cmd,
-			final UnblockHook unblockHook) throws IOException {
+	synchronized public int writeToDeviceBlocked(String cmd)
+			throws IOException, InterruptedException {
 		out.write(cmd);
 		out.flush();
 
+		reset();
+
 		// wait for reply
-		while (!in.ready()
-				&& (unblockHook != null ? unblockHook.isWaitingBlock() : true)) {
+		while (!in.ready() && isWaitingBlock()) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -135,7 +156,7 @@ public class DeviceConnectionWifi implements DeviceConnection {
 			replyStatus = in.read();
 			System.out.println("CMD status: " + replyStatus);
 		} else {
-			throw new IOException("Interrupted");
+			throw new InterruptedException("Прервано");
 		}
 		return replyStatus;
 	}

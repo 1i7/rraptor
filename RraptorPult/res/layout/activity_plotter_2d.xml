@@ -36,6 +36,18 @@
             android:gravity="bottom"
             android:orientation="vertical" >
 
+            <ProgressBar
+                android:id="@+id/drawing_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/open_file_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Я.Диск" />
+
             <Button
                 android:id="@+id/clear_btn"
                 android:layout_width="wrap_content"

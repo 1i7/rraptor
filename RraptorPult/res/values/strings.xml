@@ -6,5 +6,6 @@
     <string name="title_activity_rraptor">RRaptor: Панель управления</string>
     <string name="title_activity_plotter2_d">RRaptor: 2D Плоттер</string>
     <string name="title_activity_manual">RRaptor: Ручное управление</string>
+    <string name="title_activity_calibrate">RRaptor: Калибровка</string>
 
 </resources>

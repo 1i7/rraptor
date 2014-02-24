@@ -35,31 +35,34 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f090013;
-        public static final int calibrate_btn=0x7f090009;
+        public static final int action_settings=0x7f090015;
         public static final int checkedTextView1=0x7f090002;
         public static final int checkedTextView2=0x7f090003;
         public static final int checkedTextView3=0x7f090004;
-        public static final int clear_btn=0x7f09000c;
-        public static final int draw_btn=0x7f09000f;
-        public static final int fullscreen_content=0x7f09000a;
-        public static final int goto_plotter_2d=0x7f090012;
-        public static final int goto_pult_btn=0x7f090011;
-        public static final int plotter_canvas=0x7f09000b;
-        public static final int stop_btn=0x7f090010;
+        public static final int clear_btn=0x7f09000d;
+        public static final int draw_btn=0x7f090010;
+        public static final int drawing_progress=0x7f09000b;
+        public static final int fullscreen_content=0x7f090009;
+        public static final int goto_calibrate_btn=0x7f090014;
+        public static final int goto_manual_pult_btn=0x7f090012;
+        public static final int goto_plotter_2d=0x7f090013;
+        public static final int open_file_btn=0x7f09000c;
+        public static final int plotter_canvas=0x7f09000a;
+        public static final int stop_btn=0x7f090011;
         public static final int x_backward_btn=0x7f090001;
         public static final int x_forward_btn=0x7f090000;
         public static final int y_backward_btn=0x7f090005;
         public static final int y_forward_btn=0x7f090006;
         public static final int z_backward_btn=0x7f090007;
-        public static final int z_down_btn=0x7f09000e;
+        public static final int z_down_btn=0x7f09000f;
         public static final int z_forward_btn=0x7f090008;
-        public static final int z_up_btn=0x7f09000d;
+        public static final int z_up_btn=0x7f09000e;
     }
     public static final class layout {
-        public static final int activity_manual_pult=0x7f030000;
-        public static final int activity_plotter_2d=0x7f030001;
-        public static final int activity_rraptor=0x7f030002;
+        public static final int activity_calibrate=0x7f030000;
+        public static final int activity_manual_pult=0x7f030001;
+        public static final int activity_plotter_2d=0x7f030002;
+        public static final int activity_rraptor=0x7f030003;
     }
     public static final class menu {
         public static final int rraptor=0x7f080000;
@@ -68,6 +71,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     public static final class string {
         public static final int action_settings=0x7f060001;
         public static final int app_name=0x7f060000;
+        public static final int title_activity_calibrate=0x7f060005;
         public static final int title_activity_manual=0x7f060004;
         public static final int title_activity_plotter2_d=0x7f060003;
         public static final int title_activity_rraptor=0x7f060002;
