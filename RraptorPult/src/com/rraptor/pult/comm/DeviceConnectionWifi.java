@@ -34,9 +34,11 @@ public class DeviceConnectionWifi implements DeviceConnection {
 
 	@Override
 	public void connectToDevice(String address, int port) throws Exception {
+		System.out.println("Connecting to device...");
 		socket = new Socket(address, port);
 		out = new OutputStreamWriter(socket.getOutputStream());
 		in = new InputStreamReader(socket.getInputStream());
+		System.out.println("Connection to device success");
 	}
 
 	public boolean isWaitingBlock() {
@@ -156,7 +158,7 @@ public class DeviceConnectionWifi implements DeviceConnection {
 			replyStatus = in.read();
 			System.out.println("CMD status: " + replyStatus);
 		} else {
-			throw new InterruptedException("Прервано");
+			throw new InterruptedException("РїСЂРµСЂРІР°РЅРѕ");
 		}
 		return replyStatus;
 	}

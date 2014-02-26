@@ -99,12 +99,12 @@ public class Plotter2DActivity extends Activity {
 					.getLines(new FileInputStream(new File(fileName))));
 		} catch (FileNotFoundException e) {
 			Toast.makeText(getApplicationContext(),
-					"Файл " + fileName + " не найден", Toast.LENGTH_LONG)
+					"Р¤Р°Р№Р» " + fileName + " РЅРµ РЅР°Р№РґРµРЅ", Toast.LENGTH_LONG)
 					.show();
 			e.printStackTrace();
 		} catch (ParseException e) {
 			Toast.makeText(getApplicationContext(),
-					"Не получилось загрузить файл " + fileName,
+					"РќРµ РїРѕР»СѓС‡РёР»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ С„Р°Р№Р» " + fileName,
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
 		}
@@ -181,7 +181,7 @@ public class Plotter2DActivity extends Activity {
 							@Override
 							public void OnSelectedFile(String fileName) {
 								Toast.makeText(getApplicationContext(),
-										"Открываем " + fileName,
+										"Р—Р°РіСЂСѓР¶Р°РµРј " + fileName,
 										Toast.LENGTH_LONG).show();
 								loadDrawingFile(fileName);
 							}
@@ -258,9 +258,11 @@ public class Plotter2DActivity extends Activity {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							Toast.makeText(Plotter2DActivity.this,
-									"Failed to draw: " + e.getMessage(),
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(
+									Plotter2DActivity.this,
+									"РќРµ РїРѕР»СѓС‡РёР»РѕСЃСЊ РЅР°СЂРёСЃРѕРІР°С‚СЊ: "
+											+ e.getMessage(), Toast.LENGTH_LONG)
+									.show();
 						}
 					});
 				}
