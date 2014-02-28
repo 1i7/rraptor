@@ -114,4 +114,12 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/command_voice_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="right|bottom"
+        android:text="Голос" />
+
 </LinearLayout>
