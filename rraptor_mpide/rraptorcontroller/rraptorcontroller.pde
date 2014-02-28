@@ -10,7 +10,7 @@
 #define G01_PRECISION 100
 
 /* Количество циклов в одной интерации команды "go" */
-#define CMD_GO_CYCLE_COUNT 100
+#define CMD_GO_CYCLE_COUNT 300
 
 /* Количество циклов в одной интерации команды "calibrate" */
 #define CMD_CALIBRATE_CYCLE_COUNT 50
@@ -336,6 +336,129 @@ void gcode_g01(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z,
       shift_coord_um(_sm_y, y - _sm_y->current_pos, 0);
     }
 }
+
+/**
+ * Реализация команды g-code G01 - переместить текущее положение рабочего блока в 
+ * указанную позицию по прямой линии с заданной скоростью.
+ */
+void gcode_g01_v2(smotor* _sm_x, smotor* _sm_y, smotor* _sm_z, int x, int y, int z, int f) {
+    Serial.print(String("") + "Info: Exec G01 [" 
+        + "dest pos=(" + x + "um" + ", " + y + "um" + ", " + z + "um)" + ", f=" + f + "" + "]: ");
+    Serial.println(String("") + 
+         + " current pos=(" + _sm_x->current_pos + "um, " + _sm_y->current_pos + "um" + ", " + _sm_z->current_pos + "um)");
+         
+    // В этой реализации перемещение по координате z обрабатывается отдельно от x и y - за один шаг, 
+    // перемещение по плоскости (x,y) осуществляется маленькими шажками по алгоритму Брезенхама.
+    // TODO: добавить реализацию работы со скоростью.
+    
+    // Сначала переместимся по Z:
+    if(z != _sm_z->current_pos) {
+      int dl_z = z - _sm_z->current_pos;
+      Serial.println(String("") + "Move Z, shift=" + dl_z + "um");
+      shift_coord_um(_sm_z, dl_z, 0);
+    }
+    
+    // Переместимся по плоскости (x,y) по лесенке.
+    
+    int dl_x= x - _sm_x->current_pos;
+    int dl_y= y - _sm_y->current_pos;
+    
+    // Проверить крайние ситуации
+    if(abs(dl_x) < (_sm_x->distance_per_cycle * G01_PRECISION) ||
+        abs(dl_y) < (_sm_y->distance_per_cycle * G01_PRECISION)) {
+      shift_coord_um(_sm_x, dl_x, 0);
+      shift_coord_um(_sm_y, dl_y, 0);
+    } else {
+      // пошли лесенкой
+      int stairstep_count = abs(dl_x) < abs(dl_y) ? 
+          abs(dl_x) / (_sm_x->distance_per_cycle * G01_PRECISION) :
+          abs(dl_y) / (_sm_y->distance_per_cycle * G01_PRECISION);
+      Serial.println(String("") + "Go X-Y stairs, stair step count=" + stairstep_count);
+    
+      // длина ступеньки - мкм
+      int stairstep_x = dl_x / stairstep_count;
+      int stairstep_y = dl_y / stairstep_count;
+      
+      int cnum_x = abs(stairstep_x) / _sm_x->distance_per_cycle;
+      int cnum_y = abs(stairstep_y) / _sm_y->distance_per_cycle;
+      
+      // задать направление в зависиомости от знака
+      int dir_x = (stairstep_x > 0 ? 1 : -1);
+      digitalWrite(_sm_x->DIR_PIN, (dir_x * _sm_x->dir_inv > 0 ? HIGH : LOW));
+      
+      // задать направление в зависиомости от знака
+      int dir_y = (stairstep_y > 0 ? 1 : -1);
+      digitalWrite(_sm_y->DIR_PIN, (dir_y * _sm_y->dir_inv > 0 ? HIGH : LOW));
+    
+      for(int j = 0; j < stairstep_count; j++) {
+        //shift_coord_um(_sm_x, stairstep_x, 0);
+        //shift_coord_um(_sm_y, stairstep_y, 0);
+        
+        int i=0;
+        // Считаем шаги и не забываем проверять выход за границы рабочей области
+        while (i < cnum_x && !GLOBAL_DISABLE_MOTORS && 
+                (calibrate_mode ? 1 :
+                (dir_x > 0 ? _sm_x->current_pos + _sm_x->distance_per_cycle <= _sm_x->MAX_POS : 
+                           _sm_x->current_pos - _sm_x->distance_per_cycle >= 0))) {
+          // пусть будет 2 шага в одном цикле
+            digitalWrite(_sm_x->PULSE_PIN, HIGH);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_x->PULSE_PIN, LOW);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_x->PULSE_PIN, HIGH);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_x->PULSE_PIN, LOW);
+            delayMicroseconds(_sm_x->step_delay);
+            
+            if(calibrate_mode) {
+              _sm_x->current_pos = 0;
+            } else {
+              if(dir_x > 0) {
+                _sm_x->current_pos += _sm_x->distance_per_cycle;
+              } else {
+                _sm_x->current_pos -= _sm_x->distance_per_cycle;
+              }
+            }            
+            //delay(tdelay);
+            i++;
+        }
+        
+        
+        // Считаем шаги и не забываем проверять выход за границы рабочей области
+        while (i < cnum_y && !GLOBAL_DISABLE_MOTORS && 
+                (calibrate_mode ? 1 :
+                (dir_y > 0 ? _sm_y->current_pos + _sm_y->distance_per_cycle <= _sm_y->MAX_POS : 
+                           _sm_y->current_pos - _sm_y->distance_per_cycle >= 0))) {
+          // пусть будет 2 шага в одном цикле
+            digitalWrite(_sm_y->PULSE_PIN, HIGH);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_y->PULSE_PIN, LOW);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_y->PULSE_PIN, HIGH);
+            delayMicroseconds(_sm_x->step_delay);
+            digitalWrite(_sm_y->PULSE_PIN, LOW);
+            delayMicroseconds(_sm_y->step_delay);
+            
+            if(calibrate_mode) {
+              _sm_y->current_pos = 0;
+            } else {
+              if(dir_y > 0) {
+                _sm_y->current_pos += _sm_y->distance_per_cycle;
+              } else {
+                _sm_y->current_pos -= _sm_y->distance_per_cycle;
+              }
+            }            
+            //delay(tdelay);
+            i++;
+        }        
+      }
+      
+      // добить оставшийся путь
+      shift_coord_um(_sm_x, x - _sm_x->current_pos, 0);
+      shift_coord_um(_sm_y, y - _sm_y->current_pos, 0);
+    }
+}
+
 
 void go_cycle_motor(smotor* sm, int spd) {
   if(spd != 0) {
@@ -729,7 +852,7 @@ void setup()
   int step_delay = 500;
   // with step_delay=250 1 cycle=1 mls
   rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 2, 3, 4, 216000, 1); // X - синий драйвер
-  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, -1); // Y - желтый драйвер
+  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, 1); // Y - желтый драйвер
   rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 10, 11, 12, 100000, -1); // Z - черный драйвер
   
   pinMode(rraptor::sm_x.DIR_PIN, OUTPUT);
