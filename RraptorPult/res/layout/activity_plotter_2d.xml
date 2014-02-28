@@ -43,10 +43,16 @@
                 android:visibility="invisible" />
 
             <Button
-                android:id="@+id/open_file_btn"
+                android:id="@+id/open_file_yadisk_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Я.Диск" />
+
+            <Button
+                android:id="@+id/open_file_sdcard_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SD-карта" />
 
             <Button
                 android:id="@+id/clear_btn"

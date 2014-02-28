@@ -9,6 +9,7 @@ import java.util.List;
 import org.kabeja.parser.ParseException;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -26,6 +27,7 @@ import com.rraptor.pult.comm.DeviceConnectionWifi;
 import com.rraptor.pult.dxf.DxfLoader;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point2D;
+import com.rraptor.pult.yad.YaDiskActivity;
 
 import edu.android.openfiledialog.OpenFileDialog;
 
@@ -34,6 +36,8 @@ import edu.android.openfiledialog.OpenFileDialog;
  */
 public class Plotter2DActivity extends Activity {
 	private Plotter2DCanvasView plotterCanvas;
+
+	private static int REQUEST_CODE_PICK_FILE = 0;
 
 	private final Handler handler = new Handler();
 
@@ -46,7 +50,8 @@ public class Plotter2DActivity extends Activity {
 	private Button btnStartDrawing;
 	private Button btnStopDrawing;
 	private Button btnClearDrawing;
-	private Button btnOpenFile;
+	private Button btnOpenFileYaDisk;
+	private Button btnOpenFileSdcard;
 
 	private final OnTouchListener onTouchListener = new OnTouchListener() {
 
@@ -92,21 +97,33 @@ public class Plotter2DActivity extends Activity {
 		}
 	}
 
-	private void loadDrawingFile(String fileName) {
+	private void loadDrawingFile(String filePath) {
 
 		try {
 			plotterCanvas.setDrawingLines(DxfLoader
-					.getLines(new FileInputStream(new File(fileName))));
+					.getLines(new FileInputStream(new File(filePath))));
 		} catch (FileNotFoundException e) {
 			Toast.makeText(getApplicationContext(),
-					"Файл " + fileName + " не найден", Toast.LENGTH_LONG)
+					"Файл " + filePath + " не найден", Toast.LENGTH_LONG)
 					.show();
 			e.printStackTrace();
 		} catch (ParseException e) {
 			Toast.makeText(getApplicationContext(),
-					"Не получилось загрузить файл " + fileName,
+					"Не получилось загрузить файл " + filePath,
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_CODE_PICK_FILE) {
+			if (resultCode == RESULT_OK) {
+				Bundle bundle = data.getExtras();
+				String filePath = bundle
+						.getString(YaDiskActivity.KEY_DOWNLOADED_FILE_PATH);
+				loadDrawingFile(filePath);
+			}
 		}
 	}
 
@@ -148,11 +165,19 @@ public class Plotter2DActivity extends Activity {
 			}
 		});
 
-		btnOpenFile = (Button) findViewById(R.id.open_file_btn);
-		btnOpenFile.setOnClickListener(new OnClickListener() {
+		btnOpenFileYaDisk = (Button) findViewById(R.id.open_file_yadisk_btn);
+		btnOpenFileYaDisk.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				openDrawingFile();
+				openDrawingFileYaDisk();
+			}
+		});
+
+		btnOpenFileSdcard = (Button) findViewById(R.id.open_file_sdcard_btn);
+		btnOpenFileSdcard.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				openDrawingFileSdCard();
 			}
 		});
 
@@ -165,7 +190,7 @@ public class Plotter2DActivity extends Activity {
 		uptdateViewsState();
 	}
 
-	private void openDrawingFile() {
+	private void openDrawingFileSdCard() {
 		// http://habrahabr.ru/post/203884/
 		// https://github.com/Scogun/Android-OpenFileDialog
 
@@ -179,14 +204,19 @@ public class Plotter2DActivity extends Activity {
 				.setFilter(".*\\.dxf").setOpenDialogListener(
 						new OpenFileDialog.OpenDialogListener() {
 							@Override
-							public void OnSelectedFile(String fileName) {
+							public void OnSelectedFile(String filePath) {
 								Toast.makeText(getApplicationContext(),
-										"Загружаем " + fileName,
+										"Загружаем " + filePath,
 										Toast.LENGTH_LONG).show();
-								loadDrawingFile(fileName);
+								loadDrawingFile(filePath);
 							}
 						});
 		fileDialog.show();
+	}
+
+	private void openDrawingFileYaDisk() {
+		startActivityForResult(new Intent(this, YaDiskActivity.class),
+				REQUEST_CODE_PICK_FILE);
 	}
 
 	private void startDrawingOnDevice() {
@@ -286,7 +316,7 @@ public class Plotter2DActivity extends Activity {
 			drawingProgress.setVisibility(View.VISIBLE);
 			plotterCanvas.setEnabled(false);
 			btnClearDrawing.setEnabled(false);
-			btnOpenFile.setEnabled(false);
+			btnOpenFileYaDisk.setEnabled(false);
 			btnZUp.setEnabled(false);
 			btnZDown.setEnabled(false);
 			btnStartDrawing.setEnabled(false);
@@ -295,7 +325,7 @@ public class Plotter2DActivity extends Activity {
 			drawingProgress.setVisibility(View.INVISIBLE);
 			plotterCanvas.setEnabled(true);
 			btnClearDrawing.setEnabled(true);
-			btnOpenFile.setEnabled(true);
+			btnOpenFileYaDisk.setEnabled(true);
 			btnZUp.setEnabled(true);
 			btnZDown.setEnabled(true);
 			btnStartDrawing.setEnabled(true);

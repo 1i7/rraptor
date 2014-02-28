@@ -44,29 +44,30 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int logo2=0x7f020009;
     }
     public static final class id {
-        public static final int action_settings=0x7f090016;
+        public static final int action_settings=0x7f090017;
         public static final int checkedTextView1=0x7f090000;
         public static final int checkedTextView2=0x7f090003;
         public static final int checkedTextView3=0x7f090006;
-        public static final int clear_btn=0x7f09000d;
-        public static final int draw_btn=0x7f090010;
+        public static final int clear_btn=0x7f09000e;
+        public static final int draw_btn=0x7f090011;
         public static final int drawing_progress=0x7f09000b;
         public static final int fullscreen_content=0x7f090009;
-        public static final int goto_calibrate_btn=0x7f090014;
-        public static final int goto_manual_pult_btn=0x7f090012;
-        public static final int goto_plotter_2d=0x7f090013;
-        public static final int imageView1=0x7f090015;
-        public static final int open_file_btn=0x7f09000c;
+        public static final int goto_calibrate_btn=0x7f090015;
+        public static final int goto_manual_pult_btn=0x7f090013;
+        public static final int goto_plotter_2d=0x7f090014;
+        public static final int imageView1=0x7f090016;
+        public static final int open_file_sdcard_btn=0x7f09000d;
+        public static final int open_file_yadisk_btn=0x7f09000c;
         public static final int plotter_canvas=0x7f09000a;
-        public static final int stop_btn=0x7f090011;
+        public static final int stop_btn=0x7f090012;
         public static final int x_backward_btn=0x7f090001;
         public static final int x_forward_btn=0x7f090002;
         public static final int y_backward_btn=0x7f090004;
         public static final int y_forward_btn=0x7f090005;
         public static final int z_backward_btn=0x7f090007;
-        public static final int z_down_btn=0x7f09000f;
+        public static final int z_down_btn=0x7f090010;
         public static final int z_forward_btn=0x7f090008;
-        public static final int z_up_btn=0x7f09000e;
+        public static final int z_up_btn=0x7f09000f;
     }
     public static final class layout {
         public static final int activity_calibrate=0x7f030000;
@@ -81,6 +82,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     public static final class string {
         public static final int action_settings=0x7f040002;
         public static final int app_name=0x7f040001;
+        public static final int example_auth_message=0x7f040009;
+        public static final int example_auth_negative_button=0x7f04000b;
+        public static final int example_auth_positive_button=0x7f04000a;
+        public static final int example_auth_title=0x7f040008;
+        public static final int example_get_file_unsupported_scheme=0x7f04000f;
+        public static final int example_loading_file_cancel_button=0x7f04000d;
+        public static final int example_loading_file_chooser_title=0x7f04000e;
+        public static final int example_loading_file_title=0x7f04000c;
+        public static final int example_no_files=0x7f040007;
         public static final int projest_name=0x7f040000;
         public static final int title_activity_calibrate=0x7f040006;
         public static final int title_activity_manual=0x7f040005;
