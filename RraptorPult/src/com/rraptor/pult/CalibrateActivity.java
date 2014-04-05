@@ -38,7 +38,7 @@ public class CalibrateActivity extends Activity {
 				case R.id.y_forward_btn:
 					deviceConnection.sendToDeviceBackground(
 							CalibrateActivity.this, handler,
-							DeviceConnection.CMD_Y_FORWARD);
+							DeviceConnection.CMD_Y_FORWARD_CAL);
 					break;
 				case R.id.y_backward_btn:
 					deviceConnection.sendToDeviceBackground(
