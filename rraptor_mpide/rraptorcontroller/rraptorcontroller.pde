@@ -832,37 +832,37 @@ DNETcK::STATUS status;
 /* ***************************************************** */
 // Runtime
 
-void printIP(void)
-{
-  Serial.print("IP Address assigned: ");
-  Serial.print((int)ipServer.rgbIP[0]);
-  Serial.print(".");
-  Serial.print((int)ipServer.rgbIP[1]);
-  Serial.print(".");
-  Serial.print((int)ipServer.rgbIP[2]);
-  Serial.print(".");
-  Serial.println((int)ipServer.rgbIP[3]);
+void printIP(void) {
+    Serial.print("IP Address assigned: ");
+    Serial.print((int)ipServer.rgbIP[0]);
+    Serial.print(".");
+    Serial.print((int)ipServer.rgbIP[1]);
+    Serial.print(".");
+    Serial.print((int)ipServer.rgbIP[2]);
+    Serial.print(".");
+    Serial.println((int)ipServer.rgbIP[3]);
 }
-void setup()
-{
-  // start serial port at 9600 bps:
-  Serial.begin(9600);
-  
-  // init stepper motors
-  int step_delay = 500;
-  // with step_delay=250 1 cycle=1 mls
-  rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 2, 3, 4, 216000, 1); // X - синий драйвер
-  rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 6, 7, 8, 300000, 1); // Y - желтый драйвер
-  rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 10, 11, 12, 100000, -1); // Z - черный драйвер
-  
-  pinMode(rraptor::sm_x.DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_x.PULSE_PIN, OUTPUT);
-  pinMode(rraptor::sm_y.DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_y.PULSE_PIN, OUTPUT);
-  pinMode(rraptor::sm_z.DIR_PIN, OUTPUT);
-  pinMode(rraptor::sm_z.PULSE_PIN, OUTPUT);
-  
-  // Wifi
+void setup() {
+    // start serial port at 9600 bps:
+    Serial.begin(9600);
+    
+    // init stepper motors
+    int step_delay = 500;
+    // with step_delay=250 1 cycle=1 mls
+    //  init_smotor(smotor* sm, char* name, int distance_per_cycle, int time_per_cycle,
+    //    int step_delay, int pulse_pin, int dir_pin, int en_pin, int max_pos, int dir_inv)
+    rraptor::init_smotor(&rraptor::sm_x, "X", 15, step_delay * 4, step_delay, 3, 5, 6, 216000, 1); // X - синий драйвер
+    rraptor::init_smotor(&rraptor::sm_y, "Y", 15, step_delay * 4, step_delay, 26, 27, 28, 300000, -1); // Y - желтый драйвер
+    rraptor::init_smotor(&rraptor::sm_z, "Z", 15, step_delay * 4, step_delay, 31, 32, 33, 100000, -1); // Z - черный драйвер
+    
+    pinMode(rraptor::sm_x.DIR_PIN, OUTPUT);
+    pinMode(rraptor::sm_x.PULSE_PIN, OUTPUT);
+    pinMode(rraptor::sm_y.DIR_PIN, OUTPUT);
+    pinMode(rraptor::sm_y.PULSE_PIN, OUTPUT);
+    pinMode(rraptor::sm_z.DIR_PIN, OUTPUT);
+    pinMode(rraptor::sm_z.PULSE_PIN, OUTPUT);
+    
+    // Wifi
     int conID = DWIFIcK::INVALID_CONNECTION_ID;
 
     Serial.println("WiFiTCPEchoServer 1.0");
@@ -883,8 +883,7 @@ void setup()
     DNETcK::begin(ipServer);
 }
 
-void loop()
-{
+void loop() {
   //rraptor::handle_command("move x -10000");
   //rraptor::handle_command("step x 1000");
   
