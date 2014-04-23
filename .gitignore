@@ -15,3 +15,8 @@
 *.exe
 *.out
 *.app
+
+# Android generated out
+/RraptorPult/bin/
+/RraptorPult/gen/
+
