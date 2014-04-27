@@ -3,6 +3,8 @@
 
 // Протокол общения с Пультом управления
 
+#include "stepper.h"
+
 // Команды Rraptor
 
 /* Остановить все моторы */
@@ -33,6 +35,9 @@ static char* CMD_GCODE_G03 = "G03";
 // Ответы
 static char*  REPLY_OK = "ok";
 static char*  REPLY_DONTUNDERSTAND = "dontunderstand";
+
+
+void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 
 // Обработчики команд
 

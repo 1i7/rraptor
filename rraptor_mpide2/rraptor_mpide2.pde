@@ -1,10 +1,12 @@
+
 #include <WiFiShieldOrPmodWiFi_G.h>
 
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
-#include "tcp_util.h"
+#include "network_util.h"
 #include "rraptor_protocol.h"
+#include "stepper.h"
 
 // Пины статуса подключений
 #define STATUS_WIFI_PIN 6
@@ -17,10 +19,11 @@ const char* wifi_wpa2_passphrase = "robotguest";
 
 // статический IP-адрес для текущего хоста - попросим у 
 // точки Wifi (иначе Пульт не узнает, куда подключаться)
-IPv4 host_ip = {192,168,117,117};
+//IPv4 host_ip = {192,168,115,115};
+IPv4 host_ip = {192,168,43,115};
 
 // Порт для tcp-сервера
-const int tcp_server_port = DNETcK::iPersonalPorts44 + 116;
+const int tcp_server_port = DNETcK::iPersonalPorts44 + 115;
 
 int conectionId = DWIFIcK::INVALID_CONNECTION_ID;
 
@@ -36,6 +39,9 @@ static char write_buffer[128];
 int read_size;
 int write_size;
 
+// Шаговые моторы
+stepper sm_x, sm_y, sm_z;
+
 void printTcpServerStatus() {
     printIPAddress(&host_ip);
     Serial.print(":");
@@ -43,29 +49,7 @@ void printTcpServerStatus() {
 }
 
 /**
- * Подключиться к открытой сети WiFi.
- */
-int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-  
-    return DWIFIcK::connect(wifi_ssid, netStatus);   
-}
-
-/**
- * Подключиться к сети WiFi, защищенной WPA2 с паролем.
- */
-int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, DNETcK::STATUS *netStatus) {
-    Serial.print("SSID: ");
-    Serial.print(ssid);
-    Serial.print(", WPA2 passphrase: ");
-    Serial.println(passphrase);
-    
-    return DWIFIcK::connect(ssid, passphrase, netStatus);
-}
-
-/**
- * Подлключиться к сети WiFi.
+ * Подлключиться к сети Wifi.
  */
 int connectWifi(DNETcK::STATUS *netStatus) {
     int conId = DWIFIcK::INVALID_CONNECTION_ID;
@@ -78,6 +62,16 @@ int connectWifi(DNETcK::STATUS *netStatus) {
 void setup() {
     Serial.begin(9600);
     Serial.println("Start wifi network server demo");
+        
+//    init_stepper(stepper* smotor,  char* name, 
+//        int pin_pulse, int pin_dir, int pin_en,
+//        int dir_inv, int pulse_delay,
+//        float distance_per_step, float max_pos)
+    init_stepper(&sm_x, "x", 3, 5, 6,     1, 1000, 7.5, 216000); // X - синий драйвер
+    init_stepper(&sm_y, "y", 26, 27, 28, -1, 1000, 7.5, 300000); // Y - желтый драйвер
+    init_stepper(&sm_z, "z", 31, 32, 33, -1, 1000, 7.5, 100000); // Z - черный драйвер
+    
+    init_protocol(&sm_x, &sm_y, &sm_z);
 }
     
 void loop() {
@@ -207,7 +201,6 @@ void loop() {
         }
     } else {
         // Пульт подключен - читаем команды, отправляем ответы
-        
         // есть что почитать?
         if((readSize = tcpClient.available()) > 0) {
             readSize = readSize < sizeof(read_buffer) ? readSize : sizeof(read_buffer);
@@ -243,6 +236,22 @@ void loop() {
             Serial.print("Close connection on timeout");
             tcpClient.close();
         }
+    }
+    
+    // Держим Tcp-стек в живом состоянии    
+    DNETcK::periodicTasks();
+    
+    
+    if(is_cycle_running()) {
+        Serial.print("X.pos=");
+        Serial.print(sm_x.current_pos, DEC);
+        Serial.print(", Y.pos=");
+        Serial.print(sm_y.current_pos, DEC);
+        Serial.print(", Z.pos=");
+        Serial.print(sm_z.current_pos, DEC);
+        Serial.println();
+        
+        delay(1000);
     }
 }
 

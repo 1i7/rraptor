@@ -4,6 +4,28 @@
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
+/**
+ * Подключиться к открытой сети WiFi.
+ */
+int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
+    Serial.print("SSID: ");
+    Serial.println(ssid);
+  
+    return DWIFIcK::connect(ssid, netStatus);   
+}
+
+/**
+ * Подключиться к сети WiFi, защищенной WPA2 с паролем.
+ */
+int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, DNETcK::STATUS *netStatus) {
+    Serial.print("SSID: ");
+    Serial.print(ssid);
+    Serial.print(", WPA2 passphrase: ");
+    Serial.println(passphrase);
+    
+    return DWIFIcK::connect(ssid, passphrase, netStatus);
+}
+
 void printIPAddress(IPv4 *ipAddress) {
     Serial.print(ipAddress->rgbIP[0], DEC);
     Serial.print(".");

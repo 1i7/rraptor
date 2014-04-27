@@ -256,7 +256,7 @@ int handleInput(char* buffer, int size, char* reply_buffer) {
                     
                     // Команда корректна
                     success = 1;
-                    Serial.println(String("") + "Handle command: [cmd=G01, dest pos=(" + x + ", " + y + ", " + z + ")");
+                    Serial.println(String("") + "Handle command: [cmd=G01, dest pos=(" + x + ", " + y + ", " + z + ")]");
                     
                     // Выполнить команду
                     cmd_gcode_g01(x, y, z, f);        
