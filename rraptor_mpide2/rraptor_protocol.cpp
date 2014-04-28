@@ -3,286 +3,148 @@
 
 #include "rraptor_protocol.h"
 
+/**
+ * Разбить параметр команды на составляющие:
+ * 1й символ - имя параметра,
+ * подстрока начиная со 2го символа - значение параметра, число с плавающей точкой.
+ */
+void parseParam(char* param, char* pname, double* pvalue) {
+    if(strlen(param) > 1) {
+        *pname = param[0];
+        *pvalue = atof(param + 1);
+    }
+}
+
 
 /**
  * Обработать входные данные - разобрать строку, выполнить команду.
  * @return размер ответа в байтах (0, чтобы не отправлять ответ).
  */
-int handleInput(char* buffer, int size, char* reply_buffer) {
-    int replySize = 0;
+int handleInput(char* buffer, char* reply_buffer) {
     reply_buffer[0] = 0;
     
-    String cmd_line_str = String(buffer).trim();
+    bool std_reply = true;
+    bool success = false;
     
-    int success = 0;
-    if (cmd_line_str.startsWith(CMD_RR_STOP)) {
-        // Команда корректна
-        success = 1;
-        Serial.println("Handle command: stop");
-      
-        // Выполнить команду
-        cmd_rr_stop();
-    } else if(cmd_line_str.startsWith(CMD_RR_STEP)) {
-        // command 'step' syntax:
-        //     step motor_name cnum [cdelay]
-        String motor_name;
-        String cnum_str;
-        String cdelay_str;
-        int cnum;
-        int cdelay = 0;
+    char* tokens[8];
+    int tokensNum = 0;
+    
+    // Разобьем команду на куски по пробелам
+    char* token;
+    token = strtok(buffer, " ");
+    while(token != NULL) {
+        tokens[tokensNum] = token;
+        tokensNum++;
         
-        int space1 = -1;
-        int space2 = -1;
+        token = strtok(NULL, " ");
+    }
+    
+    // Определим, с какой командой имеем дело    
+    if(tokensNum > 0) {
+        if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
+            // синтаксис:
+            //     rr_status
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_status(reply_buffer);
+            std_reply = false;
+        } else if(strcmp(tokens[0], CMD_RR_STOP) == 0) {
+            // синтаксис:
+            //     rr_stop
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_stop();
+        } else if(strcmp(tokens[0], CMD_RR_GO) == 0) {
+            // синтаксис:
+            //     rr_go motor_name speed
+            if(tokensNum >= 3) {
+                char motor_name = tokens[1][0];
+                int spd = atoi(tokens[2]);
         
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                motor_name = cmd_line_str.substring(space1 + 1, space2);
-                
-                space1 = space2;
-                space2 = cmd_line_str.indexOf(' ', space1 + 1);
-                if(space2 != -1) {
-                    cnum_str = cmd_line_str.substring(space1 + 1, space2);
-                } else {
-                    cnum_str = cmd_line_str.substring(space1 + 1);
-                }
-                
-                cnum = cnum_str.toInt();//atoi(cnum_str.toCharArray());
-                  
-                // Необязательный параметр - cdelay
-                if(space2 != -1) {
-                    cdelay_str = cmd_line_str.substring(space2 + 1);
-                    cdelay = cdelay_str.toInt();//atoi(cnum_str.toCharArray());
-                }
-                  
                 // Команда корректна
-                success = 1;
-                Serial.println("Handle command: [cmd=step, motor=" + motor_name + ", cycle num=" + cnum + ", cycle delay=" + cdelay + "]");
+                success = true;
                   
-                // Выполнить команду
-                char motor_name_chars[motor_name.length() + 1];
-                motor_name.toCharArray(motor_name_chars, motor_name.length() + 1);
-                
-                cmd_rr_step(motor_name_chars, cnum, cdelay);
+                // Выполнить команду - запустить моторы в постоянную работу 
+                // до прихода команды на остановку               
+                cmd_rr_go(motor_name, spd);
             }
-        }
-    } else if(cmd_line_str.startsWith(CMD_RR_SHIFT)) {
-        // command 'shift' syntax:
-        //     shift motor_name dl [dt]
-        String motor_name;
-        String dl_str;
-        String dt_str;
-        int dl;
-        int dt = 0;
+        } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
+            // синтаксис:
+            //     rr_calibrate motor_name speed
+            if(tokensNum >= 3) {
+                char motor_name = tokens[1][0];
+                int spd = atoi(tokens[2]);
         
-        int space1 = -1;
-        int space2 = -1;
-        
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                motor_name = cmd_line_str.substring(space1 + 1, space2);
-                
-                space1 = space2;
-                space2 = cmd_line_str.indexOf(' ', space1 + 1);
-                if(space2 != -1) {
-                    dl_str = cmd_line_str.substring(space1 + 1, space2);
-                } else {
-                    dl_str = cmd_line_str.substring(space1 + 1);
-                }
-                
-                dl = dl_str.toInt();//atoi(cnum_str.toCharArray());
-                  
-                // Необязательный параметр - dt
-                if(space2 != -1) {
-                    dt_str = cmd_line_str.substring(space2 + 1);
-                    dt = dt_str.toInt();//atoi(cnum_str.toCharArray());
-                }
-                  
                 // Команда корректна
-                success = 1;
-                Serial.println("Handle command: [cmd=shift, motor=" + motor_name + ", dl=" + dl + ", dt=" + dt + "]");
+                success = true;
                   
-                // Выполнить команду
-                char motor_name_chars[motor_name.length() + 1];
-                motor_name.toCharArray(motor_name_chars, motor_name.length() + 1);
-                
-                cmd_rr_shift(motor_name_chars, dl, dt);
+                // Выполнить команду - запустить моторы в постоянную работу 
+                // до прихода команды на остановку в режиме калибровки                
+                cmd_rr_calibrate(motor_name, spd);
             }
-        }
-    } else if(cmd_line_str.startsWith(CMD_RR_MOVE)) {
-        // command 'move' syntax:
-        //     move motor_name pos [dt]
-        String motor_name;
-        String pos_str;
-        int pos;
-        
-        int space1 = -1;
-        int space2 = -1;
-        
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                motor_name = cmd_line_str.substring(space1 + 1, space2);
+        } else if(strcmp(tokens[0], CMD_GCODE_G01) == 0) {
+            // синтаксис:
+            //     G01 [Xv1] [Yv] [Zv3] Fv4
+            // v1, v2, v3 - значения перемещения для координаты
+            // v4 - скорость перемещения, мм/с
+            if(tokensNum >= 3) {
+                char motor_names[3];
+                double cvalues[3];
+                int pcount = 0;
                 
-                space1 = space2;
-                space2 = cmd_line_str.indexOf(' ', space1 + 1);
-                if(space2 != -1) {
-                    pos_str = cmd_line_str.substring(space1 + 1, space2);
-                } else {
-                    pos_str = cmd_line_str.substring(space1 + 1);
-                }
+                double f = 0;
                 
-                pos = pos_str.toInt();//atoi(cnum_str.toCharArray());
-                  
-                // Команда корректна
-                success = 1;
-                Serial.println("Handle command: [cmd=move, motor=" + motor_name + ", pos=" + pos + "]");
-                  
-                // Выполнить команду
-                char motor_name_chars[motor_name.length() + 1];
-                motor_name.toCharArray(motor_name_chars, motor_name.length() + 1);
-                
-                cmd_rr_move(motor_name_chars, pos);
-            }
-        }
-    } else if(cmd_line_str.startsWith(CMD_RR_GO)) {
-        // command 'go' syntax:
-        //     go motor_name speed
-        String motor_name;
-        String spd_str;
-        int spd;
-        
-        int space1 = -1;
-        int space2 = -1;
-        
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                motor_name = cmd_line_str.substring(space1 + 1, space2);
-                
-                spd_str = cmd_line_str.substring(space2 + 1);
-                spd = spd_str.toInt();//atoi(cnum_str.toCharArray());
-                  
-                // Команда корректна
-                success = 1;
-                Serial.println("Handle command: [cmd=go, motor=" + motor_name + ", speed=" + spd + "]");
-                  
-                // Выполнить команду - запустить моторы в постоянную работу до прихода команды на остановку
-                char motor_name_chars[motor_name.length() + 1];
-                motor_name.toCharArray(motor_name_chars, motor_name.length() + 1);
-                
-                cmd_rr_go(motor_name_chars, spd);
-            }
-        }
-    } else if(cmd_line_str.startsWith(CMD_RR_CALIBRATE)) {
-        // command 'calibrate' syntax:
-        //     calibrate motor_name speed
-        String motor_name;
-        String spd_str;
-        int spd;
-        
-        int space1 = -1;
-        int space2 = -1;
-        
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                motor_name = cmd_line_str.substring(space1 + 1, space2);
-                
-                spd_str = cmd_line_str.substring(space2 + 1);
-                spd = spd_str.toInt();//atoi(cnum_str.toCharArray());
-                  
-                // Команда корректна
-                success = 1;
-                Serial.println("Handle command: [cmd=calibrate, motor=" + motor_name + ", speed=" + spd + "]");
-                  
-                // Выполнить команду - запустить моторы в постоянную работу до прихода команды на остановку
-                // в режиме калибровки
-                char motor_name_chars[motor_name.length() + 1];
-                motor_name.toCharArray(motor_name_chars, motor_name.length() + 1);
-                
-                cmd_rr_calibrate(motor_name_chars, spd);
-            }
-        }
-    } else if(cmd_line_str.startsWith(CMD_GCODE_G01)) {
-        // command 'G01' syntax:
-        //     G01 x y z [f]
-        String x_str;
-        String y_str;
-        String z_str;
-        String f_str;
-        int x;
-        int y;
-        int z;
-        int f;
-        
-        int space1 = -1;
-        int space2 = -1;
-        
-        space1 = cmd_line_str.indexOf(' ');
-        if(space1 != -1) {
-            space2 = cmd_line_str.indexOf(' ', space1 + 1);
-            if(space2 != -1) {
-                x_str = cmd_line_str.substring(space1 + 1, space2);
-                x = x_str.toInt();//atoi(cnum_str.toCharArray());
-                
-                space1 = space2;
-                space2 = cmd_line_str.indexOf(' ', space1 + 1);
-                if(space2 != -1) {
-                    y_str = cmd_line_str.substring(space1 + 1, space2);
-                    y = y_str.toInt();//atoi(cnum_str.toCharArray());
+                char pname;
+                double pvalue;
+                for(int i = 1; i < tokensNum; i++) {                
+                    parseParam(tokens[i], &pname, &pvalue);
                     
-                    space1 = space2;
-                    space2 = cmd_line_str.indexOf(' ', space1 + 1);
-                    if(space2 != -1) {
-                        z_str = cmd_line_str.substring(space1 + 1, space2);            
+                    if(pname == GCODE_PARAM_F) {
+                        f = pvalue;
                     } else {
-                        z_str = cmd_line_str.substring(space1 + 1);
+                        if(pcount < 3) {
+                            motor_names[pcount] = pname;
+                            cvalues[pcount] = pvalue;
+                            pcount++;
+                        }
                     }
-                    
-                    z = z_str.toInt();//atoi(cnum_str.toCharArray());
-                    
-                    // Необязательный параметр - f
-                    if(space2 != -1) {
-                        f_str = cmd_line_str.substring(space2 + 1);
-                        f = f_str.toInt();//atoi(cnum_str.toCharArray());
-                    }
-                    
+                }
+                
+                if(pcount > 0 && f > 0) {
                     // Команда корректна
-                    success = 1;
-                    Serial.println(String("") + "Handle command: [cmd=G01, dest pos=(" + x + ", " + y + ", " + z + ")]");
+                    success = true;
                     
-                    // Выполнить команду
-                    cmd_gcode_g01(x, y, z, f);        
+                    // Выполнить команду                    
+                    cmd_gcode_g01(motor_names, cvalues, pcount, f);
                 }
             }
+            
+        } else if(strcmp(tokens[0], CMD_GCODE_G02) == 0) {
+            // TODO: implement G02
+            cmd_gcode_g02();
+        } else if(strcmp(tokens[0], CMD_GCODE_G03) == 0) {
+            // TODO: implement G03
+            cmd_gcode_g03();
         }
-    } else if(cmd_line_str.startsWith(CMD_GCODE_G02)) {
-        // TODO: implement G02
-        cmd_gcode_g02();
-    } else if(cmd_line_str.startsWith(CMD_GCODE_G03)) {
-        // TODO: implement G03
-        cmd_gcode_g03();
     }
   
-    if(!success) {
-        Serial.println("Can't handle command: " + cmd_line_str);
-        
-        // Подготовить ответ
-        strcpy(reply_buffer, REPLY_DONTUNDERSTAND);
-        replySize = strlen(reply_buffer) + 1;
-    } else {
-        // Подготовить ответ
-        strcpy(reply_buffer, REPLY_OK);
-        replySize = strlen(reply_buffer) + 1;
+    if(std_reply) {
+        if(!success) {
+            Serial.print("Can't handle command: ");
+            Serial.println(buffer);
+            
+            // Подготовить ответ
+            strcpy(reply_buffer, REPLY_DONTUNDERSTAND);
+        } else {
+            // Подготовить ответ
+            strcpy(reply_buffer, REPLY_OK);
+        }
     }
     
-    return replySize;
+    return strlen(reply_buffer) + 1;
 }
 

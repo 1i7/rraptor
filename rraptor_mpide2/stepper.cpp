@@ -15,10 +15,10 @@
 /**
  * Инициализировать шаговый мотор необходимыми значениями.
  */
-void init_stepper(stepper* smotor,  char* name, 
+void init_stepper(stepper* smotor,  char name, 
         int pin_pulse, int pin_dir, int pin_en,
         int dir_inv, int pulse_delay,
-        float distance_per_step, float max_pos) {
+        double distance_per_step, double max_pos) {
   
     smotor->name = name;
     

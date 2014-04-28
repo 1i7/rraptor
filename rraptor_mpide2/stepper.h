@@ -18,8 +18,8 @@
  * Структура - шаговый двигатель.
  */
 typedef struct {
-    /* Имя шагового мотора */
-    char* name;
+    /* Имя шагового мотора (один символ) */
+    char name;
     
     /* Информация о подключение через драйвер Step-dir */
     
@@ -55,10 +55,10 @@ typedef struct {
 /**
  * Инициализировать шаговый мотор необходимыми значениями.
  */
-void init_stepper(stepper* smotor,  char* name, 
+void init_stepper(stepper* smotor,  char name, 
         int pin_pulse, int pin_dir, int pin_en,
         int dir_inv, int pulse_delay,
-        float distance_per_step, float max_pos);
+        double distance_per_step, double max_pos);
         
 /**
  * Подготовить мотор к запуску ограниченной серии шагов - задать нужное количество 
@@ -100,13 +100,21 @@ bool is_cycle_running();
 
 ////
 // Математика
+
 /**
- * @param dx - сдвиг по x, мм
- * @param dy - сдвиг по y, мм
- * @param dt - время на перемещение, секунды.
+ * @param sm - мотор на выбранной координате
+ * @param dl - сдвиг по указанной оси, мм
+ * @param spd - скорость перемещения, мм/с
  * 
  */
-void prepare_line(stepper *sm_x, stepper *sm_y, float dx, float dy, float dt);
+void prepare_line(stepper *sm, double dl, double spd);
+
+/**
+ * @param dl1 - сдвиг по оси 1, мм
+ * @param dl2 - сдвиг по оси 2, мм
+ * @param spd - скорость перемещения, мм/с
+ */
+void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double spd);
 
 #endif // STEPPER_H
 

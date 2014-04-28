@@ -103,7 +103,7 @@ void prepare_steps(stepper *smotor, int step_count, int step_delay) {
   
     // Взводим счетчики
     cstatuses[sm_i].step_counter = cstatuses[sm_i].step_count;
-    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay * 2 + cstatuses[sm_i].step_delay;
+    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay + cstatuses[sm_i].step_delay;
 }
 
 /**
@@ -140,7 +140,7 @@ void prepare_whirl(stepper *smotor, int dir, int step_delay, bool check_bounds) 
     cstatuses[sm_i].step_delay = step_delay;
   
     // Взводим счетчики
-    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay * 2 + cstatuses[sm_i].step_delay;
+    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay + cstatuses[sm_i].step_delay;
     
     // на всякий случай обнулим
     cstatuses[sm_i].step_count = 0;
@@ -167,13 +167,13 @@ void start_stepper_cycle() {
     
     // для частоты 5 микросекунд (500000 операций в секунду):
     // 80000000/8/500000=20
-    timer_freq_us = 5;
-    initTimerISR(TIMER3, TIMER_PRESCALAR_1_8, 20);
+//    timer_freq_us = 5;
+//    initTimerISR(TIMER3, TIMER_PRESCALAR_1_8, 20);
     
     // Запустим таймер с периодом 10 микросекунд (100тыс операций в секунду):
     // 80000000/8/100000=100=0x64
-//    timer_freq_us = 10;
-//    initTimerISR(TIMER3, TIMER_PRESCALAR_1_8, 0x64);
+    timer_freq_us = 10;
+    initTimerISR(TIMER3, TIMER_PRESCALAR_1_8, 0x64);
 }
 
 /**
@@ -212,6 +212,8 @@ void handle_interrupts(int timer) {
     bool finished = true;
     
     for(int i = 0; i < stepper_count; i++) {
+        cstatuses[i].step_timer -= timer_freq_us;
+      
         if( (cstatuses[i].non_stop || cstatuses[i].step_counter > 0) &&
                 // проверка выхода за границы во время предстоящего шага
                 (!cstatuses[i].check_bounds ? true : 
@@ -224,8 +226,8 @@ void handle_interrupts(int timer) {
           
             // Шаг происходит по фронту сигнала HIGH>LOW, ширина ступени HIGH при этом не важна.
             // Поэтому сформируем ступень HIGH за один цикл таймера до сброса в LOW
-            if(cstatuses[i].step_timer < timer_freq_us*2 && cstatuses[i].step_timer >= timer_freq_us) {
-                // cstatuses[i].step_timer ~ timer_freq_us с учетом погрешности таймера timer_freq_us =>
+            if(cstatuses[i].step_timer < timer_freq_us * 2 && cstatuses[i].step_timer >= timer_freq_us) {
+                // cstatuses[i].step_timer ~ timer_freq_us с учетом погрешности таймера (timer_freq_us) =>
                 // импульс1 - готовим шаг
                 digitalWrite(smotors[i]->pin_pulse, HIGH);
             } else if(cstatuses[i].step_timer < timer_freq_us) {
@@ -233,11 +235,8 @@ void handle_interrupts(int timer) {
                 // импульс2 (спустя timer_freq_us микросекунд после импульса1) - совершаем шаг
                 digitalWrite(smotors[i]->pin_pulse, LOW);
                 
-                // переустановим таймер
-                cstatuses[i].step_timer = cstatuses[i].step_delay + smotors[i]->pulse_delay + timer_freq_us;
-                
+                // посчитаем шаг
                 if(!cstatuses[i].non_stop) {
-                    // посчитаем шаг
                     cstatuses[i].step_counter--;
                 }
                 
@@ -252,9 +251,18 @@ void handle_interrupts(int timer) {
                     // режим калибровки
                     smotors[i]->current_pos = 0;
                 }
+                
+                // сделали последний шаг
+                if(!cstatuses[i].non_stop && cstatuses[i].step_counter == 0) {
+                    Serial.print("Finished motor=");
+                    Serial.print(smotors[i]->name);
+                    Serial.print(": ");
+                    Serial.println(millis(), DEC);
+                }
+                
+                // взведём таймер на новый шаг
+                cstatuses[i].step_timer = smotors[i]->pulse_delay + cstatuses[i].step_delay;
             }
-            
-            cstatuses[i].step_timer -= timer_freq_us;
         }
     }
     

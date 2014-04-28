@@ -7,14 +7,10 @@
 
 // Команды Rraptor
 
+/* Получить статус системы */
+static char* CMD_RR_STATUS = "rr_status";
 /* Остановить все моторы */
 static char* CMD_RR_STOP = "rr_stop";
-/* Повернуть заданный мотор на заданное количество шагов */
-static char* CMD_RR_STEP = "rr_step";
-/* Сдвинуть заданную координату на заданное расстояние */
-static char* CMD_RR_SHIFT = "rr_shift";
-/* Переместить заданную координату в заданное положение */
-static char* CMD_RR_MOVE = "rr_move";
 /* Запустить мотор с заданной скоростью на непрерывное вращение */
 static char* CMD_RR_GO = "rr_go";
 /** 
@@ -36,10 +32,25 @@ static char* CMD_GCODE_G03 = "G03";
 static char*  REPLY_OK = "ok";
 static char*  REPLY_DONTUNDERSTAND = "dontunderstand";
 
+static char*  STATUS_IDLE = "idle";
+static char*  STATUS_WORKING = "working";
+
+// Параметры G-кодов
+static char GCODE_PARAM_X = 'X';
+static char GCODE_PARAM_Y = 'Y';
+static char GCODE_PARAM_Z = 'Z';
+static char GCODE_PARAM_F = 'F';
+
+
 
 void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 
 // Обработчики команд
+
+/** 
+ * Получить текущий статус системы.
+ */
+int cmd_rr_status(char* reply_buffer);
 
 /** 
  * Остановить все моторы.
@@ -47,35 +58,25 @@ void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 void cmd_rr_stop();
 
 /** 
- * Повернуть заданный мотор на заданное количество шагов.
- */
-void cmd_rr_step(char* motor_name, int cnum, int cdelay=0);
-
-/** 
- * Сдвинуть заданную координату на заданное расстояние.
- */
-void cmd_rr_shift(char* motor_name, int dl, int dt=0);
-
-/**
- * Переместить заданную координату в заданное положение.
- */
-void cmd_rr_move(char* motor_name, int pos);
-
-/** 
  * Запустить мотор с заданной скоростью на непрерывное вращение.
  */
-void cmd_rr_go(char* motor_name, int spd);
+void cmd_rr_go(char motor_name, int spd);
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
  */
-void cmd_rr_calibrate(char* motor_name, int spd);
+void cmd_rr_calibrate(char motor_name, int spd);
 
 /** 
  * Команда G-code G01 - прямая линия.
+ * 
+ * @param motor_names имена моторов.
+ * @param cvalues значения координат.
+ * @param pcount количество параметров (моторов в списке).
+ * @param f скорость перемещения мм/с.
  */
-void cmd_gcode_g01(int x, int y, int z, int f);
+void cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f);
 
 /** 
  * Команда G-code G02 - дуга по часовой стрелке.
@@ -92,7 +93,7 @@ void cmd_gcode_g03();
  * Обработать входные данные - разобрать строку, выполнить команду.
  * @return размер ответа в байтах (0, чтобы не отправлять ответ).
  */
-int handleInput(char* buffer, int size, char* reply_buffer);
+int handleInput(char* buffer, char* reply_buffer);
 
 #endif // RRAPTOR_PROTOCOL_H
 

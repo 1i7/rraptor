@@ -13,59 +13,105 @@
 #include "stepper.h"
 
 /**
- * @param dx - сдвиг по x, мм
- * @param dy - сдвиг по y, мм
- * @param dt - время на перемещение, секунды.
- * 
+ * @param sm - мотор на выбранной координате
+ * @param dl - сдвиг по указанной оси, мм
+ * @param spd - скорость перемещения, мм/с
  */
-void prepare_line(stepper *sm_x, stepper *sm_y, float dx, float dy, float dt) {
+void prepare_line(stepper *sm, double dl, double spd) {
     Serial.print("prepare line:");
-    Serial.print(" dx=");
-    Serial.print(dx, DEC);
-    Serial.print(", dy=");
-    Serial.print(dy, DEC);
+    Serial.print(" dl=");
+    Serial.print(dl, DEC);
     Serial.print(", dt=");
     Serial.print(dt, DEC);
     Serial.println();
     
-    int steps_x;
-    int steps_y;
-    int mod_steps_x;
-    int mod_steps_y;
-    int step_delay_x;
-    int step_delay_y;
+    int steps;
+    int mod_steps;
+    int step_delay;
+        
+    steps = dl * 1000 / sm->distance_per_step;
+    mod_steps = steps >= 0 ? steps : -steps;
     
-    steps_x = dx * 1000 / sm_x->distance_per_step;
-    steps_y = dy * 1000 / sm_y->distance_per_step;
-    
-    mod_steps_x = steps_x >= 0 ? steps_x : -steps_x;
-    mod_steps_y = steps_y >= 0 ? steps_y : -steps_y;
-    
-    Serial.print("steps_x=");
-    Serial.print(steps_x, DEC);
-    Serial.print(", steps_y=");
-    Serial.print(steps_y, DEC);
+    Serial.print("steps=");
+    Serial.print(steps, DEC);
     Serial.println();
     
-    step_delay_x = dt * 1000000 / mod_steps_x - sm_x->pulse_delay;    
-    step_delay_y = dt * 1000000 / mod_steps_y - sm_y->pulse_delay;
+    // время на прохождение линии - длина делить на скорость, секунды
+    double dt = dl / spd;
+    // задержка между 2мя шагами, микросекунды
+    step_delay = dt * 1000000 / mod_steps - sm->pulse_delay;
     
-    Serial.print("step_delay_x(1)=");
-    Serial.print(step_delay_x, DEC);
-    Serial.print(", step_delay_y(1)=");
-    Serial.print(step_delay_y, DEC);
+    Serial.print("step_delay(1)=");
+    Serial.print(step_delay, DEC);
     Serial.println();
 
-    step_delay_x = step_delay_x > 0 ? step_delay_x : 0;
-    step_delay_y = step_delay_y > 0 ? step_delay_y : 0;
+    step_delay = step_delay > 0 ? step_delay : 0;
     
-    Serial.print("step_delay_x=");
-    Serial.print(step_delay_x, DEC);
-    Serial.print(", step_delay_y=");
-    Serial.print(step_delay_y, DEC);
+    prepare_steps(sm, steps, step_delay);
+}
+
+/**
+ * @param dl1 - сдвиг по оси 1, мм
+ * @param dl2 - сдвиг по оси 2, мм
+ * @param spd - скорость перемещения, мм/с
+ */
+void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double spd) {
+    Serial.print("prepare line:");
+    Serial.print(" d");
+    Serial.print(sm1->name);
+    Serial.print("=");
+    Serial.print(dl1, DEC);
+    Serial.print(", d");
+    Serial.print(sm2->name);
+    Serial.print("=");
+    Serial.print(dl2, DEC);
+    Serial.print(", speed=");
+    Serial.print(spd, DEC);
     Serial.println();
     
-    prepare_steps(sm_x, steps_x, step_delay_x);
-    prepare_steps(sm_y, steps_y, step_delay_y);
+    int steps_sm1;
+    int steps_sm2;
+    int mod_steps_sm1;
+    int mod_steps_sm2;
+    int step_delay_sm1;
+    int step_delay_sm2;
+    
+    steps_sm1 = dl1 * 1000 / sm1->distance_per_step;
+    steps_sm2 = dl2 * 1000 / sm2->distance_per_step;
+    
+    mod_steps_sm1 = steps_sm1 >= 0 ? steps_sm1 : -steps_sm1;
+    mod_steps_sm2 = steps_sm2 >= 0 ? steps_sm2 : -steps_sm2;
+    
+    Serial.print("steps_x=");
+    Serial.print(steps_sm1, DEC);
+    Serial.print(", steps_y=");
+    Serial.print(steps_sm2, DEC);
+    Serial.println();
+    
+    // длина гипотенузы
+    double dl = sqrt(dl1*dl1 + dl2*dl2);
+    // время на прохождение диагонали - длина делить на скорость, секунды
+    double dt = dl / spd;
+    // задержка между 2мя шагами, микросекунды
+    step_delay_sm1 = dt * 1000000 / mod_steps_sm1 - sm1->pulse_delay;    
+    step_delay_sm2 = dt * 1000000 / mod_steps_sm2 - sm2->pulse_delay;
+    
+    Serial.print("step_delay_x(1)=");
+    Serial.print(step_delay_sm1, DEC);
+    Serial.print(", step_delay_y(1)=");
+    Serial.print(step_delay_sm2, DEC);
+    Serial.println();
+
+    step_delay_sm1 = step_delay_sm1 > 0 ? step_delay_sm1 : 0;
+    step_delay_sm2 = step_delay_sm2 > 0 ? step_delay_sm2 : 0;
+    
+    Serial.print("step_delay_x=");
+    Serial.print(step_delay_sm1, DEC);
+    Serial.print(", step_delay_y=");
+    Serial.print(step_delay_sm2, DEC);
+    Serial.println();
+    
+    prepare_steps(sm1, steps_sm1, step_delay_sm1);
+    prepare_steps(sm2, steps_sm2, step_delay_sm2);
 }
 

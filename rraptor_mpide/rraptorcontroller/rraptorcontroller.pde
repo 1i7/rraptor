@@ -173,7 +173,7 @@ void step_motor(smotor* sm, int cnum, int cdelay) {
             (calibrate_mode ? 1 : 
             (dir > 0 ? sm->current_pos + sm->distance_per_cycle <= sm->MAX_POS : 
                        sm->current_pos - sm->distance_per_cycle >= 0))) {
-      // пусть будет 2 шага в одном цикле
+        // пусть будет 2 шага в одном цикле
         digitalWrite(sm->PULSE_PIN, HIGH);
         delayMicroseconds(sm->step_delay);
         digitalWrite(sm->PULSE_PIN, LOW);
