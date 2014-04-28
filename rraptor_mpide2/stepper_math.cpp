@@ -21,9 +21,9 @@ void prepare_line(stepper *sm, double dl, double spd) {
     Serial.print("prepare line:");
     Serial.print(" dl=");
     Serial.print(dl, DEC);
-    Serial.print(", dt=");
-    Serial.print(dt, DEC);
-    Serial.println();
+    Serial.print("mm, speed=");
+    Serial.print(spd, DEC);
+    Serial.println("mm/s");
     
     int steps;
     int mod_steps;
@@ -61,13 +61,13 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double 
     Serial.print(sm1->name);
     Serial.print("=");
     Serial.print(dl1, DEC);
-    Serial.print(", d");
+    Serial.print("mm, d");
     Serial.print(sm2->name);
     Serial.print("=");
     Serial.print(dl2, DEC);
-    Serial.print(", speed=");
+    Serial.print("mm, speed=");
     Serial.print(spd, DEC);
-    Serial.println();
+    Serial.println("mm/s");
     
     int steps_sm1;
     int steps_sm2;
