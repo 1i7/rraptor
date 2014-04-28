@@ -21,6 +21,8 @@ static char* CMD_RR_CALIBRATE = "rr_calibrate";
   
 // Команды G-кода
 
+/* Команда G-code G0 - перемещение с максимальной скоростью */
+static char* CMD_GCODE_G0 = "G0";
 /* Команда G-code G01 - прямая линия */
 static char* CMD_GCODE_G01 = "G01";
 /* Команда G-code G02 - дуга по часовой стрелке */
@@ -67,6 +69,15 @@ void cmd_rr_go(char motor_name, int spd);
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
  */
 void cmd_rr_calibrate(char motor_name, int spd);
+
+/** 
+ * Команда G-code G0 - прямая линия.
+ * 
+ * @param motor_names имена моторов.
+ * @param cvalues значения координат.
+ * @param pcount количество параметров (моторов в списке).
+ */
+void cmd_gcode_g0(char motor_names[], double cvalues[], int  pcount);
 
 /** 
  * Команда G-code G01 - прямая линия.

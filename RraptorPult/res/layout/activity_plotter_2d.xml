@@ -61,18 +61,6 @@
                 android:text="Очистить" />
 
             <Button
-                android:id="@+id/z_up_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⇈" />
-
-            <Button
-                android:id="@+id/z_down_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⇊" />
-
-            <Button
                 android:id="@+id/draw_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -83,6 +71,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Остановить" />
+            
+            <Button
+                android:id="@+id/z_up_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⇈" />
+
+            <Button
+                android:id="@+id/z_down_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⇊" />
         </LinearLayout>
     </LinearLayout>
 

@@ -219,6 +219,12 @@ public class Plotter2DActivity extends Activity {
 				REQUEST_CODE_PICK_FILE);
 	}
 
+	private String sendCommand(final String cmd) throws InterruptedException,
+			Exception {
+		final String replyStatus = deviceConnection.sendToDeviceBlocked(cmd);
+		return replyStatus;
+	}
+
 	private void startDrawingOnDevice() {
 		new Thread(new Runnable() {
 
@@ -238,7 +244,7 @@ public class Plotter2DActivity extends Activity {
 				});
 
 				String cmd;
-				int replyStatus;
+				String replyStatus;
 
 				final List<Line2D> drawingLines = plotterCanvas
 						.getDrawingLines();
@@ -252,28 +258,43 @@ public class Plotter2DActivity extends Activity {
 								LineDrawingStatus.DRAWING_PROGRESS);
 						// swap X and Y for natural view when plot 2d pictures
 						// on device table
-						if (line.getStart() != endPoint) {
-							// move to start point with drawing pen up
-							cmd = DeviceConnection.CMD_GCODE_G01 + " "
-									+ line.getStart().getY() * 1000 + " "
-									+ line.getStart().getX() * 1000 + " 1000";
+						if (!line.getStart().equals(endPoint)) {
+							// поднимем блок
+							cmd = DeviceConnection.CMD_GCODE_G0 + " " + "Z" + 5;
 
-							replyStatus = deviceConnection
-									.sendToDeviceBlocked(cmd);
+							replyStatus = sendCommand(cmd);
+							if (!DeviceConnection.REPLY_OK.equals(replyStatus)) {
+								throw new Exception("reply status ERROR");
+							}
 
-							if (replyStatus == DeviceConnection.REPLY_STATUS_ERROR) {
+							// переместимся в начальную точку
+							cmd = DeviceConnection.CMD_GCODE_G0 + " " + "X"
+									+ line.getStart().getY() + " " + "Y"
+									+ line.getStart().getX();
+
+							replyStatus = sendCommand(cmd);
+							if (!DeviceConnection.REPLY_OK.equals(replyStatus)) {
 								throw new Exception("reply status ERROR");
 							}
 						}
 
-						// move to end point with drawing pen down
-						cmd = DeviceConnection.CMD_GCODE_G01 + " "
-								+ line.getEnd().getY() * 1000 + " "
-								+ line.getEnd().getX() * 1000 + " 0";
-						replyStatus = deviceConnection.sendToDeviceBlocked(cmd);
+						// опустим блок на уровень для рисования
+						cmd = DeviceConnection.CMD_GCODE_G01 + " " + "Z" + 0
+								+ " F10";
+						replyStatus = sendCommand(cmd);
+						if (!DeviceConnection.REPLY_OK.equals(replyStatus)) {
+							throw new Exception("reply status ERROR");
+						}
+
+						// прочертим линию со скоростью 2мм/с
+						cmd = DeviceConnection.CMD_GCODE_G01 + " " + "X"
+								+ line.getEnd().getY() + " " + "Y"
+								+ line.getEnd().getX() + " F2";
+
+						replyStatus = sendCommand(cmd);
 						plotterCanvas.setLineStatus(line,
 								LineDrawingStatus.DRAWN);
-						if (replyStatus == DeviceConnection.REPLY_STATUS_ERROR) {
+						if (!DeviceConnection.REPLY_OK.equals(replyStatus)) {
 							throw new Exception("reply status ERROR");
 						}
 

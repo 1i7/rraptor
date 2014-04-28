@@ -25,5 +25,4 @@ public class Line2D {
 	public void setStart(Point2D start) {
 		this.start = start;
 	}
-
 }

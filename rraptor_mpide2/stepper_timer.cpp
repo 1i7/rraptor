@@ -256,8 +256,11 @@ void handle_interrupts(int timer) {
                 if(!cstatuses[i].non_stop && cstatuses[i].step_counter == 0) {
                     Serial.print("Finished motor=");
                     Serial.print(smotors[i]->name);
-                    Serial.print(": ");
-                    Serial.println(millis(), DEC);
+                    Serial.print(".pos:");
+                    Serial.print(smotors[i]->current_pos);
+                    Serial.print("um, curr time=");
+                    Serial.print(millis(), DEC);
+                    Serial.print("ms");
                 }
                 
                 // взведём таймер на новый шаг

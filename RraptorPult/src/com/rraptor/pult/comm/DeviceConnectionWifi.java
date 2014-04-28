@@ -14,9 +14,10 @@ public class DeviceConnectionWifi implements DeviceConnection {
 		private static DeviceConnectionWifi instance = new DeviceConnectionWifi();
 	}
 
-	public static final String ADDRESS_DEFAULT = "192.168.43.191";
+	// public static final String ADDRESS_DEFAULT = "192.168.115.115";
+	public static final String ADDRESS_DEFAULT = "192.168.43.115";
 
-	public static final int PORT_DEFAULT = 44300;
+	public static final int PORT_DEFAULT = 44115;
 
 	public static DeviceConnectionWifi getInstance() {
 		return SingletonHolder.instance;
@@ -99,19 +100,19 @@ public class DeviceConnectionWifi implements DeviceConnection {
 	}
 
 	@Override
-	public int sendToDeviceBlocked(String cmd) throws Exception {
+	public String sendToDeviceBlocked(String cmd) throws Exception {
 		return sendToDeviceBlocked(ADDRESS_DEFAULT, PORT_DEFAULT, cmd);
 	}
 
-	public int sendToDeviceBlocked(final String address, final int port,
+	public String sendToDeviceBlocked(final String address, final int port,
 			String cmd) throws Exception, InterruptedException {
-		int returnCode = -1;
+		String replyLine = null;
 
 		boolean connected = false;
 		if (out != null) {
 			try {
 				System.out.println(cmd);
-				returnCode = writeToDeviceBlocked(cmd);
+				replyLine = writeToDeviceBlocked(cmd);
 				connected = true;
 			} catch (IOException e) {
 				// Only catch IOException for the 2nd trial,
@@ -121,9 +122,9 @@ public class DeviceConnectionWifi implements DeviceConnection {
 		}
 		if (!connected) {
 			connectToDevice(address, port);
-			returnCode = writeToDeviceBlocked(cmd);
+			replyLine = writeToDeviceBlocked(cmd);
 		}
-		return returnCode;
+		return replyLine;
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public class DeviceConnectionWifi implements DeviceConnection {
 	}
 
 	@Override
-	synchronized public int writeToDeviceBlocked(String cmd)
+	synchronized public String writeToDeviceBlocked(String cmd)
 			throws IOException, InterruptedException {
 		out.write(cmd);
 		out.flush();
@@ -153,13 +154,17 @@ public class DeviceConnectionWifi implements DeviceConnection {
 			}
 		}
 
-		int replyStatus;
-		if (in.ready()) {
-			replyStatus = in.read();
-			System.out.println("CMD status: " + replyStatus);
+		final char[] readBuffer = new char[256];
+		String replyLine;
+		final int readSize = in.read(readBuffer);
+		if (readSize != -1) {
+			replyLine = new String(readBuffer, 0, readSize - 1);
+			System.out
+					.println("CMD reply: " + replyLine + ", size=" + readSize);
 		} else {
 			throw new InterruptedException("прервано");
 		}
-		return replyStatus;
+
+		return replyLine;
 	}
 }

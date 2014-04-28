@@ -86,10 +86,40 @@ int handleInput(char* buffer, char* reply_buffer) {
                 // до прихода команды на остановку в режиме калибровки                
                 cmd_rr_calibrate(motor_name, spd);
             }
+        } else if(strcmp(tokens[0], CMD_GCODE_G0) == 0) {
+            // синтаксис:
+            //     G0 [Xv1] [Yv] [Zv3]
+            // v1, v2, v3 - значения перемещения для координаты, мм
+            if(tokensNum >= 2) {
+                char motor_names[3];
+                double cvalues[3];
+                int pcount = 0;
+                                
+                char pname;
+                double pvalue;
+                for(int i = 1; i < tokensNum; i++) {                
+                    parseParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < 3) {
+                        motor_names[pcount] = pname;
+                        cvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                if(pcount > 0) {
+                    // Команда корректна
+                    success = true;
+                    
+                    // Выполнить команду                    
+                    cmd_gcode_g0(motor_names, cvalues, pcount);
+                }
+            }
+            
         } else if(strcmp(tokens[0], CMD_GCODE_G01) == 0) {
             // синтаксис:
             //     G01 [Xv1] [Yv] [Zv3] Fv4
-            // v1, v2, v3 - значения перемещения для координаты
+            // v1, v2, v3 - значения перемещения для координаты, мм
             // v4 - скорость перемещения, мм/с
             if(tokensNum >= 3) {
                 char motor_names[3];

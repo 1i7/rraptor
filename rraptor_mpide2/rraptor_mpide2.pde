@@ -120,7 +120,9 @@ void loop1() {
         delay(1000);
     }
 }
-    
+
+int prevTime = 0;
+
 void loop() {
     DNETcK::STATUS networkStatus;
     int readSize;
@@ -130,7 +132,7 @@ void loop() {
         // Подключимся к сети Wifi
         
         bool connectedToWifi = false;
-        
+                
         Serial.println("Connecting wifi...");
         conectionId = connectWifi(&networkStatus);
   
@@ -174,6 +176,10 @@ void loop() {
             // Подключились к Wifi
             Serial.println("Connected to wifi");
             printNetworkStatus();
+            
+            // Вернем TCP-сервер в исходное состояние, если он уже запускался 
+            // ранее за эту сессию
+            tcpServer.close();
         } else {
             // Так и не получилось подключиться
             Serial.print("Failed to connect wifi, status: ");
@@ -191,7 +197,7 @@ void loop() {
             delay(4000);
         }
     } else if(!tcpServer.isListening()) {
-        // Подключимся к сети Wifi
+        // Запустим TCP-сервер слушать подключения
         
         bool startedListening = false;
         
@@ -288,8 +294,9 @@ void loop() {
     // Держим Tcp-стек в живом состоянии    
     DNETcK::periodicTasks();
     
-    
-    if(is_cycle_running()) {
+    int currTime = millis();
+    if(is_cycle_running() && (currTime - prevTime) >= 1000) {
+        prevTime = currTime;
         Serial.print("X.pos=");
         Serial.print(sm_x.current_pos, DEC);
         Serial.print(", Y.pos=");
@@ -297,8 +304,6 @@ void loop() {
         Serial.print(", Z.pos=");
         Serial.print(sm_z.current_pos, DEC);
         Serial.println();
-        
-        delay(1000);
     }
 }
 

@@ -104,17 +104,17 @@ bool is_cycle_running();
 /**
  * @param sm - мотор на выбранной координате
  * @param dl - сдвиг по указанной оси, мм
- * @param spd - скорость перемещения, мм/с
+ * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  * 
  */
-void prepare_line(stepper *sm, double dl, double spd);
+void prepare_line(stepper *sm, double dl, double spd=0);
 
 /**
  * @param dl1 - сдвиг по оси 1, мм
  * @param dl2 - сдвиг по оси 2, мм
- * @param spd - скорость перемещения, мм/с
+ * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  */
-void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double spd);
+void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double spd=0);
 
 #endif // STEPPER_H
 
