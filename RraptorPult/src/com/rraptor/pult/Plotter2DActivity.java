@@ -280,7 +280,7 @@ public class Plotter2DActivity extends Activity {
 
 						// опустим блок на уровень для рисования
 						cmd = DeviceConnection.CMD_GCODE_G01 + " " + "Z" + 0
-								+ " F10";
+								+ " F7.5";
 						replyStatus = sendCommand(cmd);
 						if (!DeviceConnection.REPLY_OK.equals(replyStatus)) {
 							throw new Exception("reply status ERROR");
@@ -289,7 +289,7 @@ public class Plotter2DActivity extends Activity {
 						// прочертим линию со скоростью 2мм/с
 						cmd = DeviceConnection.CMD_GCODE_G01 + " " + "X"
 								+ line.getEnd().getY() + " " + "Y"
-								+ line.getEnd().getX() + " F2";
+								+ line.getEnd().getX() + " F7.5";
 
 						replyStatus = sendCommand(cmd);
 						plotterCanvas.setLineStatus(line,
@@ -338,6 +338,7 @@ public class Plotter2DActivity extends Activity {
 			plotterCanvas.setEnabled(false);
 			btnClearDrawing.setEnabled(false);
 			btnOpenFileYaDisk.setEnabled(false);
+			btnOpenFileSdcard.setEnabled(false);
 			btnZUp.setEnabled(false);
 			btnZDown.setEnabled(false);
 			btnStartDrawing.setEnabled(false);
@@ -347,6 +348,7 @@ public class Plotter2DActivity extends Activity {
 			plotterCanvas.setEnabled(true);
 			btnClearDrawing.setEnabled(true);
 			btnOpenFileYaDisk.setEnabled(true);
+			btnOpenFileSdcard.setEnabled(true);
 			btnZUp.setEnabled(true);
 			btnZDown.setEnabled(true);
 			btnStartDrawing.setEnabled(true);
