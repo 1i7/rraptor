@@ -91,6 +91,8 @@ void cmd_rr_calibrate(char motor_name, int spd) {
     }
 }
 
+int prevTime1 = 0;
+
 /** 
  * Команда G-code G0 - прямая линия.
  * 
@@ -130,16 +132,18 @@ void cmd_gcode_g0(char motor_names[], double cvalues[], int  pcount) {
         start_stepper_cycle();
                 
         // Заблокируем на время рисования (TODO: убрать)
+        int currTime = millis();
         while(is_cycle_running()) {
-            Serial.print("X.pos=");
-            Serial.print(_sm_x->current_pos, DEC);
-            Serial.print(", Y.pos=");
-            Serial.print(_sm_y->current_pos, DEC);
-            Serial.print(", Z.pos=");
-            Serial.print(_sm_z->current_pos, DEC);
-            Serial.println();
-            
-            delay(1000);
+            if( (currTime - prevTime1) >= 1000) {
+                prevTime1 = currTime;
+                Serial.print("X.pos=");
+                Serial.print(_sm_x->current_pos, DEC);
+                Serial.print(", Y.pos=");
+                Serial.print(_sm_y->current_pos, DEC);
+                Serial.print(", Z.pos=");
+                Serial.print(_sm_z->current_pos, DEC);
+                Serial.println();
+            }
         }
     }
 }
@@ -186,16 +190,18 @@ void cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f) 
         start_stepper_cycle();
                 
         // Заблокируем на время рисования (TODO: убрать)
+        int currTime = millis();
         while(is_cycle_running()) {
-            Serial.print("X.pos=");
-            Serial.print(_sm_x->current_pos, DEC);
-            Serial.print(", Y.pos=");
-            Serial.print(_sm_y->current_pos, DEC);
-            Serial.print(", Z.pos=");
-            Serial.print(_sm_z->current_pos, DEC);
-            Serial.println();
-            
-            delay(1000);
+            if( (currTime - prevTime1) >= 1000) {
+                prevTime1 = currTime;
+                Serial.print("X.pos=");
+                Serial.print(_sm_x->current_pos, DEC);
+                Serial.print(", Y.pos=");
+                Serial.print(_sm_y->current_pos, DEC);
+                Serial.print(", Z.pos=");
+                Serial.print(_sm_z->current_pos, DEC);
+                Serial.println();
+            }
         }
     }
 }
