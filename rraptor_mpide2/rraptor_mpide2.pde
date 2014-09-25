@@ -60,15 +60,15 @@ int connectWifi(DNETcK::STATUS *netStatus) {
 
 void setup() {
     Serial.begin(9600);
-    Serial.println("Start wifi network server demo");
+    Serial.println("Start Rraptor");
         
 //    init_stepper(stepper* smotor,  char* name, 
-//        int pin_pulse, int pin_dir, int pin_en,
+//        int pin_step, int pin_dir, int pin_en,
 //        int dir_inv, int pulse_delay,
 //        float distance_per_step, float max_pos)
-    init_stepper(&sm_x, 'x', 3, 5, 6,     1, 1000, 7.5, 216000); // X - синий драйвер
-    init_stepper(&sm_y, 'y', 26, 27, 28, -1, 1000, 7.5, 300000); // Y - желтый драйвер
-    init_stepper(&sm_z, 'z', 31, 32, 33, -1, 1000, 7.5, 100000); // Z - черный драйвер
+    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5, 216000); // X - синий драйвер
+    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5, 300000); // Y - желтый драйвер
+    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5, 100000); // Z - черный драйвер
     
     init_protocol(&sm_x, &sm_y, &sm_z);
     

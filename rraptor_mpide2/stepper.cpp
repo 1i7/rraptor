@@ -16,13 +16,13 @@
  * Инициализировать шаговый мотор необходимыми значениями.
  */
 void init_stepper(stepper* smotor,  char name, 
-        int pin_pulse, int pin_dir, int pin_en,
+        int pin_step, int pin_dir, int pin_en,
         int dir_inv, int pulse_delay,
         double distance_per_step, double max_pos) {
   
     smotor->name = name;
     
-    smotor->pin_pulse = pin_pulse;
+    smotor->pin_step = pin_step;
     smotor->pin_dir = pin_dir;
     smotor->pin_en = pin_en;
     
@@ -33,7 +33,7 @@ void init_stepper(stepper* smotor,  char name,
     smotor->max_pos = max_pos;
     
     // задать настройки пинов
-    pinMode(pin_pulse, OUTPUT);
+    pinMode(pin_step, OUTPUT);
     pinMode(pin_dir, OUTPUT);
     pinMode(pin_en, OUTPUT);
     

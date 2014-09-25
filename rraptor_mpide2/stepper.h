@@ -24,7 +24,7 @@ typedef struct {
     /* Информация о подключение через драйвер Step-dir */
     
     /* Подача периодического импульса HIGH/LOW будет вращать мотор */
-    int pin_pulse;
+    int pin_step;
     /* Направление (1 - в одну сторону, 0 - в другую) */
     int pin_dir;
     /* Вкл (0)/выкл (1) мотор */
@@ -56,7 +56,7 @@ typedef struct {
  * Инициализировать шаговый мотор необходимыми значениями.
  */
 void init_stepper(stepper* smotor,  char name, 
-        int pin_pulse, int pin_dir, int pin_en,
+        int pin_step, int pin_dir, int pin_en,
         int dir_inv, int pulse_delay,
         double distance_per_step, double max_pos);
         
