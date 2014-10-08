@@ -8,19 +8,19 @@ public interface DeviceConnection {
     // Общие (для Сервера Роботов)
     public static final String CMD_PING = "ping";
 
-    // Команды Rraptor
+    // Команды Рраптор
     // Статические свойства
-    /* Имя устройства */
+    /* Получить имя устройства */
     public static final String CMD_RR_DEVICE_NAME = "rr_device_name";
-    /* Версия прошивки */
+    /* Получить версию прошивки */
     public static final String CMD_RR_FIRMWARE_VERSION = "rr_firmware_version";
-    /* Размер рабочей области */
+    /* Получить размер рабочей области */
     public static final String CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 
     // Динамические свойства
-    /* Получить статус системы */
+    /* Получить статус устройства */
     public static final String CMD_RR_STATUS = "rr_status";
-    /* Текущее положение печатающего блока */
+    /* Получить текущее положение печатающего блока */
     public static final String CMD_RR_CURRENT_POS = "rr_current_pos";
 
     // Управление

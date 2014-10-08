@@ -38,6 +38,30 @@ int cmd_ping(char* reply_buffer) {
 }
 
 /** 
+ * Получить имя устройства 
+ */
+int cmd_rr_device_name(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement rr_device_name");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить версию прошивки 
+ */
+int cmd_rr_firmware_version(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement rr_firmware_version");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить размер рабочей области 
+ */
+int cmd_rr_working_area_dim(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement rr_working_area_dim");
+    return strlen(reply_buffer);
+}
+
+/** 
  * Получить текущий статус устройства.
  */
 int cmd_rr_status(char* reply_buffer) {
@@ -46,6 +70,14 @@ int cmd_rr_status(char* reply_buffer) {
     } else {
         strcpy(reply_buffer, STATUS_IDLE);
     }
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить текущее положение печатающего блока 
+ */
+int cmd_rr_current_pos(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement rr_current_pos");
     return strlen(reply_buffer);
 }
 

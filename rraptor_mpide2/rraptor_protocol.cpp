@@ -49,6 +49,30 @@ int handleInput(char* buffer, char* reply_buffer) {
           
             // Проверить доступность устройства.
             cmd_ping(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_RR_DEVICE_NAME) == 0) {
+            // синтаксис:
+            //     rr_device_name
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_device_name(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_RR_FIRMWARE_VERSION) == 0) {
+            // синтаксис:
+            //     rr_firmware_version
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_firmware_version(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_RR_WORKING_AREA_DIM) == 0) {
+            // синтаксис:
+            //     rr_working_area_dim
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_working_area_dim(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
             // синтаксис:
             //     rr_status
@@ -57,6 +81,14 @@ int handleInput(char* buffer, char* reply_buffer) {
           
             // Выполнить команду
             cmd_rr_status(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_RR_CURRENT_POS) == 0) {
+            // синтаксис:
+            //     rr_current_pos
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_rr_current_pos(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_STOP) == 0) {
             // синтаксис:
             //     rr_stop

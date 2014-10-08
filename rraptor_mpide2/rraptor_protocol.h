@@ -10,17 +10,17 @@ static const char* CMD_PING = "ping";
 
 // Команды Rraptor
 // Статические свойства
-/* Имя устройства */
+/* Получить имя устройства */
 static const char* CMD_RR_DEVICE_NAME = "rr_device_name";
-/* Версия прошивки */
+/* Получить версию прошивки */
 static const char* CMD_RR_FIRMWARE_VERSION = "rr_firmware_version";
-/* Размер рабочей области */
+/* Получить размер рабочей области */
 static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 
 // Динамические свойства
-/* Получить статус системы */
+/* Получить статус устройства */
 static const char* CMD_RR_STATUS = "rr_status";
-/* Текущее положение печатающего блока */
+/* Получить текущее положение печатающего блока */
 static const char* CMD_RR_CURRENT_POS = "rr_current_pos";
 
 // Управление
@@ -70,9 +70,29 @@ void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 int cmd_ping(char* reply_buffer);
 
 /** 
+ * Получить имя устройства 
+ */
+int cmd_rr_device_name(char* reply_buffer);
+
+/** 
+ * Получить версию прошивки 
+ */
+int cmd_rr_firmware_version(char* reply_buffer);
+
+/** 
+ * Получить размер рабочей области 
+ */
+int cmd_rr_working_area_dim(char* reply_buffer);
+
+/** 
  * Получить текущий статус устройства.
  */
 int cmd_rr_status(char* reply_buffer);
+
+/** 
+ * Получить текущее положение печатающего блока 
+ */
+int cmd_rr_current_pos(char* reply_buffer);
 
 /** 
  * Остановить все моторы.
