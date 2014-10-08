@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RRaptor</string>
+    <string name="app_name">Рраптор</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_rraptor">RRaptor: Панель управления</string>
-    <string name="title_activity_plotter2d">RRaptor: 2D Плоттер</string>
-    <string name="title_activity_manual">RRaptor: Ручное управление</string>
-    <string name="title_activity_calibrate">RRaptor: Калибровка</string>
-    <string name="title_activity_debug">RRaptor: Отладка</string>
+    <string name="title_activity_rraptor">Рраптор: Панель управления</string>
+    <string name="title_activity_plotter2d">Рраптор: 2д Плоттер</string>
+    <string name="title_activity_manual">Рраптор: Ручное управление</string>
+    <string name="title_activity_calibrate">Рраптор: Калибровка</string>
+    <string name="title_activity_status">Рраптор: Статус</string>
+    <string name="title_activity_debug">Рраптор: Отладка</string>
     
+    <!-- Панель управления -->
+    <string name="rraptor_plotter2d">2D плоттер</string>
+    <string name="rraptor_manual_pult">Ручное управление</string>
+    <string name="rraptor_calibrate">Калибровка</string>
+    <string name="rraptor_status">Статус устройства</string>
+    <string name="rraptor_debug">Отладка</string>
+       
     <!-- Подключение к устройству -->
     <string name="status_disconnected">Отключен</string>
     <string name="status_connecting">Подключаем...</string>
     <string name="status_connected">Подключен</string>
     <string name="status_error">Ошибка</string>
     <string name="connect">Подключиться</string>
+    
+    <!-- Стус устройства -->
+    <string name="status_connection_status">Статус подключения</string>
+    <string name="status_device_name">Имя устройства</string>
+    <string name="status_firmware_version">Версия</string>
+    <string name="status_device_status">Статус устройства</string>
+    <string name="status_working_area_dim">Рабочая область</string>
+    <string name="status_current_pos">Положение блока</string>
+    <string name="pause">Пауза</string>
+    <string name="resume">Возобновить</string>
+    <string name="stop">Остановить</string>
+    <string name="disconnect">Отключить</string>
     
     <!-- Отладка -->
     <string name="clear_log">Очистить отладочные сообщения</string>

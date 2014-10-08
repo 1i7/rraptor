@@ -36,6 +36,12 @@
             android:screenOrientation="sensor" >
         </activity>
         <activity
+            android:name="com.rraptor.pult.DeviceStatusActivity"
+            android:label="@string/title_activity_status"
+            android:parentActivityName="@string/title_activity_rraptor"
+            android:screenOrientation="sensor" >
+        </activity>
+        <activity
             android:name="com.rraptor.pult.DebugActivity"
             android:label="@string/title_activity_debug"
             android:parentActivityName="@string/title_activity_rraptor"

@@ -370,6 +370,15 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Получить текущее положение рабочего блока на устройстве.
+     * 
+     * @return
+     */
+    public String getDeviceCurrentPosition() {
+        return "Implement me: device current position";
+    }
+
+    /**
      * Сервис для управления процессом рисования на устройстве.
      * 
      * @return
@@ -379,12 +388,39 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Получить версию программного обеспечения устройства.
+     * 
+     * @return
+     */
+    public String getDeviceFirmwareVersion() {
+        return "Implement me: device firmware version";
+    }
+
+    /**
+     * Получить имя устройства.
+     * 
+     * @return
+     */
+    public String getDeviceName() {
+        return "Implement me: device name";
+    }
+
+    /**
      * Статус устройства.
      * 
      * @return
      */
     public DeviceStatus getDeviceStatus() {
         return deviceStatus;
+    }
+
+    /**
+     * Получить размер рабочей области устройства.
+     * 
+     * @return
+     */
+    public String getDeviceWorkingArea() {
+        return "Implement me: device working area";
     }
 
     @Override

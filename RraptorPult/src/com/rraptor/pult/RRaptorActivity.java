@@ -25,34 +25,45 @@ public class RRaptorActivity extends RRActivity {
         startActivity(new Intent(this, ManualPultActivity.class));
     }
 
+    private void gotoStatus() {
+        startActivity(new Intent(this, DeviceStatusActivity.class));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rraptor);
         super.initViews();
 
-        final Button btnGotoPult = (Button) findViewById(R.id.goto_manual_pult_btn);
-        btnGotoPult.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gotoPult();
-            }
-        });
-        final Button btnGotoPlotter2D = (Button) findViewById(R.id.goto_plotter_2d);
+        final Button btnGotoPlotter2D = (Button) findViewById(R.id.btn_goto_plotter_2d);
         btnGotoPlotter2D.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 gotoPlotter2D();
             }
         });
-        final Button btnGotoCalibrate = (Button) findViewById(R.id.goto_calibrate_btn);
+        final Button btnGotoPult = (Button) findViewById(R.id.btn_goto_manual_pult);
+        btnGotoPult.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gotoPult();
+            }
+        });
+        final Button btnGotoCalibrate = (Button) findViewById(R.id.btn_goto_calibrate);
         btnGotoCalibrate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 gotoCalibrate();
             }
         });
-        final Button btnGotoDebug = (Button) findViewById(R.id.goto_debug_btn);
+        final Button btnGotoStatus = (Button) findViewById(R.id.btn_goto_status);
+        btnGotoStatus.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gotoStatus();
+            }
+        });
+        final Button btnGotoDebug = (Button) findViewById(R.id.btn_goto_debug);
         btnGotoDebug.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

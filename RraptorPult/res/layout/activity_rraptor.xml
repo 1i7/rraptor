@@ -32,42 +32,51 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/goto_manual_pult_btn"
+        android:id="@+id/btn_goto_plotter_2d"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:layout_weight="0"
-        android:text="Ручное управление" />
+        android:text="@string/rraptor_plotter2d" />
 
     <Button
-        android:id="@+id/goto_plotter_2d"
+        android:id="@+id/btn_goto_manual_pult"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_weight="0"
-        android:text="2D Плоттер" />
+        android:text="@string/rraptor_manual_pult" />
 
     <Button
-        android:id="@+id/goto_calibrate_btn"
+        android:id="@+id/btn_goto_calibrate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_weight="0"
-        android:text="Калибровка" />
-    
+        android:text="@string/rraptor_calibrate" />
+
     <Button
-        android:id="@+id/goto_debug_btn"
+        android:id="@+id/btn_goto_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_weight="0"
-        android:text="Отладка" />
-    
+        android:text="@string/rraptor_status" />
+
+    <Button
+        android:id="@+id/btn_goto_debug"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_weight="0"
+        android:text="@string/rraptor_debug" />
+
     <ImageView
-        android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="0dip"
         android:layout_marginTop="12dp"
         android:layout_weight="1"
+        android:contentDescription="Dinosaur"
         android:src="@drawable/logo2" />
 
 </LinearLayout>
