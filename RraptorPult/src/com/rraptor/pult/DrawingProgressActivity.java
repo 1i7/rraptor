@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.rraptor.pult.core.DeviceControlService;
 
-public class DeviceStatusActivity extends RRActivity {
+public class DrawingProgressActivity extends RRActivity {
 
     public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
@@ -47,7 +47,7 @@ public class DeviceStatusActivity extends RRActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_status);
+        setContentView(R.layout.activity_drawing_progress);
         super.initViews();
 
         txtConnectionType = (TextView) findViewById(R.id.txt_connection_type);

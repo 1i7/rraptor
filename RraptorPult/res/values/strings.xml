@@ -8,6 +8,7 @@
     <string name="title_activity_manual">RRaptor: Manual pult</string>
     <string name="title_activity_calibrate">RRaptor: Calibrate</string>
     <string name="title_activity_status">RRaptor: Status</string>
+    <string name="title_activity_drawing_progress">RRaptor: Drawing progress</string>
     <string name="title_activity_debug">RRaptor: Debug</string>
     
     
@@ -16,6 +17,7 @@
     <string name="rraptor_manual_pult">Manual pult</string>
     <string name="rraptor_calibrate">Calibrate</string>
     <string name="rraptor_status">Device status</string>
+    <string name="rraptor_drawing_progress">Drawing progress</string>
     <string name="rraptor_debug">Debug</string>    
     
     <!-- Device connection -->
@@ -27,6 +29,8 @@
     
     <!-- Device status -->
     <string name="status_connection_status">Connection status</string>
+    <string name="status_connection_type">Connection type</string>
+    <string name="status_connection_info">Connection info</string>
     <string name="status_device_name">Device name</string>
     <string name="status_firmware_version">Version</string>
     <string name="status_device_status">Device status</string>

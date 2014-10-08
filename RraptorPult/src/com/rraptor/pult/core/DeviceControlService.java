@@ -361,6 +361,15 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Тип поключения к устройству.
+     * 
+     * @return
+     */
+    public String getConnectionType() {
+        return "Implement me: connection type";
+    }
+
+    /**
      * Получить все отладочные сообщения.
      * 
      * @return

@@ -8,6 +8,7 @@
     <string name="title_activity_manual">Рраптор: Ручное управление</string>
     <string name="title_activity_calibrate">Рраптор: Калибровка</string>
     <string name="title_activity_status">Рраптор: Статус</string>
+    <string name="title_activity_drawing_progress">RRaptor: Процесс рисования</string>
     <string name="title_activity_debug">Рраптор: Отладка</string>
     
     <!-- Панель управления -->
@@ -15,6 +16,7 @@
     <string name="rraptor_manual_pult">Ручное управление</string>
     <string name="rraptor_calibrate">Калибровка</string>
     <string name="rraptor_status">Статус устройства</string>
+    <string name="rraptor_drawing_progress">Процесс рисования</string>
     <string name="rraptor_debug">Отладка</string>
        
     <!-- Подключение к устройству -->
@@ -26,6 +28,8 @@
     
     <!-- Стус устройства -->
     <string name="status_connection_status">Статус подключения</string>
+    <string name="status_connection_type">Тип подключения</string>
+    <string name="status_connection_info">Информация о подключении</string>
     <string name="status_device_name">Имя устройства</string>
     <string name="status_firmware_version">Версия</string>
     <string name="status_device_status">Статус устройства</string>
