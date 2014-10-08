@@ -1,6 +1,11 @@
 package com.rraptor.pult.model;
 
-public class Line2D {
+import java.io.Serializable;
+
+public class Line2D implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	private Point2D start;
 	private Point2D end;
 
@@ -10,12 +15,28 @@ public class Line2D {
 		this.end = end;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Line2D) {
+			final Line2D l2 = (Line2D) o;
+			return (l2.getStart().equals(getStart()) && (l2.getEnd()
+					.equals(getEnd())));
+		} else {
+			return false;
+		}
+	}
+
 	public Point2D getEnd() {
 		return end;
 	}
 
 	public Point2D getStart() {
 		return start;
+	}
+
+	@Override
+	public int hashCode() {
+		return start.hashCode() + end.hashCode();
 	}
 
 	public void setEnd(Point2D end) {

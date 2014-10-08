@@ -1,89 +1,90 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Plotter2DActivity" >
+    android:orientation="horizontal"
+    tools:ignore="UselessParent" >
 
-    <!--
-         The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc.
-    -->
-
-    <!--
-         This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows.
-    -->
+    <com.rraptor.pult.Plotter2DCanvasView
+        android:id="@+id/plotter_canvas"
+        android:layout_width="0dip"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
 
     <LinearLayout
-        android:id="@+id/fullscreen_content"
-        style="?buttonBarStyle"
-        android:layout_width="match_parent"
+        android:layout_width="130dip"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        tools:ignore="UselessParent" >
-
-        <com.rraptor.pult.Plotter2DCanvasView
-            android:id="@+id/plotter_canvas"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+        android:layout_weight="0"
+        android:gravity="bottom"
+        android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="130dip"
-            android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:gravity="bottom"
-            android:orientation="vertical" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
-            <ProgressBar
-                android:id="@+id/drawing_progress"
+            <TextView
+                android:id="@+id/txt_status"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Button
+                android:id="@+id/btn_connect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="invisible" />
-
-            <Button
-                android:id="@+id/open_file_yadisk_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Я.Диск" />
-
-            <Button
-                android:id="@+id/open_file_sdcard_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="SD-карта" />
-
-            <Button
-                android:id="@+id/clear_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Очистить" />
-
-            <Button
-                android:id="@+id/draw_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Рисовать" />
-
-            <Button
-                android:id="@+id/stop_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Остановить" />
-            
-            <Button
-                android:id="@+id/z_up_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⇈" />
-
-            <Button
-                android:id="@+id/z_down_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⇊" />
+                android:layout_weight="0"
+                android:text="@string/connect" />
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/drawing_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/open_file_yadisk_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Я.Диск" />
+
+        <Button
+            android:id="@+id/open_file_sdcard_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SD-карта" />
+
+        <Button
+            android:id="@+id/clear_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Очистить" />
+
+        <Button
+            android:id="@+id/draw_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Рисовать" />
+
+        <Button
+            android:id="@+id/stop_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Остановить" />
+
+        <Button
+            android:id="@+id/z_up_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⇈" />
+
+        <Button
+            android:id="@+id/z_down_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⇊" />
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

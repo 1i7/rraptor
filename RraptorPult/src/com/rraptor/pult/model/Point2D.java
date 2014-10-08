@@ -1,6 +1,11 @@
 package com.rraptor.pult.model;
 
-public class Point2D {
+import java.io.Serializable;
+
+public class Point2D implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	private int x;
 	private int y;
 
@@ -26,6 +31,11 @@ public class Point2D {
 
 	public int getY() {
 		return y;
+	}
+
+	@Override
+	public int hashCode() {
+		return x + y;
 	}
 
 	public void setX(int x) {

@@ -1,4 +1,3 @@
-
 #include "WProgram.h"
 
 #include "rraptor_protocol.h"
@@ -18,12 +17,13 @@ void parseParam(char* param, char* pname, double* pvalue) {
 
 /**
  * Обработать входные данные - разобрать строку, выполнить команду.
+ * @buffer - входные данные, строка, оканчивающаяся нулём.
+ * @reply_buffer - ответ, строка, оканчивающая нулём
  * @return размер ответа в байтах (0, чтобы не отправлять ответ).
  */
 int handleInput(char* buffer, char* reply_buffer) {
     reply_buffer[0] = 0;
     
-    bool std_reply = true;
     bool success = false;
     
     char* tokens[8];
@@ -41,7 +41,15 @@ int handleInput(char* buffer, char* reply_buffer) {
     
     // Определим, с какой командой имеем дело    
     if(tokensNum > 0) {
-        if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
+        if(strcmp(tokens[0], CMD_PING) == 0) {
+            // синтаксис:
+            //     ping
+            // Команда корректна
+            success = true;
+          
+            // Проверить доступность устройства.
+            cmd_ping(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
             // синтаксис:
             //     rr_status
             // Команда корректна
@@ -49,7 +57,6 @@ int handleInput(char* buffer, char* reply_buffer) {
           
             // Выполнить команду
             cmd_rr_status(reply_buffer);
-            std_reply = false;
         } else if(strcmp(tokens[0], CMD_RR_STOP) == 0) {
             // синтаксис:
             //     rr_stop
@@ -57,7 +64,7 @@ int handleInput(char* buffer, char* reply_buffer) {
             success = true;
           
             // Выполнить команду
-            cmd_rr_stop();
+            cmd_rr_stop(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_GO) == 0) {
             // синтаксис:
             //     rr_go motor_name speed
@@ -70,7 +77,7 @@ int handleInput(char* buffer, char* reply_buffer) {
                   
                 // Выполнить команду - запустить моторы в постоянную работу 
                 // до прихода команды на остановку               
-                cmd_rr_go(motor_name, spd);
+                cmd_rr_go(motor_name, spd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
             // синтаксис:
@@ -84,7 +91,7 @@ int handleInput(char* buffer, char* reply_buffer) {
                   
                 // Выполнить команду - запустить моторы в постоянную работу 
                 // до прихода команды на остановку в режиме калибровки                
-                cmd_rr_calibrate(motor_name, spd);
+                cmd_rr_calibrate(motor_name, spd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_GCODE_G0) == 0) {
             // синтаксис:
@@ -112,7 +119,7 @@ int handleInput(char* buffer, char* reply_buffer) {
                     success = true;
                     
                     // Выполнить команду                    
-                    cmd_gcode_g0(motor_names, cvalues, pcount);
+                    cmd_gcode_g0(motor_names, cvalues, pcount, reply_buffer);
                 }
             }
             
@@ -149,7 +156,7 @@ int handleInput(char* buffer, char* reply_buffer) {
                     success = true;
                     
                     // Выполнить команду                    
-                    cmd_gcode_g01(motor_names, cvalues, pcount, f);
+                    cmd_gcode_g01(motor_names, cvalues, pcount, f, reply_buffer);
                 }
             }
             
@@ -161,20 +168,14 @@ int handleInput(char* buffer, char* reply_buffer) {
             cmd_gcode_g03();
         }
     }
-  
-    if(std_reply) {
-        if(!success) {
-            Serial.print("Can't handle command: ");
-            Serial.println(buffer);
-            
-            // Подготовить ответ
-            strcpy(reply_buffer, REPLY_DONTUNDERSTAND);
-        } else {
-            // Подготовить ответ
-            strcpy(reply_buffer, REPLY_OK);
-        }
+    if(!success) {
+        Serial.print("Can't handle command: ");
+        Serial.println(buffer);
+        
+        // Подготовить ответ
+        strcpy(reply_buffer, REPLY_DONTUNDERSTAND);
     }
     
-    return strlen(reply_buffer) + 1;
+    return strlen(reply_buffer);
 }
 

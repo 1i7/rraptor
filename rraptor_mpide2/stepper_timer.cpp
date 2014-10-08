@@ -260,7 +260,7 @@ void handle_interrupts(int timer) {
                     Serial.print(smotors[i]->current_pos);
                     Serial.print("um, curr time=");
                     Serial.print(millis(), DEC);
-                    Serial.print("ms");
+                    Serial.println("ms");
                 }
                 
                 // взведём таймер на новый шаг

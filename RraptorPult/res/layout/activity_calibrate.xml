@@ -11,6 +11,26 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/txt_status"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Button
+            android:id="@+id/btn_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/connect" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:gravity="center_horizontal"
@@ -37,11 +57,10 @@
             android:id="@+id/x_forward_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_right"
             android:contentDescription="x forward"
             android:minHeight="100dip"
-            android:minWidth="100dip"
-            android:background="@drawable/btn_right" />
-
+            android:minWidth="100dip" />
     </LinearLayout>
 
     <LinearLayout
@@ -63,20 +82,19 @@
             android:id="@+id/y_backward_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_left"
             android:contentDescription="y backward"
             android:minHeight="100dip"
-            android:minWidth="100dip"
-            android:background="@drawable/btn_left" />
+            android:minWidth="100dip" />
 
         <ImageButton
             android:id="@+id/y_forward_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_right"
             android:contentDescription="y forward"
             android:minHeight="100dip"
-            android:minWidth="100dip"
-            android:background="@drawable/btn_right" />
-
+            android:minWidth="100dip" />
     </LinearLayout>
 
     <LinearLayout
@@ -98,20 +116,19 @@
             android:id="@+id/z_backward_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_left"
             android:contentDescription="z backward"
             android:minHeight="100dip"
-            android:minWidth="100dip"
-            android:background="@drawable/btn_left" />
+            android:minWidth="100dip" />
 
         <ImageButton
             android:id="@+id/z_forward_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_right"
             android:contentDescription="z forward"
             android:minHeight="100dip"
-            android:minWidth="100dip"
-            android:background="@drawable/btn_right" />
-
+            android:minWidth="100dip" />
     </LinearLayout>
 
 </LinearLayout>
