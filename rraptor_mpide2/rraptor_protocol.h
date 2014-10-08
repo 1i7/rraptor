@@ -5,14 +5,25 @@
 
 #include "stepper.h"
 
-
-// 
+// Общие (для Сервера Роботов)
 static const char* CMD_PING = "ping";
 
 // Команды Rraptor
+// Статические свойства
+/* Имя устройства */
+static const char* CMD_RR_DEVICE_NAME = "rr_device_name";
+/* Версия прошивки */
+static const char* CMD_RR_FIRMWARE_VERSION = "rr_firmware_version";
+/* Размер рабочей области */
+static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 
+// Динамические свойства
 /* Получить статус системы */
 static const char* CMD_RR_STATUS = "rr_status";
+/* Текущее положение печатающего блока */
+static const char* CMD_RR_CURRENT_POS = "rr_current_pos";
+
+// Управление
 /* Остановить все моторы */
 static const char* CMD_RR_STOP = "rr_stop";
 /* Запустить мотор с заданной скоростью на непрерывное вращение */
