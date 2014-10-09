@@ -1,3 +1,5 @@
+// Управление устройством с Сервера Роботов
+
 #include "WProgram.h"
 
 #include <WiFiShieldOrPmodWiFi_G.h>
@@ -18,33 +20,20 @@
 static const char* wifi_ssid = "helen";
 static const char* wifi_wpa2_passphrase = "13april1987";
 
-// статический IP-адрес для текущего хоста - попросим у 
-// точки Wifi (иначе Пульт не узнает, куда подключаться)
-//IPv4 host_ip = {192,168,115,115};
-//static IPv4 host_ip = {192,168,43,115};
-static IPv4 host_ip = {192,168,1,115};
+// Сервер Роботов
+static const char* robot_server_host = "robotc.lasto4ka.su";
+//const char* robot_server_host = "192.168.1.3";
+static const int robot_server_port = 1116;
 
-// Порт для tcp-сервера
-static const int tcp_server_port = DNETcK::iPersonalPorts44 + 114;
-
+// Подключение к WiFi
 static int conectionId = DWIFIcK::INVALID_CONNECTION_ID;
-
-static TcpServer tcpServer;
+// TCP-клиент - подключение к серверу
 static TcpClient tcpClient;
 
-// Таймаут неактивности подключенного клиента, миллисекунды
-static int CLIENT_IDLE_TIMEOUT = 10000;
-static int clientIdleStart = 0;
-
+// Буферы для обмена данными с сервером
 static char read_buffer[128];
 static char write_buffer[128];
 static int write_size;
-
-static void printTcpServerStatus() {
-    printIPAddress(&host_ip);
-    Serial.print(":");
-    Serial.println(tcp_server_port);
-}
 
 /**
  * Подлключиться к сети Wifi.
@@ -58,17 +47,17 @@ static int connectWifi(DNETcK::STATUS *netStatus) {
 }
 
 /**
- * Инициализировать канал связи Tcp.
+ * Инициализировать канал связи с Сервером Роботов.
  */
-void rraptorTcpSetup() {
+void rraptorRobotServerSetup() {
     pinMode(WIFI_STATUS_PIN, OUTPUT);
 }
 
 /**
- * Работа канала связи Tcp, запускать в loop. При получении
- * команды, вызывает handleInput.
+ * Работа канала связи с Сервером Роботов, запускать в loop. 
+ * При получении команды, вызывает handleInput.
  */
-void rraptorTcpTasks() {
+void rraptorRobotServerTasks() {
     DNETcK::STATUS networkStatus;
     int readSize;
     int writeSize;
@@ -80,7 +69,7 @@ void rraptorTcpTasks() {
         // Не подключены к WiFi - выключим лампочку
         digitalWrite(WIFI_STATUS_PIN, LOW);
         
-        // Подключимся к сети Wifi
+        // Подключимся к сети WiFi
         bool connectedToWifi = false;
         
         Serial.println("Connecting wifi...");
@@ -94,8 +83,8 @@ void rraptorTcpTasks() {
 
             Serial.print("Initializing IP stack...");
             
-            // Подключимся со статическим ip-адресом
-            DNETcK::begin(host_ip);
+            // Получим IP и сетевые адреса по DHCP
+            DNETcK::begin();
             
             // К открытой сети может подключиться с первой попытки, к сети с паролем
             // может потребоваться несколько циклов (если пароль для сети неправильный,
@@ -129,13 +118,10 @@ void rraptorTcpTasks() {
             
             // включим лампочку
             digitalWrite(WIFI_STATUS_PIN, HIGH);
-            
-            // Вернем TCP-сервер в исходное состояние, если он уже запускался 
-            // ранее за эту сессию
-            tcpServer.close();
         } else {
             // Так и не получилось подключиться
             Serial.print("Failed to connect wifi, status: ");
+            //Serial.print(networkStatus, DEC);
             printDNETcKStatus(networkStatus);
             Serial.println();
             
@@ -149,66 +135,53 @@ void rraptorTcpTasks() {
             Serial.println("Retry after 4 seconds...");
             delay(4000);
         }
-    } else if(!tcpServer.isListening()) {
-        // Запустим TCP-сервер слушать подключения
+    } else if(!tcpClient.isConnected()) {
+        // Подключимся к Серверу Роботов
         
-        bool startedListening = false;
+        bool connectedToServer = false;
         
-        Serial.print("Start listening connection from Pult...");
-        tcpServer.startListening(tcp_server_port);
-        // Подождем, пока сокет начнет слушать подключения
-        bool starting = true;
-        while(starting) {
+        Serial.print("Connecting to Robot Server...");
+        tcpClient.connect(robot_server_host, robot_server_port);
+        // Сокет для подключения назначен, подождем, чем завершится процесс подключения
+        bool connecting = true;
+        while(connecting) {
             Serial.print(".");
-            if(tcpServer.isListening(&networkStatus)) {
-                // Начали слушать
-                startedListening = true;
+            if(tcpClient.isConnected(&networkStatus)) {
+                // Подключились к сереверу
+                connectedToServer = true;
                                     
-                starting = false;
+                connecting = false;
             } else if(DNETcK::isStatusAnError(networkStatus)) {
-                // Не смогли начать слушать из-за ошибки,
+                // Не смогли подключиться к серверу из-за ошибки,
                 // в этом месте больше не пробуем
-                starting = false;                    
+                connecting = false;                    
             }
         }
         Serial.println();
         
-        if(startedListening) {
-            // Начали слушать подключения от пульта
-            Serial.print("Listen connection from Pult on: ");
-            printTcpServerStatus();
+        if(connectedToServer) {
+            // Подключились к Серверу Роботов
+            Serial.println("Connected to Robot Server");
+            
+            printTcpClientStatus(&tcpClient);
         } else {
-            // Так и не получилось начать слушать подключения
-            Serial.print("Failed to start listening, status: ");
+            // Так и не получилось подключиться
+            Serial.print("Failed to connect Robot Server, status: ");
+            //Serial.print(networkStatus, DEC);
             printDNETcKStatus(networkStatus);
             Serial.println();
             
-            // Вернем TCP-сервер в исходное состояние
-            tcpServer.close();
+            // Вернем TCP-клиента в исходное состояние
+            tcpClient.close();
             
             // Немного подождем и попробуем переподключиться на следующей итерации
             Serial.println("Retry after 4 seconds...");
             delay(4000);
         }
-    } else if(!tcpClient.isConnected()) {
-        // Подождем подключения клиента
-        
-        if(tcpServer.availableClients() > 0) {
-            // закроем старого клиента, если он использовался ранее
-            tcpClient.close(); 
-
-            if(tcpServer.acceptClient(&tcpClient)) {
-                Serial.println("Got a Connection: ");
-                printTcpClientStatus(&tcpClient);
-                
-                // начнем счетчик неактивности
-                clientIdleStart = millis();
-            }
-        }
     } else {
-        // Пульт подключен - читаем команды, отправляем ответы
+        // Подключены к серверу - читаем команды, отправляем ответы
         
-        // есть что почитать?
+        // есть чо почитать?
         if((readSize = tcpClient.available()) > 0) {
             readSize = readSize < sizeof(read_buffer) ? readSize : sizeof(read_buffer);
             readSize = tcpClient.readStream((byte*)read_buffer, readSize);
@@ -222,9 +195,6 @@ void rraptorTcpTasks() {
             // и можно выполнить команду, ответ попадет в write_buffer
             writeSize = handleInput(read_buffer, write_buffer);
             write_size = writeSize;
-            
-            // сбросим счетчик неактивности
-            clientIdleStart = millis();
         }
             
         if(write_size > 0) {
@@ -234,14 +204,6 @@ void rraptorTcpTasks() {
             
             tcpClient.writeStream((const byte*)write_buffer, write_size);
             write_size = 0;
-            
-            // сбросим счетчик неактивности
-            clientIdleStart = millis();
-        }
-        
-        if( (millis() - clientIdleStart) > CLIENT_IDLE_TIMEOUT ) {
-            Serial.println("Close connection on timeout");
-            tcpClient.close();
         }
     }
 }

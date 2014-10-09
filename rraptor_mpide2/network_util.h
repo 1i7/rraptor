@@ -16,7 +16,7 @@ void printNetworkStatus();
 
 void printTcpClientStatus(TcpClient *tcpClient);
 
-void printStatus(DNETcK::STATUS status);
+void printDNETcKStatus(DNETcK::STATUS status);
 
 #endif // NETWORK_UTIL_H
 

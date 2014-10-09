@@ -93,7 +93,7 @@ void printTcpClientStatus(TcpClient *tcpClient) {
     }
 }
 
-void printStatus(DNETcK::STATUS status) {
+void printDNETcKStatus(DNETcK::STATUS status) {
     switch(status) {
         case DNETcK::None:                           // = 0,
             Serial.print("None");

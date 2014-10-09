@@ -10,6 +10,7 @@ static const char* DEVICE_MANUFACTURER = "Rraptor team";
 static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 
 #define RR_TCP
+#define RR_ROBOT_SERVER
 //#define RR_USB_ACCESSORY
 
 #endif // RRAPTOR_CONFIG_H
