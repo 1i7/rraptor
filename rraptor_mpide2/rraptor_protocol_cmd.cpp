@@ -29,6 +29,46 @@ static stepper* stepper_by_id(char id) {
 }
 
 /** 
+ * Получить собственное имя устройства.
+ */
+int cmd_name(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement 'name'");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить модель устройства.
+ */
+int cmd_model(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement 'model'");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить серийный номер устройства.
+ */
+int cmd_serial_number(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement 'sn'");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить словесное описание устройства. 
+ */
+int cmd_description(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement 'description'");
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить версию прошивки устройства.
+ */
+int cmd_version(char* reply_buffer) {
+    strcpy(reply_buffer, "todo: implement 'version'");
+    return strlen(reply_buffer);
+}
+
+/** 
  * Проверить доступность устройства.
  */
 int cmd_ping(char* reply_buffer) {
@@ -38,23 +78,7 @@ int cmd_ping(char* reply_buffer) {
 }
 
 /** 
- * Получить имя устройства 
- */
-int cmd_rr_device_name(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement rr_device_name");
-    return strlen(reply_buffer);
-}
-
-/** 
- * Получить версию прошивки 
- */
-int cmd_rr_firmware_version(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement rr_firmware_version");
-    return strlen(reply_buffer);
-}
-
-/** 
- * Получить размер рабочей области 
+ * Получить размер рабочей области.
  */
 int cmd_rr_working_area_dim(char* reply_buffer) {
     strcpy(reply_buffer, "todo: implement rr_working_area_dim");

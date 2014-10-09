@@ -5,25 +5,39 @@ import java.util.concurrent.TimeoutException;
 
 public interface DeviceConnection {
 
-    // Общие (для Сервера Роботов)
+    /**************************************/
+    // Универсальные команды (для Сервера Роботов)
+
+    // Постоянные свойства
+    /** Получить собственное имя устройства */
+    public static final String CMD_NAME = "name";
+    /** Получить модель устройства */
+    public static final String CMD_MODEL = "model";
+    /** Получить серийный номер устройства */
+    public static final String CMD_SERIAL_NUMBER = "sn";
+    /** Получить словесное описание устройства */
+    public static final String CMD_DESCRIPTION = "description";
+    /** Получить версию прошивки устройства */
+    public static final String CMD_VERSION = "version";
+
+    // Команды
+    /** Проверить доступность устройства */
     public static final String CMD_PING = "ping";
 
-    // Команды Рраптор
-    // Статические свойства
-    /* Получить имя устройства */
-    public static final String CMD_RR_DEVICE_NAME = "rr_device_name";
-    /* Получить версию прошивки */
-    public static final String CMD_RR_FIRMWARE_VERSION = "rr_firmware_version";
-    /* Получить размер рабочей области */
+    /**************************************/
+    // Команды Rraptor
+
+    // Постоянные свойства
+    /** Получить размер рабочей области */
     public static final String CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 
     // Динамические свойства
-    /* Получить статус устройства */
+    /** Получить статус устройства */
     public static final String CMD_RR_STATUS = "rr_status";
-    /* Получить текущее положение печатающего блока */
+    /** Получить текущее положение печатающего блока */
     public static final String CMD_RR_CURRENT_POS = "rr_current_pos";
 
-    // Управление
+    // Команды
     public static final String CMD_RR_STOP = "rr_stop";
 
     public static final String CMD_RR_GO_X_FORWARD = "rr_go x 1";
@@ -39,6 +53,9 @@ public interface DeviceConnection {
     public static final String CMD_RR_CALIBRATE_Y_BACKWARD = "rr_calibrate y -1";
     public static final String CMD_RR_CALIBRATE_Z_FORWARD = "rr_calibrate z 1";
     public static final String CMD_RR_CALIBRATE_Z_BACKWARD = "rr_calibrate z -1";
+
+    /**************************************/
+    // Команды G-кода
 
     public static final String CMD_GCODE_G0 = "G0";
     public static final String CMD_GCODE_G01 = "G01";

@@ -5,28 +5,42 @@
 
 #include "stepper.h"
 
-// Общие (для Сервера Роботов)
+/**************************************/
+// Универсальные команды (для Сервера Роботов)
+
+// Постоянные свойства
+/** Получить собственное имя устройства */
+static const char* CMD_NAME = "name";
+/** Получить модель устройства */
+static const char* CMD_MODEL = "model";
+/** Получить серийный номер устройства */
+static const char* CMD_SERIAL_NUMBER = "sn";
+/** Получить словесное описание устройства */
+static const char* CMD_DESCRIPTION = "description";
+/** Получить версию прошивки устройства */
+static const char* CMD_VERSION = "version";
+
+// Команды
+/** Проверить доступность устройства */
 static const char* CMD_PING = "ping";
 
+/**************************************/
 // Команды Rraptor
-// Статические свойства
-/* Получить имя устройства */
-static const char* CMD_RR_DEVICE_NAME = "rr_device_name";
-/* Получить версию прошивки */
-static const char* CMD_RR_FIRMWARE_VERSION = "rr_firmware_version";
-/* Получить размер рабочей области */
+
+// Постоянные свойства
+/** Получить размер рабочей области */
 static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 
 // Динамические свойства
-/* Получить статус устройства */
+/** Получить статус устройства */
 static const char* CMD_RR_STATUS = "rr_status";
-/* Получить текущее положение печатающего блока */
+/** Получить текущее положение печатающего блока */
 static const char* CMD_RR_CURRENT_POS = "rr_current_pos";
 
-// Управление
-/* Остановить все моторы */
+// Команды
+/** Остановить все моторы */
 static const char* CMD_RR_STOP = "rr_stop";
-/* Запустить мотор с заданной скоростью на непрерывное вращение */
+/** Запустить мотор с заданной скоростью на непрерывное вращение */
 static const char* CMD_RR_GO = "rr_go";
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
@@ -34,17 +48,19 @@ static const char* CMD_RR_GO = "rr_go";
  */
 static const char* CMD_RR_CALIBRATE = "rr_calibrate";
   
+/**************************************/
 // Команды G-кода
 
-/* Команда G-code G0 - перемещение с максимальной скоростью */
+/** Команда G-code G0 - перемещение с максимальной скоростью */
 static const char* CMD_GCODE_G0 = "G0";
-/* Команда G-code G01 - прямая линия */
+/** Команда G-code G01 - прямая линия */
 static const char* CMD_GCODE_G01 = "G01";
 /* Команда G-code G02 - дуга по часовой стрелке */
 static const char* CMD_GCODE_G02 = "G02";
-/* Команда G-code G03 - дуга против часовой стрелки */
+/** Команда G-code G03 - дуга против часовой стрелки */
 static const char* CMD_GCODE_G03 = "G03";
 
+/**************************************/
 // Ответы
 static const char* REPLY_OK = "ok";
 static const char* REPLY_DONTUNDERSTAND = "dontunderstand";
@@ -54,6 +70,7 @@ static const char* REPLY_BUSY = "busy";
 static const char* STATUS_IDLE = "idle";
 static const char* STATUS_WORKING = "working";
 
+/**************************************/
 // Параметры G-кодов
 static const char GCODE_PARAM_X = 'X';
 static const char GCODE_PARAM_Y = 'Y';
@@ -62,7 +79,33 @@ static const char GCODE_PARAM_F = 'F';
 
 void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 
+/**************************************/
 // Обработчики команд
+
+/** 
+ * Получить собственное имя устройства.
+ */
+int cmd_name(char* reply_buffer);
+
+/** 
+ * Получить модель устройства.
+ */
+int cmd_model(char* reply_buffer);
+
+/** 
+ * Получить серийный номер устройства.
+ */
+int cmd_serial_number(char* reply_buffer);
+
+/** 
+ * Получить словесное описание устройства. 
+ */
+int cmd_description(char* reply_buffer);
+
+/** 
+ * Получить версию прошивки устройства.
+ */
+int cmd_version(char* reply_buffer);
 
 /** 
  * Проверить доступность устройства.
@@ -70,17 +113,7 @@ void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 int cmd_ping(char* reply_buffer);
 
 /** 
- * Получить имя устройства 
- */
-int cmd_rr_device_name(char* reply_buffer);
-
-/** 
- * Получить версию прошивки 
- */
-int cmd_rr_firmware_version(char* reply_buffer);
-
-/** 
- * Получить размер рабочей области 
+ * Получить размер рабочей области.
  */
 int cmd_rr_working_area_dim(char* reply_buffer);
 
@@ -90,7 +123,7 @@ int cmd_rr_working_area_dim(char* reply_buffer);
 int cmd_rr_status(char* reply_buffer);
 
 /** 
- * Получить текущее положение печатающего блока 
+ * Получить текущее положение печатающего блока.
  */
 int cmd_rr_current_pos(char* reply_buffer);
 

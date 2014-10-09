@@ -41,7 +41,47 @@ int handleInput(char* buffer, char* reply_buffer) {
     
     // Определим, с какой командой имеем дело    
     if(tokensNum > 0) {
-        if(strcmp(tokens[0], CMD_PING) == 0) {
+        if(strcmp(tokens[0], CMD_NAME) == 0) {
+            // синтаксис:
+            //     name
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_name(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_MODEL) == 0) {
+            // синтаксис:
+            //     model
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_model(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_SERIAL_NUMBER) == 0) {
+            // синтаксис:
+            //     sn
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_serial_number(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_DESCRIPTION) == 0) {
+            // синтаксис:
+            //     description
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_description(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_VERSION) == 0) {
+            // синтаксис:
+            //     version
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_version(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_PING) == 0) {
             // синтаксис:
             //     ping
             // Команда корректна
@@ -49,22 +89,6 @@ int handleInput(char* buffer, char* reply_buffer) {
           
             // Проверить доступность устройства.
             cmd_ping(reply_buffer);
-        } else if(strcmp(tokens[0], CMD_RR_DEVICE_NAME) == 0) {
-            // синтаксис:
-            //     rr_device_name
-            // Команда корректна
-            success = true;
-          
-            // Выполнить команду
-            cmd_rr_device_name(reply_buffer);
-        } else if(strcmp(tokens[0], CMD_RR_FIRMWARE_VERSION) == 0) {
-            // синтаксис:
-            //     rr_firmware_version
-            // Команда корректна
-            success = true;
-          
-            // Выполнить команду
-            cmd_rr_firmware_version(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_WORKING_AREA_DIM) == 0) {
             // синтаксис:
             //     rr_working_area_dim

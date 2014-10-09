@@ -35,7 +35,10 @@ public class DeviceStatusActivity extends RRActivity {
     private TextView txtConnectionStatus;
     private TextView txtConnectionInfo;
     private TextView txtDeviceName;
-    private TextView txtDeviceFirmwareVersion;
+    private TextView txtDeviceModel;
+    private TextView txtDeviceSerialNumber;
+    private TextView txtDeviceDescription;
+    private TextView txtDeviceVersion;
     private TextView txtDeviceStatus;
     private TextView txtDeviceWorkingAreaDim;
     private TextView txtDeviceCurrentPos;
@@ -54,7 +57,10 @@ public class DeviceStatusActivity extends RRActivity {
         txtConnectionStatus = (TextView) findViewById(R.id.txt_connection_status);
         txtConnectionInfo = (TextView) findViewById(R.id.txt_connection_info);
         txtDeviceName = (TextView) findViewById(R.id.txt_device_name);
-        txtDeviceFirmwareVersion = (TextView) findViewById(R.id.txt_firmware_version);
+        txtDeviceModel = (TextView) findViewById(R.id.txt_device_model);
+        txtDeviceSerialNumber = (TextView) findViewById(R.id.txt_device_serial_number);
+        txtDeviceDescription = (TextView) findViewById(R.id.txt_device_description);
+        txtDeviceVersion = (TextView) findViewById(R.id.txt_device_version);
         txtDeviceStatus = (TextView) findViewById(R.id.txt_device_status);
         txtDeviceWorkingAreaDim = (TextView) findViewById(R.id.txt_working_area_dim);
         txtDeviceCurrentPos = (TextView) findViewById(R.id.txt_current_pos);
@@ -141,8 +147,12 @@ public class DeviceStatusActivity extends RRActivity {
         txtConnectionInfo
                 .setText(getDeviceControlService().getConnectionInfo());
         txtDeviceName.setText(getDeviceControlService().getDeviceName());
-        txtDeviceFirmwareVersion.setText(getDeviceControlService()
-                .getDeviceFirmwareVersion());
+        txtDeviceModel.setText(getDeviceControlService().getDeviceModel());
+        txtDeviceSerialNumber.setText(getDeviceControlService()
+                .getDeviceSerialNumber());
+        txtDeviceDescription.setText(getDeviceControlService()
+                .getDeviceDescription());
+        txtDeviceVersion.setText(getDeviceControlService().getDeviceVersion());
         txtDeviceStatus.setText(getDeviceControlService().getDeviceStatus()
                 .name());
         txtDeviceWorkingAreaDim.setText(getDeviceControlService()

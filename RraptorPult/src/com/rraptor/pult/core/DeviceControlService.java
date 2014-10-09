@@ -388,6 +388,15 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Получить словесное описание устройства.
+     * 
+     * @return
+     */
+    public String getDeviceDescription() {
+        return "Implement me: device description";
+    }
+
+    /**
      * Сервис для управления процессом рисования на устройстве.
      * 
      * @return
@@ -397,12 +406,12 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Получить версию программного обеспечения устройства.
+     * Получить модель устройства.
      * 
      * @return
      */
-    public String getDeviceFirmwareVersion() {
-        return "Implement me: device firmware version";
+    public String getDeviceModel() {
+        return "Implement me: device model";
     }
 
     /**
@@ -415,12 +424,30 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Получить серийный номер устройства.
+     * 
+     * @return
+     */
+    public String getDeviceSerialNumber() {
+        return "Implement me: device serial number";
+    }
+
+    /**
      * Статус устройства.
      * 
      * @return
      */
     public DeviceStatus getDeviceStatus() {
         return deviceStatus;
+    }
+
+    /**
+     * Получить версию программного обеспечения устройства.
+     * 
+     * @return
+     */
+    public String getDeviceVersion() {
+        return "Implement me: device version";
     }
 
     /**

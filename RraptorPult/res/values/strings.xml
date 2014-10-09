@@ -31,8 +31,11 @@
     <string name="status_connection_status">Connection status</string>
     <string name="status_connection_type">Connection type</string>
     <string name="status_connection_info">Connection info</string>
-    <string name="status_device_name">Device name</string>
-    <string name="status_firmware_version">Version</string>
+    <string name="status_device_name">Name</string>
+    <string name="status_device_model">Model</string>
+    <string name="status_device_serial_number">Serial number</string>
+    <string name="status_device_description">Description</string>
+    <string name="status_device_version">Version</string>
     <string name="status_device_status">Device status</string>
     <string name="status_working_area_dim">Working area</string>
     <string name="status_current_pos">Current position</string>
