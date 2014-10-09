@@ -406,6 +406,15 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Получить производителя устройства.
+     * 
+     * @return
+     */
+    public String getDeviceManufacturer() {
+        return "Implement me: device manufacturer";
+    }
+
+    /**
      * Получить модель устройства.
      * 
      * @return
@@ -439,6 +448,15 @@ public class DeviceControlService extends Service {
      */
     public DeviceStatus getDeviceStatus() {
         return deviceStatus;
+    }
+
+    /**
+     * Получить ссылку на страницу устройства.
+     * 
+     * @return
+     */
+    public String getDeviceUri() {
+        return "Implement me: device uri";
     }
 
     /**

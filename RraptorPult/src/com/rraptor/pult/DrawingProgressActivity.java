@@ -39,6 +39,8 @@ public class DrawingProgressActivity extends RRActivity {
     private TextView txtDeviceSerialNumber;
     private TextView txtDeviceDescription;
     private TextView txtDeviceVersion;
+    private TextView txtDeviceManufacturer;
+    private TextView txtDeviceUri;
     private TextView txtDeviceStatus;
     private TextView txtDeviceWorkingAreaDim;
     private TextView txtDeviceCurrentPos;
@@ -61,6 +63,8 @@ public class DrawingProgressActivity extends RRActivity {
         txtDeviceSerialNumber = (TextView) findViewById(R.id.txt_device_serial_number);
         txtDeviceDescription = (TextView) findViewById(R.id.txt_device_description);
         txtDeviceVersion = (TextView) findViewById(R.id.txt_device_version);
+        txtDeviceManufacturer = (TextView) findViewById(R.id.txt_device_manufacturer);
+        txtDeviceUri = (TextView) findViewById(R.id.txt_device_uri);
         txtDeviceStatus = (TextView) findViewById(R.id.txt_device_status);
         txtDeviceWorkingAreaDim = (TextView) findViewById(R.id.txt_working_area_dim);
         txtDeviceCurrentPos = (TextView) findViewById(R.id.txt_current_pos);
@@ -153,6 +157,9 @@ public class DrawingProgressActivity extends RRActivity {
         txtDeviceDescription.setText(getDeviceControlService()
                 .getDeviceDescription());
         txtDeviceVersion.setText(getDeviceControlService().getDeviceVersion());
+        txtDeviceManufacturer.setText(getDeviceControlService()
+                .getDeviceManufacturer());
+        txtDeviceUri.setText(getDeviceControlService().getDeviceUri());
         txtDeviceStatus.setText(getDeviceControlService().getDeviceStatus()
                 .name());
         txtDeviceWorkingAreaDim.setText(getDeviceControlService()

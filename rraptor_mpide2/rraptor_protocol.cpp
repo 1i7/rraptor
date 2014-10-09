@@ -81,6 +81,22 @@ int handleInput(char* buffer, char* reply_buffer) {
           
             // Выполнить команду
             cmd_version(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_MANUFACTURER) == 0) {
+            // синтаксис:
+            //     manufacturer
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_manufacturer(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_URI) == 0) {
+            // синтаксис:
+            //     uri
+            // Команда корректна
+            success = true;
+          
+            // Выполнить команду
+            cmd_uri(reply_buffer);
         } else if(strcmp(tokens[0], CMD_PING) == 0) {
             // синтаксис:
             //     ping

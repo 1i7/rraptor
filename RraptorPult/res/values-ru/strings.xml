@@ -35,6 +35,8 @@
     <string name="status_device_serial_number">Серийный номер</string>
     <string name="status_device_description">Описание</string>
     <string name="status_device_version">Версия</string>
+    <string name="status_device_manufacturer">Производитель</string>
+    <string name="status_device_uri">Сайт</string>
     <string name="status_device_status">Статус устройства</string>
     <string name="status_working_area_dim">Рабочая область</string>
     <string name="status_current_pos">Положение блока</string>

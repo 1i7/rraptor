@@ -4,10 +4,35 @@
 #include "rraptor_protocol.h"
 #include "stepper.h"
 
+static const char* device_name;
+static const char* device_model;
+static const char* device_serial_number;
+static const char* device_description;
+static const char* device_version;
+static const char* device_manufacturer;
+static const char* device_uri;
 
 static stepper *_sm_x, *_sm_y, *_sm_z;
 
-void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z) {
+/**
+ * Установить информацию об устройстве. 
+ */
+void init_device_info(const char* name, const char* model, const char* serial_number, 
+        const char* description, const char* _version,
+        const char* manufacturer, const char* uri) {
+    device_name = name;
+    device_model = model;
+    device_serial_number = serial_number;
+    device_description = description;
+    device_version = _version;
+    device_manufacturer = manufacturer;
+    device_uri = uri;
+}
+
+/**
+ * Установить информацию о подключенных к устройству моторах. 
+ */
+void init_device_motors(stepper *sm_x, stepper *sm_y, stepper *sm_z) {
     _sm_x = sm_x;
     _sm_y = sm_y;
     _sm_z = sm_z;
@@ -32,7 +57,7 @@ static stepper* stepper_by_id(char id) {
  * Получить собственное имя устройства.
  */
 int cmd_name(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement 'name'");
+    strcpy(reply_buffer, device_name);
     return strlen(reply_buffer);
 }
 
@@ -40,7 +65,7 @@ int cmd_name(char* reply_buffer) {
  * Получить модель устройства.
  */
 int cmd_model(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement 'model'");
+    strcpy(reply_buffer, device_model);
     return strlen(reply_buffer);
 }
 
@@ -48,7 +73,7 @@ int cmd_model(char* reply_buffer) {
  * Получить серийный номер устройства.
  */
 int cmd_serial_number(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement 'sn'");
+    strcpy(reply_buffer, device_serial_number);
     return strlen(reply_buffer);
 }
 
@@ -56,7 +81,7 @@ int cmd_serial_number(char* reply_buffer) {
  * Получить словесное описание устройства. 
  */
 int cmd_description(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement 'description'");
+    strcpy(reply_buffer, device_description);
     return strlen(reply_buffer);
 }
 
@@ -64,7 +89,23 @@ int cmd_description(char* reply_buffer) {
  * Получить версию прошивки устройства.
  */
 int cmd_version(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement 'version'");
+    strcpy(reply_buffer, device_version);
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить производителя устройства.
+ */
+int cmd_manufacturer(char* reply_buffer) {
+    strcpy(reply_buffer, device_manufacturer);
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Получить ссылку на страницу устройства.
+ */
+int cmd_uri(char* reply_buffer) {
+    strcpy(reply_buffer, device_uri);
     return strlen(reply_buffer);
 }
 

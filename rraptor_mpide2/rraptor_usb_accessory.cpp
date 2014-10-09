@@ -7,9 +7,9 @@
 
 // Информация о текущем устройстве
 static char manufacturer[] = "Rraptor";
-static char model[] = "Rraptor CNC";
+static char model[] = "Rraptor";
 static char description[] = "Rraptor CNC controler";
-static char version[] = "1.0";
+static char version[] = "0.2-devel";
 static char uri[] = "http://rraptor.lasto4ka.su";
 static char serial[] = "N/A";
 

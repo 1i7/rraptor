@@ -54,7 +54,25 @@ void prepare_line2() {
 void setup() {
     Serial.begin(9600);
     Serial.println("Starting Rraptor...");
+    
+    // Информация о текущем устройстве
+    init_device_info(DEVICE_NAME, DEVICE_MODEL, DEVICE_SERIAL_NUMBER, 
+        DEVICE_DESCRIPTION, DEVICE_VERSION,
+        DEVICE_MANUFACTURER, DEVICE_URI);    
 
+    // информация о подключенных моторах
+    // init_stepper(stepper* smotor,  char* name, 
+    //     int pin_step, int pin_dir, int pin_en,
+    //     int dir_inv, int pulse_delay,
+    //     float distance_per_step, float max_pos)
+    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5, 216000); // X - синий драйвер
+    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5, 300000); // Y - желтый драйвер
+    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5, 100000); // Z - черный драйвер
+    
+    init_device_motors(&sm_x, &sm_y, &sm_z);
+    
+    
+    // Модули связи
     #ifdef RR_TCP
         rraptorTcpSetup();
     #endif // RR_TCP
@@ -62,16 +80,6 @@ void setup() {
     #ifdef RR_USB_ACCESSORY
         rraptorUSBAccessorySetup();
     #endif // RR_USB_ACCESSORY
-
-//    init_stepper(stepper* smotor,  char* name, 
-//        int pin_step, int pin_dir, int pin_en,
-//        int dir_inv, int pulse_delay,
-//        float distance_per_step, float max_pos)
-    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5, 216000); // X - синий драйвер
-    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5, 300000); // Y - желтый драйвер
-    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5, 100000); // Z - черный драйвер
-    
-    init_protocol(&sm_x, &sm_y, &sm_z);
         
 //    prepare_line1();
 //    start_stepper_cycle();

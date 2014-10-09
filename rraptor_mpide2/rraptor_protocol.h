@@ -19,6 +19,10 @@ static const char* CMD_SERIAL_NUMBER = "sn";
 static const char* CMD_DESCRIPTION = "description";
 /** Получить версию прошивки устройства */
 static const char* CMD_VERSION = "version";
+/** Получить производителя устройства */
+static const char* CMD_MANUFACTURER = "version";
+/** Получить ссылку на страницу устройства */
+static const char* CMD_URI = "uri";
 
 // Команды
 /** Проверить доступность устройства */
@@ -77,7 +81,17 @@ static const char GCODE_PARAM_Y = 'Y';
 static const char GCODE_PARAM_Z = 'Z';
 static const char GCODE_PARAM_F = 'F';
 
-void init_protocol(stepper *sm_x, stepper *sm_y, stepper *sm_z);
+/**
+ * Установить информацию об устройстве. 
+ */
+void init_device_info(const char* name, const char* model, const char* serial_number, 
+        const char* description, const char* _version,
+        const char* manufacturer, const char* uri);
+
+/**
+ * Установить информацию о подключенных к устройству моторах. 
+ */
+void init_device_motors(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 
 /**************************************/
 // Обработчики команд
@@ -106,6 +120,16 @@ int cmd_description(char* reply_buffer);
  * Получить версию прошивки устройства.
  */
 int cmd_version(char* reply_buffer);
+
+/** 
+ * Получить производителя устройства.
+ */
+int cmd_manufacturer(char* reply_buffer);
+
+/** 
+ * Получить ссылку на страницу устройства.
+ */
+int cmd_uri(char* reply_buffer);
 
 /** 
  * Проверить доступность устройства.

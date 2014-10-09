@@ -17,6 +17,10 @@ public class RRaptorActivity extends RRActivity {
         startActivity(new Intent(this, DebugActivity.class));
     }
 
+    private void gotoDrawingProgress() {
+        startActivity(new Intent(this, DrawingProgressActivity.class));
+    }
+
     private void gotoPlotter2D() {
         startActivity(new Intent(this, Plotter2DActivity.class));
     }
@@ -42,6 +46,7 @@ public class RRaptorActivity extends RRActivity {
                 gotoPlotter2D();
             }
         });
+
         final Button btnGotoPult = (Button) findViewById(R.id.btn_goto_manual_pult);
         btnGotoPult.setOnClickListener(new OnClickListener() {
             @Override
@@ -49,6 +54,7 @@ public class RRaptorActivity extends RRActivity {
                 gotoPult();
             }
         });
+
         final Button btnGotoCalibrate = (Button) findViewById(R.id.btn_goto_calibrate);
         btnGotoCalibrate.setOnClickListener(new OnClickListener() {
             @Override
@@ -56,6 +62,7 @@ public class RRaptorActivity extends RRActivity {
                 gotoCalibrate();
             }
         });
+
         final Button btnGotoStatus = (Button) findViewById(R.id.btn_goto_status);
         btnGotoStatus.setOnClickListener(new OnClickListener() {
             @Override
@@ -63,6 +70,15 @@ public class RRaptorActivity extends RRActivity {
                 gotoStatus();
             }
         });
+
+        final Button btnGotoDrawingProgress = (Button) findViewById(R.id.btn_goto_drawing_progress);
+        btnGotoDrawingProgress.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gotoDrawingProgress();
+            }
+        });
+
         final Button btnGotoDebug = (Button) findViewById(R.id.btn_goto_debug);
         btnGotoDebug.setOnClickListener(new OnClickListener() {
             @Override

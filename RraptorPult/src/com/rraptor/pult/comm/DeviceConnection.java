@@ -19,6 +19,10 @@ public interface DeviceConnection {
     public static final String CMD_DESCRIPTION = "description";
     /** Получить версию прошивки устройства */
     public static final String CMD_VERSION = "version";
+    /** Получить производителя устройства */
+    public static final String CMD_MANUFACTURER = "version";
+    /** Получить ссылку на страницу устройства */
+    public static final String CMD_URI = "uri";
 
     // Команды
     /** Проверить доступность устройства */
