@@ -7,21 +7,17 @@
  * 1й символ - имя параметра,
  * подстрока начиная со 2го символа - значение параметра, число с плавающей точкой.
  */
-void parseParam(char* param, char* pname, double* pvalue) {
+static void parseParam(char* param, char* pname, double* pvalue) {
     if(strlen(param) > 1) {
         *pname = param[0];
         *pvalue = atof(param + 1);
     }
 }
 
-
 /**
- * Обработать входные данные - разобрать строку, выполнить команду.
- * @buffer - входные данные, строка, оканчивающаяся нулём.
- * @reply_buffer - ответ, строка, оканчивающая нулём
- * @return размер ответа в байтах (0, чтобы не отправлять ответ).
+ * Распознать и выполнить единственную команду.
  */
-int handleInput(char* buffer, char* reply_buffer) {
+static int handleCommand(char* buffer, char* reply_buffer) {
     reply_buffer[0] = 0;
     
     bool success = false;
@@ -248,6 +244,58 @@ int handleInput(char* buffer, char* reply_buffer) {
         strcpy(reply_buffer, REPLY_DONTUNDERSTAND);
     }
     
+    return strlen(reply_buffer);
+}
+
+/**
+ * Обработать входные данные - разобрать строку, выполнить одну или 
+ * несколько команд. 
+ * 
+ * В случае выполнения нескольких команд, внутри последовательности 
+ * отдельные команды разделяются точкой с запятой ';'.
+ * Устройство выполняет их одну за одной, результаты выполнения 
+ * сохраняются и возвращаются в одной строке в порядке выполнения, 
+ * также разделенные точкой с запятой.
+ *
+ * Например:
+ * Вход: name;ping;model
+ * Результат: Anton's Rraptor;ok;Rraptor
+ *
+ * @buffer - входные данные, строка, оканчивающаяся нулём.
+ * @reply_buffer - ответ, строка, оканчивающая нулём
+ * @return размер ответа в байтах (0, чтобы не отправлять ответ).
+ */
+int handleInput(char* buffer, char* reply_buffer) {
+    reply_buffer[0] = 0;
+    
+    char cmd_reply_buffer[128];
+        
+    // Разобьем входящую строку на куски по разделителю команд ';'
+    char* token;
+    // первая команда
+    token = strtok(buffer, ";");
+    bool firstToken = true;
+    while(token != NULL) {
+        handleCommand(buffer, cmd_reply_buffer);
+        
+        // добавлять к ответу предваряющий разделитель ';' для всех команд,
+        // кроме первой
+        if(!firstToken) {
+            strcat(reply_buffer, ";");
+        } else {
+            firstToken = false;
+        }
+        
+        // добавить ответ от команды в общий список
+        // TODO: сделать что-нибудь в случае, если все ответы не умещаются
+        // в буфер (это касается и разных других мест, но здесь особенно,
+        // т.к. размер ответа от нескольких команд - динамический)
+        strcat(reply_buffer, cmd_reply_buffer);
+        
+        // следующая команда
+        token = strtok(NULL, ";");
+    }
+  
     return strlen(reply_buffer);
 }
 
