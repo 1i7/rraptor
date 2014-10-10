@@ -151,7 +151,6 @@ public class DeviceControlService extends Service {
 
     // Подключение к устройству по Wifi
     private Socket socket;
-
     private OutputStream serverOut;
     private InputStream serverIn;
 
@@ -176,10 +175,18 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Подлключиться к устройству через канал Tcp и запустить процесс отправки
-     * команд.
+     * Подлключиться к устройству через канал Tcp и запустить (или возобновить)
+     * процесс отправки команд.
+     * 
+     * @param cancelCommands
+     *            true: отменить все ранее добавленные в очередь команды; false:
+     *            продолжить выполнение команд, которые были добавлены в очередь
+     *            во время предыдущего подключения
      */
-    public void connectToDeviceTcp() {
+    public void connectToDeviceTcp(boolean cancelCommands) {
+        if (cancelCommands) {
+            cancelCommands();
+        }
         connectToDeviceTcp(DeviceConnectionWifi.DEFAULT_SERVER_HOST,
                 DeviceConnectionWifi.DEFAULT_SERVER_PORT);
     }
@@ -576,7 +583,7 @@ public class DeviceControlService extends Service {
         System.out.println("DeviceControlService.onCreate()");
         super.onCreate();
 
-        connectToDeviceTcp();
+        connectToDeviceTcp(true);
 
         // Запустим бесконечный цикл отправки команд из очереди
         startDeviceOutputWriter();
