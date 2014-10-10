@@ -103,7 +103,7 @@ public abstract class RRActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                devControlService.connectToServer();
+                devControlService.connectToDeviceTcp();
             }
         });
 

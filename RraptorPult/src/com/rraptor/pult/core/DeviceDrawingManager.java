@@ -57,6 +57,13 @@ public class DeviceDrawingManager {
             drawingCmdWaiting = devControlService.sendCommand(cmd,
                     new CommandListener() {
                         @Override
+                        public void onCommandCanceled(final String cmd) {
+                            resendDrawingCmd = false;
+                            drawingCmdError = true;
+                            drawingCmdWaiting = false;
+                        }
+
+                        @Override
                         public void onCommandExecuted(final String cmd,
                                 final String reply) {
                             // убедимся, что команда была
@@ -72,13 +79,6 @@ public class DeviceDrawingManager {
                                 resendDrawingCmd = false;
                                 drawingCmdError = true;
                             }
-                            drawingCmdWaiting = false;
-                        }
-
-                        @Override
-                        public void onError(final String cmd, final Exception ex) {
-                            resendDrawingCmd = false;
-                            drawingCmdError = true;
                             drawingCmdWaiting = false;
                         }
                     });

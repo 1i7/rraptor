@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.TimeoutException;
 
 import android.app.Service;
 import android.content.Intent;
@@ -19,9 +20,29 @@ public class DeviceControlService extends Service {
 
     /**
      * Обратный вызов для получения результата выполения команды, добавленной в
-     * очередь на выполнение в фоновом потоке.
+     * очередь на выполнение в фоновом потоке. Выполнение команды может быть
+     * завершено двумя способами: команда выполнена на устройстве и получен
+     * ответ, выполнение команды было отменено до выполнения ее на устройстве.
+     * 
+     * Логика работы очереди команд лежит выше логики связи с устройством. Если
+     * связь с устройством потеряна или произошла ошибка отправки команды по
+     * выбранному каналу связи, команда не будет автоматически отменена, просто
+     * ее выполнение будет отложено до восстановления связи с устройством, тогда
+     * попытки отправки на устройство будут продолжены.
+     * 
+     * Однако, в случае разрыва связи с устройством система (например по решению
+     * пользователя) может отменить выполнение всех команд из очереди, которые
+     * ранее так и не попали на устройство.
+     * 
      */
     public interface CommandListener {
+        /**
+         * Выполнение команды отменено до выполнения на устройстве.
+         * 
+         * @param cmd
+         */
+        void onCommandCanceled(final String cmd);
+
         /**
          * Команды была выполнена на устройстве, получен ответ.
          * 
@@ -31,14 +52,6 @@ public class DeviceControlService extends Service {
          *            ответ от устройства
          */
         void onCommandExecuted(final String cmd, final String reply);
-
-        /**
-         * Ошибка при отправке команды на устройство.
-         * 
-         * @param cmd
-         * @param ex
-         */
-        void onError(final String cmd, final Exception ex);
     }
 
     public enum ConnectionStatus {
@@ -60,17 +73,22 @@ public class DeviceControlService extends Service {
     }
 
     // Публичные события
+    // Подключение к устройству
     public static String ACTION_CONNECTION_STATUS_CHANGE = "com.rraptor.pult.CONNECTION_STATUS_CHANGE";
     public static String ACTION_DEVICE_STATUS_CHANGE = "com.rraptor.pult.DEVICE_STATUS_CHANGE";
 
     public static String EXTRA_CONNECTION_STATUS = "EXTRA_CONNECTION_STATUS";
     public static String EXTRA_DEVICE_STATUS = "EXTRA_DEVICE_STATUS";
 
+    // Очередь команд
+    public static String ACTION_DEVICE_PAUSED = "com.rraptor.pult.ACTION_DEVICE_PAUSED";
+    public static String ACTION_DEVICE_RESUMED = "com.rraptor.pult.ACTION_DEVICE_RESUMED";
+
     // Отладка
     public static String ACTION_DEBUG_MESSAGE_POSTED = "com.rraptor.pult.ACTION_DEBUG_MESSAGE_POSTED";
     public static String EXTRA_DEBUG_MESSAGE = "EXTRA_DEBUG_MESSAGE";
 
-    // Публичные события о рисовании
+    // Рисование
     public static String ACTION_DEVICE_START_DRAWING = "com.rraptor.pult.START_DRAWING";
     public static String ACTION_DEVICE_FINISH_DRAWING = "com.rraptor.pult.FINISH_DRAWING";
     public static String ACTION_DEVICE_DRAWING_UPDATE = "com.rraptor.pult.DRAWING_UPDATE";
@@ -106,6 +124,11 @@ public class DeviceControlService extends Service {
     private final CommandListener deviceStatusCommandListener = new CommandListener() {
 
         @Override
+        public void onCommandCanceled(final String cmd) {
+            // ничего не делаем
+        }
+
+        @Override
         public void onCommandExecuted(final String cmd, final String reply) {
             if (DeviceConnection.CMD_RR_STATUS.equals(cmd)) {
                 if (DeviceConnection.STATUS_IDLE.equals(reply)) {
@@ -118,20 +141,32 @@ public class DeviceControlService extends Service {
             }
         }
 
-        @Override
-        public void onError(String cmd, Exception ex) {
-            // TODO Auto-generated method stub
-        }
-
     };
+
+    // Информация об очереди команд
+    private boolean isDevicePaused = false;
 
     // Отладочные сообщения
     private final StringBuilder debugMessages = new StringBuilder();
 
     // Подключение к устройству по Wifi
     private Socket socket;
+
     private OutputStream serverOut;
     private InputStream serverIn;
+
+    /**
+     * Очистить "очередь" команд - отменить выполнение всех команд, которые до
+     * сих пор не были выполнены на устройстве.
+     */
+    public void cancelCommands() {
+        if (nextCommandListener != null) {
+            nextCommandListener.onCommandCanceled(nextCommand);
+        }
+
+        nextCommand = null;
+        nextCommandListener = null;
+    }
 
     /**
      * Очистить историю отладочных сообщений.
@@ -141,17 +176,19 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Подлключиться к серверу и запустить процесс отправки команд.
+     * Подлключиться к устройству через канал Tcp и запустить процесс отправки
+     * команд.
      */
-    public void connectToServer() {
-        connectToServer(DeviceConnectionWifi.DEFAULT_SERVER_HOST,
+    public void connectToDeviceTcp() {
+        connectToDeviceTcp(DeviceConnectionWifi.DEFAULT_SERVER_HOST,
                 DeviceConnectionWifi.DEFAULT_SERVER_PORT);
     }
 
     /**
-     * Подлключиться к серверу и запустить процесс отправки команд.
+     * Подлключиться к устройству через канал Tcp и запустить процесс отправки
+     * команд.
      */
-    public void connectToServer(final String serverHost, final int serverPort) {
+    public void connectToDeviceTcp(final String serverHost, final int serverPort) {
         // Все сетевые операции нужно делать в фоновом потоке, чтобы не
         // блокировать интерфейс
         new Thread() {
@@ -184,8 +221,7 @@ public class DeviceControlService extends Service {
                             + ":" + socket.getPort();
                     setConnectionStatus(ConnectionStatus.CONNECTED);
 
-                    // Подключились к серверу, теперь можно отправлять команды
-                    startServerOutputWriter();
+                    // приступим к постоянному опросу устройства
                     deviceStatusManager.startPollingDeviceStatus();
                 } catch (final Exception e) {
                     socket = null;
@@ -238,13 +274,35 @@ public class DeviceControlService extends Service {
             deviceDrawindManager.stopDrawingOnDevice();
             deviceStatusManager.stopPollingDeviceStatus();
 
-            // очистить "очередь" команд
-            nextCommand = null;
-            nextCommandListener = null;
-
             debug("Disconnected");
             setConnectionStatus(ConnectionStatus.DISCONNECTED);
         }
+    }
+
+    /**
+     * Выполнить команду на устройстве и сразу получить ответ.
+     * 
+     * @return ответ от устройства
+     */
+    private String execCommandOnDevice(final String cmd) throws IOException,
+            TimeoutException {
+        String reply;
+        // отправить команду на устройство
+        debug("Write: " + cmd);
+        serverOut.write((cmd).getBytes());
+        serverOut.flush();
+
+        // и сразу прочитать ответ
+        final byte[] readBuffer = new byte[256];
+        final int readSize = serverIn.read(readBuffer);
+
+        if (readSize != -1) {
+            reply = new String(readBuffer, 0, readSize);
+            debug("Read: " + "num bytes=" + readSize + ", value=" + reply);
+        } else {
+            throw new IOException("End of stream");
+        }
+        return reply;
     }
 
     /**
@@ -268,6 +326,27 @@ public class DeviceControlService extends Service {
     void fireOnDebugMessagePosted(final String msg) {
         final Intent intent = new Intent(ACTION_DEBUG_MESSAGE_POSTED);
         intent.putExtra(EXTRA_DEBUG_MESSAGE, msg);
+        getApplicationContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Отправить широковещательное сообщение (broadcast) - ACTION_DEVICE_PAUSED.
+     * 
+     * @param e
+     */
+    private void fireOnDevicePaused() {
+        final Intent intent = new Intent(ACTION_DEVICE_PAUSED);
+        getApplicationContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Отправить широковещательное сообщение (broadcast) -
+     * ACTION_DEVICE_RESUMED.
+     * 
+     * @param e
+     */
+    private void fireOnDeviceResumed() {
+        final Intent intent = new Intent(ACTION_DEVICE_RESUMED);
         getApplicationContext().sendBroadcast(intent);
     }
 
@@ -477,6 +556,16 @@ public class DeviceControlService extends Service {
         return "Implement me: device working area";
     }
 
+    /**
+     * Статус очереди команд для отправки на устройство.
+     * 
+     * @return true - отправка команд приостановлена; false - отправка команд
+     *         работает.
+     */
+    public boolean isDevicePaused() {
+        return isDevicePaused;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return deviceControlBinder;
@@ -487,7 +576,10 @@ public class DeviceControlService extends Service {
         System.out.println("DeviceControlService.onCreate()");
         super.onCreate();
 
-        connectToServer();
+        connectToDeviceTcp();
+
+        // Запустим бесконечный цикл отправки команд из очереди
+        startDeviceOutputWriter();
     }
 
     @Override
@@ -506,13 +598,29 @@ public class DeviceControlService extends Service {
     }
 
     /**
+     * Приостановить процесс отправки команд на устройство.
+     */
+    public void pauseDevice() {
+        isDevicePaused = true;
+        fireOnDevicePaused();
+    }
+
+    /**
+     * Возобновить процесс отправки команд на устройство.
+     */
+    public void resumeDevice() {
+        isDevicePaused = false;
+        fireOnDeviceResumed();
+    }
+
+    /**
      * Поставить комнаду в очередь для выполнения на сервере. При переполнении
      * очереди новые команды игнорируются. (в простой реализации в очереди может
      * быть всего один элемент).
      * 
      * @param cmd
      * @param cmdListener
-     * @return true, если команда успешно добавлена в очередь false, если
+     * @return true, если команда успешно добавлена в очередь; false, если
      *         очередь переполнена и команда не может быть добавлена.
      */
     public boolean sendCommand(final String cmd,
@@ -547,75 +655,74 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Фоновый поток отправки данных на сервер: получаем команду от пользователя
-     * (в переменной nextCommand), отправляем на сервер, ждем ответ, получаем
-     * ответ, сообщаем о результате, ждем следующую команду от пользователя.
+     * Фоновый поток отправки команд на устройство: получаем команду от
+     * пользователя (в переменной nextCommand), отправляем на устройство, ждем
+     * ответ, получаем ответ, сообщаем о результате, ждем следующую команду от
+     * пользователя.
      */
-    private void startServerOutputWriter() {
+    private void startDeviceOutputWriter() {
         new Thread() {
             @Override
             public void run() {
                 String execCommand = null;
-                try {
-                    long lastCmdTime = System.currentTimeMillis();
-                    while (true) {
 
-                        if (nextCommand != null) {
-                            execCommand = nextCommand;
-                        } else if (System.currentTimeMillis() - lastCmdTime > DeviceConnectionWifi.MAX_IDLE_TIMEOUT) {
-                            execCommand = DeviceConnection.CMD_RR_STATUS;
-                            nextCommandListener = deviceStatusCommandListener;
-                        } else {
-                            execCommand = null;
-                        }
+                long lastCmdTime = System.currentTimeMillis();
+                while (true) {
+                    if (connectionStatus == ConnectionStatus.CONNECTED
+                            && !isDevicePaused && nextCommand != null) {
+                        // получим из "очереди" команду для выполнения на
+                        // устройстве
+                        execCommand = nextCommand;
 
-                        if (execCommand != null) {
+                        try {
+                            final String reply = execCommandOnDevice(execCommand);
 
-                            // отправить команду на сервер
-                            debug("Write: " + execCommand);
-                            serverOut.write((execCommand).getBytes());
-                            serverOut.flush();
-
-                            // и сразу прочитать ответ
-                            final byte[] readBuffer = new byte[256];
-                            final int readSize = serverIn.read(readBuffer);
-                            if (readSize != -1) {
-                                final String reply = new String(readBuffer, 0,
-                                        readSize);
-                                debug("Read: " + "num bytes=" + readSize
-                                        + ", value=" + reply);
-                                if (nextCommandListener != null) {
-                                    nextCommandListener.onCommandExecuted(
-                                            execCommand, reply);
-                                }
-                            } else {
-                                throw new IOException("End of stream");
+                            // отправим сообщение о выполнении команды
+                            // подписанту
+                            if (nextCommandListener != null) {
+                                nextCommandListener.onCommandExecuted(
+                                        execCommand, reply);
                             }
 
                             // очистим "очередь" - можно добавлять следующую
-                            // команду.
+                            // команду
                             nextCommand = null;
                             nextCommandListener = null;
 
                             lastCmdTime = System.currentTimeMillis();
-                        } else {
-                            // на всякий случай - не будем напрягать систему
-                            // холостыми циклами
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {
-                            }
+                        } catch (final Exception e) {
+                            // обрыв соединения - не повод отказываться от
+                            // выполнения команды, это повод дождаться нового
+                            // подключения и повторить попытку, если к тому
+                            // времени очередь не будет очищена извне
+
+                            debug("Connection error: " + e.getMessage());
+                            e.printStackTrace();
+
+                            disconnectFromServer();
+                        }
+                    } else if (connectionStatus == ConnectionStatus.CONNECTED
+                            && System.currentTimeMillis() - lastCmdTime > DeviceConnectionWifi.MAX_IDLE_TIMEOUT) {
+                        // поддерживать связь с устройством, если на
+                        // него долго не отправляли команды - выполнять
+                        // команду PING вне очереди
+                        try {
+                            execCommandOnDevice(DeviceConnection.CMD_PING);
+                            lastCmdTime = System.currentTimeMillis();
+                        } catch (final Exception e) {
+                            debug("Connection error: " + e.getMessage());
+                            e.printStackTrace();
+                            disconnectFromServer();
+                        }
+                    } else {
+                        // на всякий случай - не будем напрягать систему
+                        // холостыми циклами
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
                         }
                     }
-                } catch (final Exception e) {
-                    debug("Connection error: " + e.getMessage());
-                    e.printStackTrace();
-                    if (nextCommandListener != null) {
-                        nextCommandListener.onError(execCommand, e);
-                    }
                 }
-                debug("Server output writer thread finish");
-                disconnectFromServer();
             }
         }.start();
     }

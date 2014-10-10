@@ -47,6 +47,14 @@ public class RRaptorActivity extends RRActivity {
             }
         });
 
+        final Button btnGotoDrawingProgress = (Button) findViewById(R.id.btn_goto_drawing_progress);
+        btnGotoDrawingProgress.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gotoDrawingProgress();
+            }
+        });
+
         final Button btnGotoPult = (Button) findViewById(R.id.btn_goto_manual_pult);
         btnGotoPult.setOnClickListener(new OnClickListener() {
             @Override
@@ -68,14 +76,6 @@ public class RRaptorActivity extends RRActivity {
             @Override
             public void onClick(View v) {
                 gotoStatus();
-            }
-        });
-
-        final Button btnGotoDrawingProgress = (Button) findViewById(R.id.btn_goto_drawing_progress);
-        btnGotoDrawingProgress.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gotoDrawingProgress();
             }
         });
 

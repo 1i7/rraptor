@@ -38,6 +38,15 @@
         android:layout_marginTop="12dp"
         android:layout_weight="0"
         android:text="@string/rraptor_plotter2d" />
+    
+    
+    <Button
+        android:id="@+id/btn_goto_drawing_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_weight="0"
+        android:text="@string/rraptor_drawing_progress" />
 
     <Button
         android:id="@+id/btn_goto_manual_pult"
@@ -62,14 +71,6 @@
         android:layout_marginTop="12dp"
         android:layout_weight="0"
         android:text="@string/rraptor_status" />
-    
-    <Button
-        android:id="@+id/btn_goto_drawing_progress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_drawing_progress" />
 
     <Button
         android:id="@+id/btn_goto_debug"

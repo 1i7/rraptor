@@ -23,13 +23,13 @@ public class ManualPultActivity extends RRActivity {
     private final CommandListener devCommandListener = new CommandListener() {
 
         @Override
-        public void onCommandExecuted(String cmd, String reply) {
+        public void onCommandCanceled(final String cmd) {
             // TODO Auto-generated method stub
 
         }
 
         @Override
-        public void onError(String cmd, Exception ex) {
+        public void onCommandExecuted(final String cmd, final String reply) {
             // TODO Auto-generated method stub
 
         }
