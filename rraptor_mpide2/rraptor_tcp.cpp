@@ -213,14 +213,13 @@ void rraptorTcpTasks() {
             readSize = readSize < sizeof(read_buffer) ? readSize : sizeof(read_buffer);
             readSize = tcpClient.readStream((byte*)read_buffer, readSize);
             
-            // Считали порцию данных - добавим завершающий ноль
             read_buffer[readSize] = 0;
-            
+            // Считали порцию данных
             Serial.print("Read: ");
             Serial.println(read_buffer);
  
             // и можно выполнить команду, ответ попадет в write_buffer
-            writeSize = handleInput(read_buffer, write_buffer);
+            writeSize = handleInput(read_buffer, readSize, write_buffer);
             write_size = writeSize;
             
             // сбросим счетчик неактивности

@@ -20,7 +20,7 @@ static const char* CMD_DESCRIPTION = "description";
 /** Получить версию прошивки устройства */
 static const char* CMD_VERSION = "version";
 /** Получить производителя устройства */
-static const char* CMD_MANUFACTURER = "version";
+static const char* CMD_MANUFACTURER = "manufacturer";
 /** Получить ссылку на страницу устройства */
 static const char* CMD_URI = "uri";
 
@@ -211,11 +211,12 @@ void cmd_gcode_g03();
  * Вход: name;ping;model
  * Результат: Anton's Rraptor;ok;Rraptor
  *
- * @buffer - входные данные, строка, оканчивающаяся нулём.
- * @reply_buffer - ответ, строка, оканчивающая нулём
- * @return размер ответа в байтах (0, чтобы не отправлять ответ).
+ * @buffer - входные данные, строка
+ * @buffer_size - размер входных данных
+ * @reply_buffer - ответ, строка, оканчивающаяся нулём
+ * @return размер ответа в байтах (0, чтобы не отправлять ответ)
  */
-int handleInput(char* buffer, char* reply_buffer);
+int handleInput(char* buffer, int buffer_size, char* reply_buffer);
 
 #endif // RRAPTOR_PROTOCOL_H
 

@@ -119,10 +119,12 @@ int cmd_ping(char* reply_buffer) {
 }
 
 /** 
- * Получить размер рабочей области.
+ * Получить размер рабочей области в формате:
+ * max_x max_y max_z
  */
 int cmd_rr_working_area_dim(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement rr_working_area_dim");
+    sprintf(reply_buffer, "%f %f %f", _sm_x.max_pos, _sm_y.max_pos, _sm_z.max_pos);
+    
     return strlen(reply_buffer);
 }
 
@@ -139,10 +141,12 @@ int cmd_rr_status(char* reply_buffer) {
 }
 
 /** 
- * Получить текущее положение печатающего блока 
+ * Получить текущее положение печатающего блока в формате:
+ * x y z 
  */
 int cmd_rr_current_pos(char* reply_buffer) {
-    strcpy(reply_buffer, "todo: implement rr_current_pos");
+    sprintf(reply_buffer, "%f %f %f", _sm_x.current_pos, _sm_y.current_pos, _sm_z.current_pos);
+    
     return strlen(reply_buffer);
 }
 

@@ -106,14 +106,12 @@ void rraptorUSBAccessoryTasks() {
             readInProgress = FALSE;
             
             if(errorCode == USB_SUCCESS) {
-                // Считали порцию данных - добавим завершающий ноль
-                read_buffer[readSize] = 0;
-                
+                // Считали порцию данных
                 Serial.print("Read: ");
                 Serial.println(read_buffer);
                 
                 // и можно выполнить команду, ответ попадет в write_buffer
-                writeSize = handleInput(read_buffer, write_buffer);
+                writeSize = handleInput(read_buffer, readSize, write_buffer);
                                 
                 // Если writeSize не 0, отправим назад ответ - инициируем 
                 // процедуру записи для следующей итерации цикла (данные уже внутри write_buffer)

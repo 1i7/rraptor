@@ -17,7 +17,8 @@ static void parseParam(char* param, char* pname, double* pvalue) {
 /**
  * Распознать и выполнить единственную команду.
  */
-static int handleCommand(char* buffer, char* reply_buffer) {
+static int handleCommand(char* buffer, char* reply_buffer) {    
+    // ответ
     reply_buffer[0] = 0;
     
     bool success = false;
@@ -261,11 +262,17 @@ static int handleCommand(char* buffer, char* reply_buffer) {
  * Вход: name;ping;model
  * Результат: Anton's Rraptor;ok;Rraptor
  *
- * @buffer - входные данные, строка, оканчивающаяся нулём.
- * @reply_buffer - ответ, строка, оканчивающая нулём
- * @return размер ответа в байтах (0, чтобы не отправлять ответ).
+ * @buffer - входные данные, строка
+ * @buffer_size - размер входных данных
+ * @reply_buffer - ответ, строка, оканчивающаяся нулём
+ * @return размер ответа в байтах (0, чтобы не отправлять ответ)
  */
-int handleInput(char* buffer, char* reply_buffer) {
+int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
+    // добавим к входным данным завершающий ноль, 
+    // чтобы рассматривать их как корректную строку
+    buffer[buffer_size] = 0;
+    
+    // обнулим ответ
     reply_buffer[0] = 0;
     
     char cmd_reply_buffer[128];
@@ -276,7 +283,7 @@ int handleInput(char* buffer, char* reply_buffer) {
     token = strtok(buffer, ";");
     bool firstToken = true;
     while(token != NULL) {
-        handleCommand(buffer, cmd_reply_buffer);
+        handleCommand(token, cmd_reply_buffer);
         
         // добавлять к ответу предваряющий разделитель ';' для всех команд,
         // кроме первой
