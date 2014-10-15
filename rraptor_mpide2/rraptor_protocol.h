@@ -39,7 +39,7 @@ static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 /** Получить статус устройства */
 static const char* CMD_RR_STATUS = "rr_status";
 /** Получить текущее положение печатающего блока */
-static const char* CMD_RR_CURRENT_POS = "rr_current_pos";
+static const char* CMD_RR_CURRENT_POSITION = "rr_current_pos";
 
 // Команды
 /** Остановить все моторы */
@@ -149,7 +149,7 @@ int cmd_rr_status(char* reply_buffer);
 /** 
  * Получить текущее положение печатающего блока.
  */
-int cmd_rr_current_pos(char* reply_buffer);
+int cmd_rr_current_position(char* reply_buffer);
 
 /** 
  * Остановить все моторы.

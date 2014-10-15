@@ -144,7 +144,7 @@ int cmd_rr_status(char* reply_buffer) {
  * Получить текущее положение печатающего блока в формате:
  * x y z 
  */
-int cmd_rr_current_pos(char* reply_buffer) {
+int cmd_rr_current_position(char* reply_buffer) {
     sprintf(reply_buffer, "%f %f %f", _sm_x->current_pos, _sm_y->current_pos, _sm_z->current_pos);
     
     return strlen(reply_buffer);

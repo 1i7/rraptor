@@ -31,26 +31,25 @@ import com.rraptor.pult.model.Point2D;
  * 
  */
 public class DxfLoader {
-	public static List<Line2D> getLines(final InputStream input)
-			throws ParseException {
-		final Parser parser = ParserBuilder.createDefaultParser();
-		parser.parse(input, DXFParser.DEFAULT_ENCODING);
-		final DXFDocument doc = parser.getDocument();
-		final DXFLayer layer = doc.getDXFLayer("Layer_1");
-		final List<DXFLine> lines = layer
-				.getDXFEntities(DXFConstants.ENTITY_TYPE_LINE);
+    public static List<Line2D> getLines(final InputStream input)
+            throws ParseException {
+        final Parser parser = ParserBuilder.createDefaultParser();
+        parser.parse(input, DXFParser.DEFAULT_ENCODING);
+        final DXFDocument doc = parser.getDocument();
+        final DXFLayer layer = doc.getDXFLayer("Layer_1");
+        final List<DXFLine> lines = layer
+                .getDXFEntities(DXFConstants.ENTITY_TYPE_LINE);
 
-		final List<Line2D> lines2D = new ArrayList<Line2D>();
-		for (DXFLine line : lines) {
-			lines2D.add(new Line2D(new Point2D((int) line.getStartPoint()
-					.getX(), (int) line.getStartPoint().getY()), new Point2D(
-					(int) line.getEndPoint().getX(), (int) line.getEndPoint()
-							.getY())));
-		}
-		return lines2D;
-	}
+        final List<Line2D> lines2D = new ArrayList<Line2D>();
+        for (DXFLine line : lines) {
+            lines2D.add(new Line2D(new Point2D(line.getStartPoint().getX(),
+                    line.getStartPoint().getY()), new Point2D(line
+                    .getEndPoint().getX(), line.getEndPoint().getY())));
+        }
+        return lines2D;
+    }
 
-	public static InputStream getTestDxfFile() throws IOException {
-		return DxfLoader.class.getResource("rraptor_logo1.dxf").openStream();
-	}
+    public static InputStream getTestDxfFile() throws IOException {
+        return DxfLoader.class.getResource("rraptor_logo1.dxf").openStream();
+    }
 }

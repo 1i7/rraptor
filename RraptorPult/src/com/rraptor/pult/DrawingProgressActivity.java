@@ -15,7 +15,7 @@ import com.rraptor.pult.core.DeviceControlService;
 
 public class DrawingProgressActivity extends RRActivity {
 
-    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -23,6 +23,9 @@ public class DrawingProgressActivity extends RRActivity {
                     .equals(intent.getAction())) {
                 onDeviceStatusUpdate();
             } else if (DeviceControlService.ACTION_DEVICE_STATUS_CHANGE
+                    .equals(intent.getAction())) {
+                onDeviceStatusUpdate();
+            } else if (DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE
                     .equals(intent.getAction())) {
                 onDeviceStatusUpdate();
             }
@@ -73,7 +76,7 @@ public class DrawingProgressActivity extends RRActivity {
         btnPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                pauseDevice();
+                pauseDrawing();
             }
         });
 
@@ -81,7 +84,7 @@ public class DrawingProgressActivity extends RRActivity {
         btnResume.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                resumeDevice();
+                resumeDrawing();
             }
         });
 
@@ -103,7 +106,9 @@ public class DrawingProgressActivity extends RRActivity {
 
         // register broadcast receiver
         final IntentFilter filter = new IntentFilter(
-                DeviceControlService.ACTION_DEBUG_MESSAGE_POSTED);
+                DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE);
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
@@ -116,6 +121,7 @@ public class DrawingProgressActivity extends RRActivity {
     @Override
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
+        super.onDeviceControlServiceConnected(service);
         updateStatusViews();
     }
 
@@ -124,23 +130,28 @@ public class DrawingProgressActivity extends RRActivity {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
-
+                updateStatusViews();
             }
 
         });
     }
 
-    private void pauseDevice() {
-
+    /**
+     * Приостановить процесс рисования.
+     */
+    private void pauseDrawing() {
+        getDeviceControlService().getDeviceDrawingManager().pauseDrawing();
     }
 
-    private void resumeDevice() {
-
+    /**
+     * Возобновить процесс рисования.
+     */
+    private void resumeDrawing() {
+        getDeviceControlService().getDeviceDrawingManager().resumeDrawing();
     }
 
     private void stopDevice() {
-
+        getDeviceControlService().disconnectFromServer();
     }
 
     private void updateStatusViews() {
@@ -162,9 +173,28 @@ public class DrawingProgressActivity extends RRActivity {
         txtDeviceUri.setText(getDeviceControlService().getDeviceUri());
         txtDeviceStatus.setText(getDeviceControlService().getDeviceStatus()
                 .name());
-        txtDeviceWorkingAreaDim.setText(getDeviceControlService()
-                .getDeviceWorkingArea());
-        txtDeviceCurrentPos.setText(getDeviceControlService()
-                .getDeviceCurrentPosition());
+        if (getDeviceControlService().getDeviceWorkingArea() != null) {
+            txtDeviceWorkingAreaDim.setText(getDeviceControlService()
+                    .getDeviceWorkingArea().getX()
+                    + "x"
+                    + getDeviceControlService().getDeviceWorkingArea().getY()
+                    + "x"
+                    + getDeviceControlService().getDeviceWorkingArea().getZ()
+                    + " ");
+        } else {
+            txtDeviceWorkingAreaDim.setText("");
+        }
+        if (getDeviceControlService().getDeviceCurrentPosition() != null) {
+            txtDeviceCurrentPos.setText(getDeviceControlService()
+                    .getDeviceCurrentPosition().getX()
+                    + " "
+                    + getDeviceControlService().getDeviceCurrentPosition()
+                            .getY()
+                    + " "
+                    + getDeviceControlService().getDeviceCurrentPosition()
+                            .getZ());
+        } else {
+            txtDeviceCurrentPos.setText("");
+        }
     }
 }

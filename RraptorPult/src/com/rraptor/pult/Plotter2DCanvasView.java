@@ -72,25 +72,28 @@ public class Plotter2DCanvasView extends View {
 
         // draw working area
         paint.setColor(Color.WHITE);
-        canvas.drawRect(canvasP1.getX(), canvasP1.getY(), canvasP3.getX(),
-                canvasP3.getY(), paint);
+        canvas.drawRect((float) canvasP1.getX(), (float) canvasP1.getY(),
+                (float) canvasP3.getX(), (float) canvasP3.getY(), paint);
 
         paint.setColor(Color.RED);
         paint.setStrokeWidth(1);
 
-        canvas.drawLine(canvasP1.getX(), canvasP1.getY(), canvasP2.getX(),
-                canvasP2.getY(), paint);
-        canvas.drawLine(canvasP2.getX(), canvasP2.getY(), canvasP3.getX(),
-                canvasP3.getY(), paint);
-        canvas.drawLine(canvasP3.getX(), canvasP3.getY(), canvasP4.getX(),
-                canvasP4.getY(), paint);
-        canvas.drawLine(canvasP4.getX(), canvasP4.getY(), canvasP1.getX(),
-                canvasP1.getY(), paint);
+        canvas.drawLine((float) canvasP1.getX(), (float) canvasP1.getY(),
+                (float) canvasP2.getX(), (float) canvasP2.getY(), paint);
+        canvas.drawLine((float) canvasP2.getX(), (float) canvasP2.getY(),
+                (float) canvasP3.getX(), (float) canvasP3.getY(), paint);
+        canvas.drawLine((float) canvasP3.getX(), (float) canvasP3.getY(),
+                (float) canvasP4.getX(), (float) canvasP4.getY(), paint);
+        canvas.drawLine((float) canvasP4.getX(), (float) canvasP4.getY(),
+                (float) canvasP1.getX(), (float) canvasP1.getY(), paint);
 
         paint.setTextSize(10);
-        canvas.drawText("0", canvasP1.getX() + 2, canvasP1.getY() + 10, paint);
-        canvas.drawText("y", canvasP2.getX() - 10, canvasP2.getY() + 10, paint);
-        canvas.drawText("x", canvasP4.getX() + 2, canvasP4.getY() - 2, paint);
+        canvas.drawText("0", (float) canvasP1.getX() + 2,
+                (float) canvasP1.getY() + 10, paint);
+        canvas.drawText("y", (float) canvasP2.getX() - 10,
+                (float) canvasP2.getY() + 10, paint);
+        canvas.drawText("x", (float) canvasP4.getX() + 2,
+                (float) canvasP4.getY() - 2, paint);
 
         // draw drawing lines
         int i = 0;
@@ -117,15 +120,16 @@ public class Plotter2DCanvasView extends View {
 
             final Point2D start = line.getStart();
             final Point2D end = line.getEnd();
-            canvas.drawLine(start.getX(), start.getY(), end.getX(), end.getY(),
-                    paint);
+            canvas.drawLine((float) start.getX(), (float) start.getY(),
+                    (float) end.getX(), (float) end.getY(), paint);
             i++;
         }
 
         // draw user point if set ()
         if (userPoint1 != null) {
             paint.setColor(Color.BLUE);
-            canvas.drawCircle(userPoint1.getX(), userPoint1.getY(), 5, paint);
+            canvas.drawCircle((float) userPoint1.getX(),
+                    (float) userPoint1.getY(), 5, paint);
         }
     }
 

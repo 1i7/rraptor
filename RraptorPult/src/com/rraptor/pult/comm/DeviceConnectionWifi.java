@@ -18,7 +18,7 @@ public class DeviceConnectionWifi implements DeviceConnection {
      * отправлял команды на сервер роботу 5 секунд, приложение само отправит
      * команду ping, чтобы держать подключение открытым.
      */
-    public final static long MAX_IDLE_TIMEOUT = 2000;// 5000;
+    public final static long MAX_IDLE_TIMEOUT = 5000;// 5000;
 
     // public static final String DEFAULT_SERVER_HOST = "192.168.43.115";
     public static final String DEFAULT_SERVER_HOST = "192.168.1.115";

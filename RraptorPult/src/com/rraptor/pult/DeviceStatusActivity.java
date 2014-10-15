@@ -15,7 +15,7 @@ import com.rraptor.pult.core.DeviceControlService;
 
 public class DeviceStatusActivity extends RRActivity {
 
-    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -103,7 +103,8 @@ public class DeviceStatusActivity extends RRActivity {
 
         // register broadcast receiver
         final IntentFilter filter = new IntentFilter(
-                DeviceControlService.ACTION_DEBUG_MESSAGE_POSTED);
+                DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
@@ -116,6 +117,7 @@ public class DeviceStatusActivity extends RRActivity {
     @Override
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
+        super.onDeviceControlServiceConnected(service);
         updateStatusViews();
     }
 
@@ -124,8 +126,7 @@ public class DeviceStatusActivity extends RRActivity {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
-
+                updateStatusViews();
             }
 
         });
@@ -162,9 +163,28 @@ public class DeviceStatusActivity extends RRActivity {
         txtDeviceUri.setText(getDeviceControlService().getDeviceUri());
         txtDeviceStatus.setText(getDeviceControlService().getDeviceStatus()
                 .name());
-        txtDeviceWorkingAreaDim.setText(getDeviceControlService()
-                .getDeviceWorkingArea());
-        txtDeviceCurrentPos.setText(getDeviceControlService()
-                .getDeviceCurrentPosition());
+        if (getDeviceControlService().getDeviceWorkingArea() != null) {
+            txtDeviceWorkingAreaDim.setText(getDeviceControlService()
+                    .getDeviceWorkingArea().getX()
+                    + "x"
+                    + getDeviceControlService().getDeviceWorkingArea().getY()
+                    + "x"
+                    + getDeviceControlService().getDeviceWorkingArea().getZ()
+                    + " ");
+        } else {
+            txtDeviceWorkingAreaDim.setText("");
+        }
+        if (getDeviceControlService().getDeviceCurrentPosition() != null) {
+            txtDeviceCurrentPos.setText(getDeviceControlService()
+                    .getDeviceCurrentPosition().getX()
+                    + " "
+                    + getDeviceControlService().getDeviceCurrentPosition()
+                            .getY()
+                    + " "
+                    + getDeviceControlService().getDeviceCurrentPosition()
+                            .getZ());
+        } else {
+            txtDeviceCurrentPos.setText("");
+        }
     }
 }

@@ -49,7 +49,7 @@ public abstract class RRActivity extends Activity {
         }
     };
 
-    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -103,16 +103,8 @@ public abstract class RRActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                // переподключиться и возобновить отправку команд, которые
-                // не дошли до устройства во время предыдущего подключения
-                devControlService.connectToDeviceTcp(false);
-
-                // TODO: доработать логику переподключения: сделать проверку
-                // имени, модели и серийного номера устройств для предыдущего
-                // и нового подключений - если все совпадает (возобновлена связь
-                // с тем же устройством), разрешить продолжить
-                // выполение старых команд, если не совпадают (подключились к
-                // новому устройству), обнулить очередь.
+                // подключиться/переподключиться к устройству
+                devControlService.connectToDeviceTcp();
 
             }
         });

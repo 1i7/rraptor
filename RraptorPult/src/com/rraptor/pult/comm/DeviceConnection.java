@@ -20,7 +20,7 @@ public interface DeviceConnection {
     /** Получить версию прошивки устройства */
     public static final String CMD_VERSION = "version";
     /** Получить производителя устройства */
-    public static final String CMD_MANUFACTURER = "version";
+    public static final String CMD_MANUFACTURER = "manufacturer";
     /** Получить ссылку на страницу устройства */
     public static final String CMD_URI = "uri";
 
@@ -39,7 +39,7 @@ public interface DeviceConnection {
     /** Получить статус устройства */
     public static final String CMD_RR_STATUS = "rr_status";
     /** Получить текущее положение печатающего блока */
-    public static final String CMD_RR_CURRENT_POS = "rr_current_pos";
+    public static final String CMD_RR_CURRENT_POSITION = "rr_current_pos";
 
     // Команды
     public static final String CMD_RR_STOP = "rr_stop";

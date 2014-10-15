@@ -118,14 +118,14 @@ static int handleCommand(char* buffer, char* reply_buffer) {
           
             // Выполнить команду
             cmd_rr_status(reply_buffer);
-        } else if(strcmp(tokens[0], CMD_RR_CURRENT_POS) == 0) {
+        } else if(strcmp(tokens[0], CMD_RR_CURRENT_POSITION) == 0) {
             // синтаксис:
             //     rr_current_pos
             // Команда корректна
             success = true;
           
             // Выполнить команду
-            cmd_rr_current_pos(reply_buffer);
+            cmd_rr_current_position(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_STOP) == 0) {
             // синтаксис:
             //     rr_stop

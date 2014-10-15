@@ -51,7 +51,7 @@ public class Plotter2DActivity extends RRActivity {
     private Button btnOpenFileYaDisk;
     private Button btnOpenFileSdcard;
 
-    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {

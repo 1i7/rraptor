@@ -15,7 +15,7 @@ import com.rraptor.pult.core.DeviceControlService;
 
 public class DebugActivity extends RRActivity {
 
-    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -90,6 +90,7 @@ public class DebugActivity extends RRActivity {
     @Override
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
+        super.onDeviceControlServiceConnected(service);
         txtDebug.setText(getDeviceControlService().getDebugMessages());
     }
 }

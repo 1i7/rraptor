@@ -15,6 +15,7 @@ import com.rraptor.pult.Plotter2DCanvasView.LineDrawingStatus;
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.comm.DeviceConnectionWifi;
 import com.rraptor.pult.model.Line2D;
+import com.rraptor.pult.model.Point3D;
 
 public class DeviceControlService extends Service {
 
@@ -55,7 +56,7 @@ public class DeviceControlService extends Service {
     }
 
     public enum ConnectionStatus {
-        DISCONNECTED, CONNECTING, CONNECTED, ERROR
+        DISCONNECTED, CONNECTING, HANDSHAKE, CONNECTED, ERROR
     }
 
     /**
@@ -80,9 +81,9 @@ public class DeviceControlService extends Service {
     public static String EXTRA_CONNECTION_STATUS = "EXTRA_CONNECTION_STATUS";
     public static String EXTRA_DEVICE_STATUS = "EXTRA_DEVICE_STATUS";
 
-    // Очередь команд
-    public static String ACTION_DEVICE_PAUSED = "com.rraptor.pult.ACTION_DEVICE_PAUSED";
-    public static String ACTION_DEVICE_RESUMED = "com.rraptor.pult.ACTION_DEVICE_RESUMED";
+    public static String ACTION_DEVICE_CURRENT_POS_CHANGE = "com.rraptor.pult.ACTION_DEVICE_CURRENT_POS_CHANGE";
+
+    public static String EXTRA_CURRENT_POS = "EXTRA_CURRENT_POS";
 
     // Отладка
     public static String ACTION_DEBUG_MESSAGE_POSTED = "com.rraptor.pult.ACTION_DEBUG_MESSAGE_POSTED";
@@ -93,6 +94,9 @@ public class DeviceControlService extends Service {
     public static String ACTION_DEVICE_FINISH_DRAWING = "com.rraptor.pult.FINISH_DRAWING";
     public static String ACTION_DEVICE_DRAWING_UPDATE = "com.rraptor.pult.DRAWING_UPDATE";
     public static String ACTION_DEVICE_DRAWING_ERROR = "com.rraptor.pult.DRAWING_ERROR";
+    // Очередь команд рисования
+    public static String ACTION_DRAWING_PAUSED = "com.rraptor.pult.ACTION_DRAWING_PAUSED";
+    public static String ACTION_DRAWING_RESUMED = "com.rraptor.pult.ACTION_DRAWING_RESUMED";
 
     public static String EXTRA_EXCEPTION = "EXTRA_EXCEPTION";
     public static String EXTRA_LINE = "EXTRA_LINE";
@@ -112,7 +116,9 @@ public class DeviceControlService extends Service {
     private DeviceControlService.ConnectionStatus connectionStatus = DeviceControlService.ConnectionStatus.DISCONNECTED;
     private String connectionInfo;
     private String connectionErrorMessage;
+    private boolean isSameDevice = true;
 
+    // Информация об очереди команд
     /**
      * "Очередь" команд для выполнения на сервере, состоящая из одного элемента.
      */
@@ -140,11 +146,19 @@ public class DeviceControlService extends Service {
                 }
             }
         }
-
     };
 
-    // Информация об очереди команд
-    private boolean isDevicePaused = false;
+    // Информация о подключенном устройстве
+    private String deviceName;
+    private String deviceModel;
+    private String deviceSerialNumber;
+    private String deviceDescription;
+    private String deviceVersion;
+    private String deviceManufacturer;
+    private String deviceUri;
+
+    private Point3D deviceWorkingArea;
+    private Point3D deviceCurrentPosition;
 
     // Отладочные сообщения
     private final StringBuilder debugMessages = new StringBuilder();
@@ -175,18 +189,11 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Подлключиться к устройству через канал Tcp и запустить (или возобновить)
-     * процесс отправки команд.
+     * Подлключиться к устройству через канал Tcp и запустить процесс отправки
+     * команд.
      * 
-     * @param cancelCommands
-     *            true: отменить все ранее добавленные в очередь команды; false:
-     *            продолжить выполнение команд, которые были добавлены в очередь
-     *            во время предыдущего подключения
      */
-    public void connectToDeviceTcp(boolean cancelCommands) {
-        if (cancelCommands) {
-            cancelCommands();
-        }
+    public void connectToDeviceTcp() {
         connectToDeviceTcp(DeviceConnectionWifi.DEFAULT_SERVER_HOST,
                 DeviceConnectionWifi.DEFAULT_SERVER_PORT);
     }
@@ -223,23 +230,39 @@ public class DeviceControlService extends Service {
                     serverOut = socket.getOutputStream();
                     serverIn = socket.getInputStream();
 
-                    debug("Connected");
+                    debug("Connected: ");
                     connectionInfo = socket.getInetAddress().getHostName()
                             + ":" + socket.getPort();
+                    debug(connectionInfo);
+
+                    // подключились - канал связи есть, но еще нужно узнать,
+                    // с кем именно имеем дело
+                    setConnectionStatus(ConnectionStatus.HANDSHAKE);
+
+                    // запросим информацию об устройстве и заодно проверим,
+                    // то ли это устройство, к которому мы были подключены в
+                    // прошлый раз, или новое:
+                    isSameDevice = retrieveDeviceInfo();
+
+                    // рабочая область устройства
+                    retrieveDeviceWorkingArea();
+
+                    // теперь окончательно подключились:
                     setConnectionStatus(ConnectionStatus.CONNECTED);
 
                     // приступим к постоянному опросу устройства
                     deviceStatusManager.startPollingDeviceStatus();
                 } catch (final Exception e) {
+
+                    debug("Error connecting to server: " + e.getMessage());
+                    e.printStackTrace();
+
                     socket = null;
                     serverOut = null;
                     serverIn = null;
 
-                    debug("Error connecting to server: " + e.getMessage());
-                    setConnectionStatus(ConnectionStatus.ERROR);
                     connectionErrorMessage = e.getMessage();
-
-                    e.printStackTrace();
+                    setConnectionStatus(ConnectionStatus.ERROR);
                 }
             }
         }.start();
@@ -257,9 +280,17 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Отключиться от сервера - закрыть все потоки и сокет, обнулить переменные.
+     * Отключиться от устройства - закрыть все потоки и сокет, обнулить
+     * переменные.
      */
     public void disconnectFromServer() {
+        // мы должны сменить статус подключения в самом начале процедуры,
+        // чтобы поток отправки сообщений не пытался отправлять команды
+        // в закрываемые сокеты (вероятность, что это произойдет все равно
+        // остается, но это не критическая ошибка)
+        this.connectionStatus = ConnectionStatus.DISCONNECTED;
+
+        // почистим ресурсы
         try {
             if (serverIn != null) {
                 serverIn.close();
@@ -281,8 +312,16 @@ public class DeviceControlService extends Service {
             deviceDrawindManager.stopDrawingOnDevice();
             deviceStatusManager.stopPollingDeviceStatus();
 
+            // очистим "очередь" команд
+            cancelCommands();
+
             debug("Disconnected");
-            setConnectionStatus(ConnectionStatus.DISCONNECTED);
+            // а событие о смене статуса подключения отправляем в самом конце,
+            // т.к. если отправить его в начале, остается возможность, что
+            // подписанты могут попробовать переподключиться в тот момент,
+            // когда еще не завершился процесс очистки ресурсов старого
+            // подключения
+            fireOnConnectionStatusChange(ConnectionStatus.DISCONNECTED);
         }
     }
 
@@ -337,23 +376,14 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Отправить широковещательное сообщение (broadcast) - ACTION_DEVICE_PAUSED.
-     * 
-     * @param e
-     */
-    private void fireOnDevicePaused() {
-        final Intent intent = new Intent(ACTION_DEVICE_PAUSED);
-        getApplicationContext().sendBroadcast(intent);
-    }
-
-    /**
      * Отправить широковещательное сообщение (broadcast) -
-     * ACTION_DEVICE_RESUMED.
+     * ACTION_DEVICE_CURRENT_POS_CHANGE.
      * 
      * @param e
      */
-    private void fireOnDeviceResumed() {
-        final Intent intent = new Intent(ACTION_DEVICE_RESUMED);
+    void fireOnDeviceCurrentPosChange(final Point3D pos) {
+        final Intent intent = new Intent(ACTION_DEVICE_CURRENT_POS_CHANGE);
+        intent.putExtra(EXTRA_CURRENT_POS, pos);
         getApplicationContext().sendBroadcast(intent);
     }
 
@@ -378,6 +408,27 @@ public class DeviceControlService extends Service {
     void fireOnDrawingError(final Exception e) {
         final Intent intent = new Intent(ACTION_DEVICE_DRAWING_ERROR);
         intent.putExtra(EXTRA_EXCEPTION, e);
+        getApplicationContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Отправить широковещательное сообщение (broadcast) - ACTION_DEVICE_PAUSED.
+     * 
+     * @param e
+     */
+    protected void fireOnDrawingPaused() {
+        final Intent intent = new Intent(ACTION_DRAWING_PAUSED);
+        getApplicationContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Отправить широковещательное сообщение (broadcast) -
+     * ACTION_DEVICE_RESUMED.
+     * 
+     * @param e
+     */
+    protected void fireOnDrawingResumed() {
+        final Intent intent = new Intent(ACTION_DRAWING_RESUMED);
         getApplicationContext().sendBroadcast(intent);
     }
 
@@ -452,7 +503,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getConnectionType() {
-        return "Implement me: connection type";
+        return "Напрямую через WiFi";
     }
 
     /**
@@ -469,8 +520,8 @@ public class DeviceControlService extends Service {
      * 
      * @return
      */
-    public String getDeviceCurrentPosition() {
-        return "Implement me: device current position";
+    public Point3D getDeviceCurrentPosition() {
+        return deviceCurrentPosition;
     }
 
     /**
@@ -479,7 +530,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceDescription() {
-        return "Implement me: device description";
+        return deviceDescription;
     }
 
     /**
@@ -497,7 +548,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceManufacturer() {
-        return "Implement me: device manufacturer";
+        return deviceManufacturer;
     }
 
     /**
@@ -506,7 +557,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceModel() {
-        return "Implement me: device model";
+        return deviceModel;
     }
 
     /**
@@ -515,7 +566,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceName() {
-        return "Implement me: device name";
+        return deviceName;
     }
 
     /**
@@ -524,7 +575,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceSerialNumber() {
-        return "Implement me: device serial number";
+        return deviceSerialNumber;
     }
 
     /**
@@ -542,7 +593,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceUri() {
-        return "Implement me: device uri";
+        return deviceUri;
     }
 
     /**
@@ -551,7 +602,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public String getDeviceVersion() {
-        return "Implement me: device version";
+        return deviceVersion;
     }
 
     /**
@@ -559,18 +610,17 @@ public class DeviceControlService extends Service {
      * 
      * @return
      */
-    public String getDeviceWorkingArea() {
-        return "Implement me: device working area";
+    public Point3D getDeviceWorkingArea() {
+        return deviceWorkingArea;
     }
 
     /**
-     * Статус очереди команд для отправки на устройство.
+     * Подключенное устройство тоже самое, что было подключено в прошлый раз.
      * 
-     * @return true - отправка команд приостановлена; false - отправка команд
-     *         работает.
+     * @return
      */
-    public boolean isDevicePaused() {
-        return isDevicePaused;
+    public boolean isSameDevice() {
+        return isSameDevice;
     }
 
     @Override
@@ -583,7 +633,12 @@ public class DeviceControlService extends Service {
         System.out.println("DeviceControlService.onCreate()");
         super.onCreate();
 
-        connectToDeviceTcp(true);
+        // инициировать промежуточные сервисы:
+        deviceDrawindManager.onCreate();
+        deviceStatusManager.onCreate();
+
+        // попробуем подключиться к устройству
+        connectToDeviceTcp();
 
         // Запустим бесконечный цикл отправки команд из очереди
         startDeviceOutputWriter();
@@ -605,38 +660,93 @@ public class DeviceControlService extends Service {
     }
 
     /**
-     * Приостановить процесс отправки команд на устройство.
+     * Получить информацию об устройстве с устройства.
+     * 
+     * @return true, если подключенное устройство - то же устройство, которое
+     *         было подключено в прошлый раз (совпадают значения всех
+     *         информационных полей); false, если подключенное устройство -
+     *         новое устройство (значения информационный полей отличаются).
+     * @throws TimeoutException
+     * @throws IOException
      */
-    public void pauseDevice() {
-        isDevicePaused = true;
-        fireOnDevicePaused();
+    private boolean retrieveDeviceInfo() throws IOException, TimeoutException {
+        // получить значения свойств с устройства
+        final String name = execCommandOnDevice(DeviceConnection.CMD_NAME);
+        final String model = execCommandOnDevice(DeviceConnection.CMD_MODEL);
+        final String serialNumber = execCommandOnDevice(DeviceConnection.CMD_SERIAL_NUMBER);
+        final String description = execCommandOnDevice(DeviceConnection.CMD_DESCRIPTION);
+        final String version = execCommandOnDevice(DeviceConnection.CMD_VERSION);
+        final String manufacturer = execCommandOnDevice(DeviceConnection.CMD_MANUFACTURER);
+        final String uri = execCommandOnDevice(DeviceConnection.CMD_URI);
+
+        // проверить, является ли подключенное устройство тем же, что было
+        // подключено в прошлый раз
+        boolean isSameDevice = deviceName != null && deviceName.equals(name)
+                && deviceModel != null && deviceModel.equals(model)
+                && deviceSerialNumber != null
+                && deviceSerialNumber.equals(serialNumber)
+                && deviceDescription != null
+                && deviceDescription.equals(description)
+                && deviceVersion != null && deviceVersion.equals(version)
+                && deviceManufacturer != null
+                && deviceManufacturer.equals(manufacturer) && deviceUri != null
+                && deviceUri.equals(uri);
+
+        // обновить значения свойств устройства
+        deviceName = name;
+        deviceModel = model;
+        deviceSerialNumber = serialNumber;
+        deviceDescription = description;
+        deviceVersion = version;
+        deviceManufacturer = manufacturer;
+        deviceUri = uri;
+
+        return isSameDevice;
     }
 
     /**
-     * Возобновить процесс отправки команд на устройство.
+     * Получить значение рабочей области устройства с устройства.
+     * 
+     * @return
+     * @throws IOException
+     * @throws TimeoutException
      */
-    public void resumeDevice() {
-        isDevicePaused = false;
-        fireOnDeviceResumed();
+    private void retrieveDeviceWorkingArea() throws IOException,
+            TimeoutException {
+        // получить значения свойств с устройства
+        final String workingAreaStr = execCommandOnDevice(DeviceConnection.CMD_RR_WORKING_AREA_DIM);
+
+        // получить значения из строки
+        final String[] wa_parts = workingAreaStr.split(" ");
+        double max_x = Double.parseDouble(wa_parts[0]);
+        double max_y = Double.parseDouble(wa_parts[1]);
+        double max_z = Double.parseDouble(wa_parts[2]);
+
+        // обновить значения свойств устройства
+        deviceWorkingArea = new Point3D(max_x, max_y, max_z);
     }
 
     /**
-     * Поставить комнаду в очередь для выполнения на сервере. При переполнении
-     * очереди новые команды игнорируются. (в простой реализации в очереди может
+     * Поставить команду в очередь для выполнения на сервере. При переполнении
+     * очереди новые команды игнорируются (в простой реализации в очереди может
      * быть всего один элемент).
      * 
      * @param cmd
      * @param cmdListener
      * @return true, если команда успешно добавлена в очередь; false, если
-     *         очередь переполнена и команда не может быть добавлена.
+     *         очередь переполнена и команда не может быть добавлена или
+     *         отсутствует связь с устройством.
      */
     public boolean sendCommand(final String cmd,
             final CommandListener cmdListener) {
-        if (nextCommand == null) {
+        if (connectionStatus == ConnectionStatus.CONNECTED
+                && nextCommand == null) {
             nextCommand = cmd;
             this.nextCommandListener = cmdListener;
+            debug("Accepted cmd: " + cmd);
             return true;
         } else {
+            debug("Rejected cmd: " + cmd);
             return false;
         }
     }
@@ -672,40 +782,40 @@ public class DeviceControlService extends Service {
             @Override
             public void run() {
                 String execCommand = null;
+                CommandListener execCommandListener = null;
 
                 long lastCmdTime = System.currentTimeMillis();
                 while (true) {
                     if (connectionStatus == ConnectionStatus.CONNECTED
-                            && !isDevicePaused && nextCommand != null) {
+                            && nextCommand != null) {
                         // получим из "очереди" команду для выполнения на
                         // устройстве
                         execCommand = nextCommand;
+                        execCommandListener = nextCommandListener;
+
+                        // очистим "очередь" - можно добавлять следующую
+                        // команду
+                        nextCommand = null;
+                        nextCommandListener = null;
 
                         try {
                             final String reply = execCommandOnDevice(execCommand);
 
                             // отправим сообщение о выполнении команды
                             // подписанту
-                            if (nextCommandListener != null) {
-                                nextCommandListener.onCommandExecuted(
+                            if (execCommandListener != null) {
+                                execCommandListener.onCommandExecuted(
                                         execCommand, reply);
                             }
 
-                            // очистим "очередь" - можно добавлять следующую
-                            // команду
-                            nextCommand = null;
-                            nextCommandListener = null;
-
                             lastCmdTime = System.currentTimeMillis();
                         } catch (final Exception e) {
-                            // обрыв соединения - не повод отказываться от
-                            // выполнения команды, это повод дождаться нового
-                            // подключения и повторить попытку, если к тому
-                            // времени очередь не будет очищена извне
-
                             debug("Connection error: " + e.getMessage());
                             e.printStackTrace();
 
+                            // обрыв соединения - закроем потоки ввода/вывода,
+                            // отменим все команды в "очереди" и дожемся нового
+                            // подключения
                             disconnectFromServer();
                         }
                     } else if (connectionStatus == ConnectionStatus.CONNECTED
@@ -719,6 +829,7 @@ public class DeviceControlService extends Service {
                         } catch (final Exception e) {
                             debug("Connection error: " + e.getMessage());
                             e.printStackTrace();
+
                             disconnectFromServer();
                         }
                     } else {
@@ -732,6 +843,40 @@ public class DeviceControlService extends Service {
                 }
             }
         }.start();
+    }
+
+    /**
+     * Обновить текущее положение печатного блока устройства.
+     * 
+     * @return
+     */
+    public boolean updateDeviceCurrentPosition() {
+        return sendCommand(DeviceConnection.CMD_RR_CURRENT_POSITION,
+                new CommandListener() {
+
+                    @Override
+                    public void onCommandCanceled(final String cmd) {
+                    }
+
+                    @Override
+                    public void onCommandExecuted(final String cmd,
+                            final String reply) {
+                        // получить значения из строки
+                        final String[] pos_parts = reply.split(" ");
+                        double x = Double.parseDouble(pos_parts[0]);
+                        double y = Double.parseDouble(pos_parts[1]);
+                        double z = Double.parseDouble(pos_parts[2]);
+
+                        final Point3D newPos = new Point3D(x, y, z);
+
+                        if (deviceCurrentPosition == null
+                                || !deviceCurrentPosition.equals(newPos)) {
+                            // обновить значения свойств устройства
+                            deviceCurrentPosition = newPos;
+                            fireOnDeviceCurrentPosChange(deviceCurrentPosition);
+                        }
+                    }
+                });
     }
 
     /**

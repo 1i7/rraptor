@@ -4,18 +4,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+
 import com.rraptor.pult.Plotter2DCanvasView.LineDrawingStatus;
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
+import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point2D;
 
 public class DeviceDrawingManager {
     private final DeviceControlService devControlService;
+    // TODO: доработать логику переподключения: сделать проверку
+    // имени, модели и серийного номера устройств для предыдущего
+    // и нового подключений - если все совпадает (возобновлена связь
+    // с тем же устройством), разрешить продолжить
+    // выполение старых команд, если не совпадают (подключились к
+    // новому устройству), обнулить очередь.
+
+    public BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE
+                    .equals(intent.getAction())) {
+                onConnectionStatusChanged((DeviceControlService.ConnectionStatus) intent
+                        .getSerializableExtra(DeviceControlService.EXTRA_CONNECTION_STATUS));
+            }
+        }
+    };
 
     // Информация о процессе рисования
     private boolean isDrawing = false;
+    private boolean isDrawingPaused = false;
+
     private final Map<Line2D, LineDrawingStatus> lineStatus = new HashMap<Line2D, LineDrawingStatus>();
     private boolean drawingCmdWaiting = false;
     private boolean drawingCmdError = false;
@@ -46,7 +72,7 @@ public class DeviceDrawingManager {
             // готово принять команду, оно просто вернет статус возврата BUSY и
             // мы повторим отправку команды.
             while (isDrawing
-                    && (devControlService.getDeviceStatus() != DeviceStatus.IDLE)) {
+                    && (isDrawingPaused || devControlService.getDeviceStatus() != DeviceStatus.IDLE)) {
                 Thread.sleep(100);
             }
             if (!isDrawing) {
@@ -58,8 +84,13 @@ public class DeviceDrawingManager {
                     new CommandListener() {
                         @Override
                         public void onCommandCanceled(final String cmd) {
-                            resendDrawingCmd = false;
-                            drawingCmdError = true;
+                            // отмена отправки команды на устройство (например
+                            // из-за обрыва соединения) - не повод отказываться
+                            // от выполнения команды, это повод дождаться нового
+                            // подключения и повторить попытку, если к тому
+                            // времени рисование не будет отменено
+                            resendDrawingCmd = true;
+                            drawingCmdError = false;
                             drawingCmdWaiting = false;
                         }
 
@@ -121,10 +152,62 @@ public class DeviceDrawingManager {
     }
 
     /**
+     * Статус очереди команд рисования для отправки на устройство.
+     * 
+     * @return true - отправка команд приостановлена; false - отправка команд
+     *         работает.
+     */
+    public boolean isDrawingPaused() {
+        return isDrawingPaused;
+    }
+
+    /**
+     * Обновить статус подключения к устройству.
+     * 
+     * @param connectionStatus
+     * 
+     * @param status
+     */
+    protected void onConnectionStatusChanged(
+            final ConnectionStatus connectionStatus) {
+        if (connectionStatus != ConnectionStatus.CONNECTED && !isDrawingPaused) {
+            pauseDrawing();
+        }
+    }
+
+    /**
+     * Вызывается при создании сервиса.
+     */
+    public void onCreate() {
+        // получать события от сервиса
+        final IntentFilter filter = new IntentFilter(
+                DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
+        devControlService.registerReceiver(deviceBroadcastReceiver, filter);
+    }
+
+    /**
+     * Приостановить процесс отправки команд рисования на устройство.
+     */
+    public void pauseDrawing() {
+        devControlService.debug("DeviceDrawingManager: pauseDrawing");
+        isDrawingPaused = true;
+        devControlService.fireOnDrawingPaused();
+    }
+
+    /**
      * Сбросить статусы рисуемых линий.
      */
     private void resetLineStatus() {
         lineStatus.clear();
+    }
+
+    /**
+     * Возобновить процесс отправки команд рисования на устройство.
+     */
+    public void resumeDrawing() {
+        devControlService.debug("DeviceDrawingManager: resumeDrawing");
+        isDrawingPaused = false;
+        devControlService.fireOnDrawingResumed();
     }
 
     /**
@@ -149,6 +232,7 @@ public class DeviceDrawingManager {
      * @param drawingLines
      */
     public void startDrawingOnDevice(final List<Line2D> drawingLines) {
+        devControlService.debug("DeviceDrawingManager: startDrawingOnDevice");
 
         new Thread(new Runnable() {
             @Override
@@ -162,6 +246,7 @@ public class DeviceDrawingManager {
                 drawingCmdError = false;
                 resetLineStatus();
                 devControlService.fireOnStartDrawing();
+                resumeDrawing();
 
                 String cmd;
                 Line2D currentLine = null;
@@ -214,8 +299,8 @@ public class DeviceDrawingManager {
                     e.printStackTrace();
                     devControlService.fireOnDrawingError(e);
                 }
-                isDrawing = false;
 
+                isDrawing = false;
                 devControlService.fireOnFinishDrawing();
             }
         }).start();
