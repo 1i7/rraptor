@@ -11,8 +11,6 @@ static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 
 #define DEBUG_SERIAL
 
-// не исполь
-
 // Включить/выключить нужные каналы связи
 // Последовательный порт Serial (при машинном чтении ответов не 
 // использовать вместе с DEBUG_SERIAL)
