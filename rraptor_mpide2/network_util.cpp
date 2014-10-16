@@ -3,13 +3,17 @@
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
+#include "rraptor_config.h"
+
 /**
  * Подключиться к открытой сети WiFi.
  */
 int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-  
+    #ifdef DEBUG_SERIAL
+        Serial.print("SSID: ");
+        Serial.println(ssid);
+    #endif // DEBUG_SERIAL
+      
     return DWIFIcK::connect(ssid, netStatus);   
 }
 
@@ -17,11 +21,13 @@ int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
  * Подключиться к сети WiFi, защищенной WPA2 с паролем.
  */
 int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, DNETcK::STATUS *netStatus) {
-    Serial.print("SSID: ");
-    Serial.print(ssid);
-    Serial.print(", WPA2 passphrase: ");
-    Serial.println(passphrase);
-    
+    #ifdef DEBUG_SERIAL
+        Serial.print("SSID: ");
+        Serial.print(ssid);
+        Serial.print(", WPA2 passphrase: ");
+        Serial.println(passphrase);
+    #endif // DEBUG_SERIAL
+        
     return DWIFIcK::connect(ssid, passphrase, netStatus);
 }
 

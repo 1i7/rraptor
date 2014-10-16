@@ -1,6 +1,7 @@
 
 #include "WProgram.h"
 
+#include "rraptor_config.h"
 #include "rraptor_protocol.h"
 #include "stepper.h"
 
@@ -154,7 +155,9 @@ int cmd_rr_current_position(char* reply_buffer) {
  * Остановить все моторы.
  */
 int cmd_rr_stop(char* reply_buffer) {
-    Serial.println("cmd_rr_stop");
+    #ifdef DEBUG_SERIAL
+        Serial.println("cmd_rr_stop");
+    #endif // DEBUG_SERIAL
     
     finish_stepper_cycle();
     
@@ -167,12 +170,14 @@ int cmd_rr_stop(char* reply_buffer) {
  * Запустить мотор с заданной скоростью на непрерывное вращение.
  */
 int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
-    Serial.print("cmd_rr_go: ");
-    Serial.print(motor_name);
-    Serial.print(", speed=");
-    Serial.print(spd, DEC);
-    Serial.println();
-    
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_go: ");
+        Serial.print(motor_name);
+        Serial.print(", speed=");
+        Serial.print(spd, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
     if(is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
@@ -203,12 +208,14 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
  */
 int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
-    Serial.print("cmd_rr_calibrate: ");
-    Serial.print(motor_name);
-    Serial.print(", speed=");
-    Serial.print(spd, DEC);
-    Serial.println();
-    
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_calibrate: ");
+        Serial.print(motor_name);
+        Serial.print(", speed=");
+        Serial.print(spd, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
     if(is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
@@ -243,16 +250,18 @@ int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
  * @param pcount количество параметров (моторов в списке).
  */
 int cmd_gcode_g0(char motor_names[], double cvalues[], int  pcount, char* reply_buffer) {
-    Serial.print("cmd_gcode_g01: ");
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_gcode_g01: ");
     
-    for(int i = 0; i < pcount; i++) {
-        Serial.print(motor_names[i]);
-        Serial.print("=");
-        Serial.print(cvalues[i], DEC);
-        Serial.print("");
-    }
-    Serial.println();
-    
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(motor_names[i]);
+            Serial.print("=");
+            Serial.print(cvalues[i], DEC);
+            Serial.print("");
+        }
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
     if(is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
@@ -317,18 +326,20 @@ int cmd_gcode_g0(char motor_names[], double cvalues[], int  pcount, char* reply_
  * @param f скорость перемещения мм/с.
  */
 int cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f, char* reply_buffer) {
-    Serial.print("cmd_gcode_g01: ");
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_gcode_g01: ");
     
-    for(int i = 0; i < pcount; i++) {
-        Serial.print(motor_names[i]);
-        Serial.print("=");
-        Serial.print(cvalues[i], DEC);
-        Serial.print(", ");
-    }
-    Serial.print("F=");
-    Serial.print(f, DEC);
-    Serial.println();
-    
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(motor_names[i]);
+            Serial.print("=");
+            Serial.print(cvalues[i], DEC);
+            Serial.print(", ");
+        }
+        Serial.print("F=");
+        Serial.print(f, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
     if(is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
@@ -383,13 +394,17 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f, c
  * Команда G-code G02 - дуга по часовой стрелке.
  */
 void cmd_gcode_g02() {
-    Serial.println("cmd_gcode_g02");
+    #ifdef DEBUG_SERIAL
+        Serial.println("cmd_gcode_g02");
+    #endif // DEBUG_SERIAL
 }
 
 /** 
  * Команда G-code G03 - дуга против часовой стрелки.
  */
 void cmd_gcode_g03() {
-    Serial.println("cmd_gcode_g03");
+    #ifdef DEBUG_SERIAL
+        Serial.println("cmd_gcode_g03");
+    #endif // DEBUG_SERIAL
 }
 

@@ -44,7 +44,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             //     name
             // Команда корректна
             success = true;
-          
+            
             // Выполнить команду
             cmd_name(reply_buffer);
         } else if(strcmp(tokens[0], CMD_MODEL) == 0) {
@@ -192,7 +192,6 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                     cmd_gcode_g0(motor_names, cvalues, pcount, reply_buffer);
                 }
             }
-            
         } else if(strcmp(tokens[0], CMD_GCODE_G01) == 0) {
             // синтаксис:
             //     G01 [Xv1] [Yv] [Zv3] Fv4
@@ -207,7 +206,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 
                 char pname;
                 double pvalue;
-                for(int i = 1; i < tokensNum; i++) {                
+                for(int i = 1; i < tokensNum; i++) {
                     parseParam(tokens[i], &pname, &pvalue);
                     
                     if(pname == GCODE_PARAM_F) {
