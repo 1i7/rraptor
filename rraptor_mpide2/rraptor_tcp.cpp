@@ -4,6 +4,7 @@
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
+#include "rraptor_config.h"
 #include "network_util.h"
 #include "rraptor_protocol.h"
 
@@ -83,16 +84,20 @@ void rraptorTcpTasks() {
         // Подключимся к сети Wifi
         bool connectedToWifi = false;
         
-        Serial.println("Connecting wifi...");
+        #ifdef DEBUG_SERIAL
+            Serial.println("Connecting wifi...");
+        #endif // DEBUG_SERIAL            
         conectionId = connectWifi(&networkStatus);
   
         if(conectionId != DWIFIcK::INVALID_CONNECTION_ID) {
             // На этом этапе подключение будет создано, даже если указанная 
             // сеть Wifi недоступна или для нее задан неправильный пароль
-            Serial.print("Connection created, connection id=");
-            Serial.println(conectionId, DEC);
+            #ifdef DEBUG_SERIAL
+                Serial.print("Connection created, connection id=");
+                Serial.println(conectionId, DEC);
 
-            Serial.print("Initializing IP stack...");
+                Serial.print("Initializing IP stack...");
+            #endif // DEBUG_SERIAL
             
             // Подключимся со статическим ip-адресом
             DNETcK::begin(host_ip);
@@ -102,7 +107,10 @@ void rraptorTcpTasks() {
             // то ошибка вылезет тоже на этом этапе).
             bool initializing = true;
             while(initializing) {
-                Serial.print(".");
+                #ifdef DEBUG_SERIAL
+                    Serial.print(".");
+                #endif // DEBUG_SERIAL
+                
                 // Вызов isInitialized заблокируется до тех пор, пока стек не будет 
                 // инициализирован или не истечет время ожидания (по умолчанию 15 секунд). 
                 // Если сеть не подключится до истечения таймаута и при этом не произойдет
@@ -119,14 +127,18 @@ void rraptorTcpTasks() {
                     initializing = false;
                 }
             }
-            Serial.println();
+            #ifdef DEBUG_SERIAL
+                Serial.println();
+            #endif // DEBUG_SERIAL
         }
         
         if(connectedToWifi) {
             // Подключились к Wifi
-            Serial.println("Connected to wifi");
-            printNetworkStatus();
-            
+            #ifdef DEBUG_SERIAL
+                Serial.println("Connected to wifi");
+                printNetworkStatus();
+            #endif // DEBUG_SERIAL
+                        
             // включим лампочку
             digitalWrite(WIFI_STATUS_PIN, HIGH);
             
@@ -135,10 +147,12 @@ void rraptorTcpTasks() {
             tcpServer.close();
         } else {
             // Так и не получилось подключиться
-            Serial.print("Failed to connect wifi, status: ");
-            printDNETcKStatus(networkStatus);
-            Serial.println();
-            
+            #ifdef DEBUG_SERIAL
+                Serial.print("Failed to connect wifi, status: ");
+                printDNETcKStatus(networkStatus);
+                Serial.println();
+            #endif // DEBUG_SERIAL
+                        
             // Нужно корректно завершить весь стек IP и Wifi, чтобы
             // иметь возможность переподключиться на следующей итерации
             DNETcK::end();
@@ -146,7 +160,9 @@ void rraptorTcpTasks() {
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             
             // Немного подождем и попробуем переподключиться на следующей итерации
-            Serial.println("Retry after 4 seconds...");
+            #ifdef DEBUG_SERIAL
+                Serial.println("Retry after 4 seconds...");
+            #endif // DEBUG_SERIAL
             delay(4000);
         }
     } else if(!tcpServer.isListening()) {
@@ -154,7 +170,9 @@ void rraptorTcpTasks() {
         
         bool startedListening = false;
         
-        Serial.print("Start listening connection from Pult...");
+        #ifdef DEBUG_SERIAL
+            Serial.print("Start listening connection from Pult...");
+        #endif // DEBUG_SERIAL
         tcpServer.startListening(tcp_server_port);
         // Подождем, пока сокет начнет слушать подключения
         bool starting = true;
@@ -175,19 +193,25 @@ void rraptorTcpTasks() {
         
         if(startedListening) {
             // Начали слушать подключения от пульта
-            Serial.print("Listen connection from Pult on: ");
-            printTcpServerStatus();
+            #ifdef DEBUG_SERIAL
+                Serial.print("Listen connection from Pult on: ");
+                printTcpServerStatus();
+            #endif // DEBUG_SERIAL
         } else {
             // Так и не получилось начать слушать подключения
-            Serial.print("Failed to start listening, status: ");
-            printDNETcKStatus(networkStatus);
-            Serial.println();
+            #ifdef DEBUG_SERIAL
+                Serial.print("Failed to start listening, status: ");
+                printDNETcKStatus(networkStatus);
+                Serial.println();
+            #endif // DEBUG_SERIAL
             
             // Вернем TCP-сервер в исходное состояние
             tcpServer.close();
             
             // Немного подождем и попробуем переподключиться на следующей итерации
-            Serial.println("Retry after 4 seconds...");
+            #ifdef DEBUG_SERIAL
+                Serial.println("Retry after 4 seconds...");
+            #endif // DEBUG_SERIAL
             delay(4000);
         }
     } else if(!tcpClient.isConnected()) {
@@ -198,9 +222,11 @@ void rraptorTcpTasks() {
             tcpClient.close(); 
 
             if(tcpServer.acceptClient(&tcpClient)) {
-                Serial.println("Got a Connection: ");
-                printTcpClientStatus(&tcpClient);
-                
+                #ifdef DEBUG_SERIAL
+                    Serial.println("Got a Connection: ");
+                    printTcpClientStatus(&tcpClient);
+                #endif // DEBUG_SERIAL
+                                
                 // начнем счетчик неактивности
                 clientIdleStart = millis();
             }
@@ -213,10 +239,12 @@ void rraptorTcpTasks() {
             readSize = readSize < sizeof(read_buffer) ? readSize : sizeof(read_buffer);
             readSize = tcpClient.readStream((byte*)read_buffer, readSize);
             
-            read_buffer[readSize] = 0;
-            // Считали порцию данных
-            Serial.print("Read: ");
-            Serial.println(read_buffer);
+            #ifdef DEBUG_SERIAL
+                // Считали порцию данных
+                read_buffer[readSize] = 0; // строка должна оканчиваться нулем
+                Serial.print("Read: ");
+                Serial.println(read_buffer);
+            #endif // DEBUG_SERIAL
  
             // и можно выполнить команду, ответ попадет в write_buffer
             writeSize = handleInput(read_buffer, readSize, write_buffer);
@@ -227,9 +255,11 @@ void rraptorTcpTasks() {
         }
             
         if(write_size > 0) {
-            Serial.print("Write: ");
-            Serial.print(write_buffer);
-            Serial.println();
+            #ifdef DEBUG_SERIAL
+                Serial.print("Write: ");
+                Serial.print(write_buffer);
+                Serial.println();
+            #endif // DEBUG_SERIAL
             
             tcpClient.writeStream((const byte*)write_buffer, write_size);
             write_size = 0;

@@ -1,5 +1,6 @@
 #include "WProgram.h"
 
+#include "rraptor_config.h"
 #include "rraptor_protocol.h"
 
 /**
@@ -238,8 +239,10 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         }
     }
     if(!success) {
-        Serial.print("Can't handle command: ");
-        Serial.println(buffer);
+        #ifdef DEBUG_SERIAL
+            Serial.print("Can't handle command: ");
+            Serial.println(buffer);
+        #endif // DEBUG_SERIAL
         
         // Подготовить ответ
         strcpy(reply_buffer, REPLY_DONTUNDERSTAND);

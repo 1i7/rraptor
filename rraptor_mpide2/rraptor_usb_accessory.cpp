@@ -3,6 +3,7 @@
 #include <chipKITUSBHost.h>
 #include <chipKITUSBAndroidHost.h>
 
+#include "rraptor_config.h"
 #include "rraptor_protocol.h"
 
 // Информация о текущем устройстве
@@ -47,13 +48,19 @@ BOOL USBEventHandlerApplication( uint8_t address, USB_EVENT event, void *data, D
     switch( event ) {
         // События от драйвера Android
         case EVENT_ANDROID_DETACH:
-            Serial.println("Device NOT attached");
+            #ifdef DEBUG_SERIAL
+                Serial.println("Device NOT attached");
+            #endif // DEBUG_SERIAL
+            
             deviceAttached = FALSE;
             return TRUE;
             break;
 
         case EVENT_ANDROID_ATTACH:
-            Serial.println("Device attached");
+            #ifdef DEBUG_SERIAL
+                Serial.println("Device attached");
+            #endif // DEBUG_SERIAL
+            
             deviceAttached = TRUE;
             deviceHandle = data;
             return TRUE;
@@ -95,8 +102,10 @@ void rraptorUSBAccessoryTasks() {
                 // проверять завершение операции будем в следующих итерациях цикла
                 readInProgress = TRUE;
             } else {
-                Serial.print("Error trying to read: errorCode=");
-                Serial.println(errorCode, HEX);
+                #ifdef DEBUG_SERIAL
+                    Serial.print("Error trying to read: errorCode=");
+                    Serial.println(errorCode, HEX);
+                #endif // DEBUG_SERIAL
             }
         }
 
@@ -106,9 +115,12 @@ void rraptorUSBAccessoryTasks() {
             readInProgress = FALSE;
             
             if(errorCode == USB_SUCCESS) {
-                // Считали порцию данных
-                Serial.print("Read: ");
-                Serial.println(read_buffer);
+                #ifdef DEBUG_SERIAL
+                    // Считали порцию данных
+                    read_buffer[readSize] = 0; // строка должна оканчиваться нулем
+                    Serial.print("Read: ");
+                    Serial.println(read_buffer);
+                #endif // DEBUG_SERIAL
                 
                 // и можно выполнить команду, ответ попадет в write_buffer
                 writeSize = handleInput(read_buffer, readSize, write_buffer);
@@ -117,16 +129,20 @@ void rraptorUSBAccessoryTasks() {
                 // процедуру записи для следующей итерации цикла (данные уже внутри write_buffer)
                 write_size = writeSize;
             } else {
-                Serial.print("Error trying to complete read: errorCode=");
-                Serial.println(errorCode, HEX);
+                #ifdef DEBUG_SERIAL
+                    Serial.print("Error trying to complete read: errorCode=");
+                    Serial.println(errorCode, HEX);
+                #endif // DEBUG_SERIAL
             }
         }
         
         // Отправка данных на устройство Android
         if(write_size > 0 && !writeInProgress) {
-            Serial.print("Write: ");
-            Serial.print(write_buffer);
-            Serial.println();
+            #ifdef DEBUG_SERIAL
+                Serial.print("Write: ");
+                Serial.print(write_buffer);
+                Serial.println();
+            #endif // DEBUG_SERIAL
           
             writeSize = write_size;
             // Нужная команда уже в буфере для отправки
@@ -136,8 +152,10 @@ void rraptorUSBAccessoryTasks() {
             if(errorCode == USB_SUCCESS) {
                 writeInProgress = TRUE;
             } else {
-                Serial.print("Error trying to write: errorCode=");
-                Serial.println(errorCode, HEX);
+                #ifdef DEBUG_SERIAL
+                    Serial.print("Error trying to write: errorCode=");
+                    Serial.println(errorCode, HEX);
+                #endif // DEBUG_SERIAL
                 
                 write_size = 0;
             }
@@ -150,8 +168,10 @@ void rraptorUSBAccessoryTasks() {
                 write_size = 0;
     
                 if(errorCode != USB_SUCCESS) {
-                    Serial.print("Error trying to complete write: errorCode=");
-                    Serial.println(errorCode, HEX);
+                    #ifdef DEBUG_SERIAL
+                        Serial.print("Error trying to complete write: errorCode=");
+                        Serial.println(errorCode, HEX);
+                    #endif // DEBUG_SERIAL
                 }
             }
         }

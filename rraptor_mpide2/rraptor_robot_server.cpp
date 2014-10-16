@@ -6,6 +6,7 @@
 #include <DNETcK.h>
 #include <DWIFIcK.h>
 
+#include "rraptor_config.h"
 #include "network_util.h"
 #include "rraptor_protocol.h"
 
@@ -72,16 +73,20 @@ void rraptorRobotServerTasks() {
         // Подключимся к сети WiFi
         bool connectedToWifi = false;
         
-        Serial.println("Connecting wifi...");
+        #ifdef DEBUG_SERIAL
+            Serial.println("Connecting wifi...");
+        #endif // DEBUG_SERIAL
         conectionId = connectWifi(&networkStatus);
   
         if(conectionId != DWIFIcK::INVALID_CONNECTION_ID) {
             // На этом этапе подключение будет создано, даже если указанная 
             // сеть Wifi недоступна или для нее задан неправильный пароль
-            Serial.print("Connection created, connection id=");
-            Serial.println(conectionId, DEC);
+            #ifdef DEBUG_SERIAL
+                Serial.print("Connection created, connection id=");
+                Serial.println(conectionId, DEC);
 
-            Serial.print("Initializing IP stack...");
+                Serial.print("Initializing IP stack...");
+            #endif // DEBUG_SERIAL
             
             // Получим IP и сетевые адреса по DHCP
             DNETcK::begin();
@@ -91,7 +96,10 @@ void rraptorRobotServerTasks() {
             // то ошибка вылезет тоже на этом этапе).
             bool initializing = true;
             while(initializing) {
-                Serial.print(".");
+                #ifdef DEBUG_SERIAL 
+                    Serial.print(".");
+                #endif // DEBUG_SERIAL
+                
                 // Вызов isInitialized заблокируется до тех пор, пока стек не будет 
                 // инициализирован или не истечет время ожидания (по умолчанию 15 секунд). 
                 // Если сеть не подключится до истечения таймаута и при этом не произойдет
@@ -108,22 +116,29 @@ void rraptorRobotServerTasks() {
                     initializing = false;
                 }
             }
-            Serial.println();
+            #ifdef DEBUG_SERIAL 
+                Serial.println();
+            #endif // DEBUG_SERIAL
         }
         
         if(connectedToWifi) {
             // Подключились к Wifi
-            Serial.println("Connected to wifi");
-            printNetworkStatus();
-            
+            #ifdef DEBUG_SERIAL 
+                Serial.println("Connected to wifi");
+                printNetworkStatus();
+            #endif // DEBUG_SERIAL
+                        
             // включим лампочку
             digitalWrite(WIFI_STATUS_PIN, HIGH);
         } else {
             // Так и не получилось подключиться
-            Serial.print("Failed to connect wifi, status: ");
-            //Serial.print(networkStatus, DEC);
-            printDNETcKStatus(networkStatus);
-            Serial.println();
+            #ifdef DEBUG_SERIAL 
+                Serial.println("Retry after 4 seconds...");
+                Serial.print("Failed to connect wifi, status: ");
+                //Serial.print(networkStatus, DEC);
+                printDNETcKStatus(networkStatus);
+                Serial.println();
+            #endif // DEBUG_SERIAL
             
             // Нужно корректно завершить весь стек IP и Wifi, чтобы
             // иметь возможность переподключиться на следующей итерации
@@ -132,7 +147,10 @@ void rraptorRobotServerTasks() {
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             
             // Немного подождем и попробуем переподключиться на следующей итерации
-            Serial.println("Retry after 4 seconds...");
+            #ifdef DEBUG_SERIAL 
+                Serial.println("Retry after 4 seconds...");
+            #endif // DEBUG_SERIAL
+            
             delay(4000);
         }
     } else if(!tcpClient.isConnected()) {
@@ -140,12 +158,18 @@ void rraptorRobotServerTasks() {
         
         bool connectedToServer = false;
         
-        Serial.print("Connecting to Robot Server...");
+        #ifdef DEBUG_SERIAL 
+                Serial.print("Connecting to Robot Server...");
+        #endif // DEBUG_SERIAL
+        
         tcpClient.connect(robot_server_host, robot_server_port);
         // Сокет для подключения назначен, подождем, чем завершится процесс подключения
         bool connecting = true;
         while(connecting) {
-            Serial.print(".");
+            #ifdef DEBUG_SERIAL 
+                Serial.print(".");
+            #endif // DEBUG_SERIAL
+            
             if(tcpClient.isConnected(&networkStatus)) {
                 // Подключились к сереверу
                 connectedToServer = true;
@@ -161,21 +185,27 @@ void rraptorRobotServerTasks() {
         
         if(connectedToServer) {
             // Подключились к Серверу Роботов
-            Serial.println("Connected to Robot Server");
+            #ifdef DEBUG_SERIAL 
+                Serial.println("Connected to Robot Server");
             
-            printTcpClientStatus(&tcpClient);
+                printTcpClientStatus(&tcpClient);
+            #endif // DEBUG_SERIAL
         } else {
             // Так и не получилось подключиться
-            Serial.print("Failed to connect Robot Server, status: ");
-            //Serial.print(networkStatus, DEC);
-            printDNETcKStatus(networkStatus);
-            Serial.println();
+            #ifdef DEBUG_SERIAL
+                Serial.print("Failed to connect Robot Server, status: ");
+                //Serial.print(networkStatus, DEC);
+                printDNETcKStatus(networkStatus);
+                Serial.println();
+            #endif // DEBUG_SERIAL
             
             // Вернем TCP-клиента в исходное состояние
             tcpClient.close();
             
             // Немного подождем и попробуем переподключиться на следующей итерации
-            Serial.println("Retry after 4 seconds...");
+            #ifdef DEBUG_SERIAL
+                Serial.println("Retry after 4 seconds...");
+            #endif // DEBUG_SERIAL
             delay(4000);
         }
     } else {
@@ -186,9 +216,12 @@ void rraptorRobotServerTasks() {
             readSize = readSize < sizeof(read_buffer) ? readSize : sizeof(read_buffer);
             readSize = tcpClient.readStream((byte*)read_buffer, readSize);
             
-            // Считали порцию данных
-            Serial.print("Read: ");
-            Serial.println(read_buffer);
+            #ifdef DEBUG_SERIAL
+                // Считали порцию данных
+                read_buffer[readSize] = 0; // строка должна оканчиваться нулем
+                Serial.print("Read: ");
+                Serial.println(read_buffer);
+            #endif // DEBUG_SERIAL
  
             // и можно выполнить команду, ответ попадет в write_buffer
             writeSize = handleInput(read_buffer, readSize, write_buffer);
@@ -196,10 +229,12 @@ void rraptorRobotServerTasks() {
         }
             
         if(write_size > 0) {
-            Serial.print("Write: ");
-            Serial.print(write_buffer);
-            Serial.println();
-            
+            #ifdef DEBUG_SERIAL
+                Serial.print("Write: ");
+                Serial.print(write_buffer);
+                Serial.println();
+            #endif // DEBUG_SERIAL
+                        
             tcpClient.writeStream((const byte*)write_buffer, write_size);
             write_size = 0;
         }

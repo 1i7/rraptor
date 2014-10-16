@@ -2,8 +2,14 @@
 #include "rraptor_protocol.h"
 #include "stepper.h"
 
-// без прямого импорта здесь их не находят импорты в других cpp-файлах
+// без прямого импорта здесь эти библиотеки не находят импорты 
+// в других cpp-файлах и при компиляции происходят ошибки
 // (походу, они не добавляются к строке компилятора)
+
+// для последовательного порта Serial
+//#ifdef RR_SERIAL
+#include "rraptor_serial.h"
+//#endif // RR_SERIAL
 
 // для TCP
 //#ifdef RR_TCP
@@ -60,8 +66,10 @@ void prepare_line2() {
 }
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("Starting Rraptor...");
+    #ifdef DEBUG_SERIAL
+        Serial.begin(9600);
+        Serial.println("Starting Rraptor...");
+    #endif // DEBUG_SERIAL
     
     // Информация о текущем устройстве
     init_device_info(DEVICE_NAME, DEVICE_MODEL, DEVICE_SERIAL_NUMBER, 
@@ -81,9 +89,17 @@ void setup() {
     
     
     // Модули связи
+    #ifdef RR_SERIAL
+        rraptorSerialSetup();
+    #endif // RR_SERIAL
+    
     #ifdef RR_TCP
         rraptorTcpSetup();
     #endif // RR_TCP
+    
+    #ifdef RR_ROBOT_SERVER
+        rraptorTcpSetup();
+    #endif // RR_ROBOT_SERVER
 
     #ifdef RR_USB_ACCESSORY
         rraptorUSBAccessorySetup();
@@ -111,25 +127,36 @@ void loop1() {
 int prevTime = 0;
 
 void loop() {
+  
+    #ifdef RR_SERIAL
+        rraptorSerialTasks();
+    #endif // RR_SERIAL
+  
     #ifdef RR_TCP
         rraptorTcpTasks();
     #endif // RR_TCP
+    
+    #ifdef RR_ROBOT_SERVER
+        rraptorRobotServerTasks();
+    #endif // RR_ROBOT_SERVER
 
     #ifdef RR_USB_ACCESSORY
         rraptorUSBAccessoryTasks();
     #endif // RR_USB_ACCESSORY
 
-    // Отладочные сообщение - печатаем текущую позицию печатающего блока    
-    int currTime = millis();
-    if(is_cycle_running() && (currTime - prevTime) >= 1000) {
-        prevTime = currTime;
-        Serial.print("X.pos=");
-        Serial.print(sm_x.current_pos, DEC);
-        Serial.print(", Y.pos=");
-        Serial.print(sm_y.current_pos, DEC);
-        Serial.print(", Z.pos=");
-        Serial.print(sm_z.current_pos, DEC);
-        Serial.println();
-    }
+    #ifdef DEBUG_SERIAL    
+        // Отладочные сообщение - печатаем текущую позицию печатающего блока
+        int currTime = millis();
+        if(is_cycle_running() && (currTime - prevTime) >= 1000) {
+            prevTime = currTime;
+            Serial.print("X.pos=");
+            Serial.print(sm_x.current_pos, DEC);
+            Serial.print(", Y.pos=");
+            Serial.print(sm_y.current_pos, DEC);
+            Serial.print(", Z.pos=");
+            Serial.print(sm_z.current_pos, DEC);
+            Serial.println();
+        }
+    #endif // DEBUG_SERIAL
 }
 
