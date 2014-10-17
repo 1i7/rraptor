@@ -11,13 +11,32 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.rraptor.pult.Plotter2DCanvasView.LineDrawingStatus;
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.comm.DeviceConnectionWifi;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point3D;
+import com.rraptor.pult.view.PlotterArea2DView.LineDrawingStatus;
 
 public class DeviceControlService extends Service {
+
+    private class CommandInfo {
+        private final String command;
+        private final CommandListener commandListener;
+
+        public CommandInfo(String command, CommandListener commandListener) {
+            super();
+            this.command = command;
+            this.commandListener = commandListener;
+        }
+
+        public String getCommand() {
+            return command;
+        }
+
+        public CommandListener getCommandListener() {
+            return commandListener;
+        }
+    }
 
     /**
      * Обратный вызов для получения результата выполения команды, добавленной в
@@ -122,8 +141,7 @@ public class DeviceControlService extends Service {
     /**
      * "Очередь" команд для выполнения на сервере, состоящая из одного элемента.
      */
-    private String nextCommand;
-    private CommandListener nextCommandListener;
+    private CommandInfo nextCommand;
 
     // Информация об устройстве
     private DeviceStatus deviceStatus = DeviceStatus.UNKNOWN;
@@ -173,12 +191,12 @@ public class DeviceControlService extends Service {
      * сих пор не были выполнены на устройстве.
      */
     public void cancelCommands() {
-        if (nextCommandListener != null) {
-            nextCommandListener.onCommandCanceled(nextCommand);
+        if (nextCommand != null && nextCommand.getCommandListener() != null) {
+            nextCommand.getCommandListener().onCommandCanceled(
+                    nextCommand.getCommand());
         }
 
         nextCommand = null;
-        nextCommandListener = null;
     }
 
     /**
@@ -349,6 +367,18 @@ public class DeviceControlService extends Service {
             throw new IOException("End of stream");
         }
         return reply;
+    }
+
+    /**
+     * Выбрать первую команду из очереди; выбранная команда удаляется.
+     * 
+     * @return первая команда; null, если очередь пуста.
+     */
+    private CommandInfo fetchCommand() {
+        final CommandInfo cmdInfo = nextCommand;
+        // удалить выбранную команду из очереди
+        nextCommand = null;
+        return cmdInfo;
     }
 
     /**
@@ -741,8 +771,7 @@ public class DeviceControlService extends Service {
             final CommandListener cmdListener) {
         if (connectionStatus == ConnectionStatus.CONNECTED
                 && nextCommand == null) {
-            nextCommand = cmd;
-            this.nextCommandListener = cmdListener;
+            nextCommand = new CommandInfo(cmd, cmdListener);
             debug("Accepted cmd: " + cmd);
             return true;
         } else {
@@ -781,56 +810,63 @@ public class DeviceControlService extends Service {
         new Thread() {
             @Override
             public void run() {
-                String execCommand = null;
+                CommandInfo execCommand = null;
                 CommandListener execCommandListener = null;
 
                 long lastCmdTime = System.currentTimeMillis();
                 while (true) {
-                    if (connectionStatus == ConnectionStatus.CONNECTED
-                            && nextCommand != null) {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
                         // получим из "очереди" команду для выполнения на
                         // устройстве
-                        execCommand = nextCommand;
-                        execCommandListener = nextCommandListener;
+                        execCommand = fetchCommand();
+                        if (execCommand != null) {
 
-                        // очистим "очередь" - можно добавлять следующую
-                        // команду
-                        nextCommand = null;
-                        nextCommandListener = null;
+                            execCommandListener = execCommand
+                                    .getCommandListener();
 
-                        try {
-                            final String reply = execCommandOnDevice(execCommand);
+                            try {
+                                final String reply = execCommandOnDevice(execCommand
+                                        .getCommand());
 
-                            // отправим сообщение о выполнении команды
-                            // подписанту
-                            if (execCommandListener != null) {
-                                execCommandListener.onCommandExecuted(
-                                        execCommand, reply);
+                                // отправим сообщение о выполнении команды
+                                // подписанту
+                                if (execCommandListener != null) {
+                                    execCommandListener.onCommandExecuted(
+                                            execCommand.getCommand(), reply);
+                                }
+
+                                lastCmdTime = System.currentTimeMillis();
+                            } catch (final Exception e) {
+                                debug("Connection error: " + e.getMessage());
+                                e.printStackTrace();
+
+                                // обрыв соединения - закроем потоки
+                                // ввода/вывода,
+                                // отменим все команды в "очереди" и дожемся
+                                // нового
+                                // подключения
+                                disconnectFromServer();
                             }
+                        } else if (System.currentTimeMillis() - lastCmdTime > DeviceConnectionWifi.MAX_IDLE_TIMEOUT) {
+                            // поддерживать связь с устройством, если на
+                            // него долго не отправляли команды - выполнять
+                            // команду PING вне очереди
+                            try {
+                                execCommandOnDevice(DeviceConnection.CMD_PING);
+                                lastCmdTime = System.currentTimeMillis();
+                            } catch (final Exception e) {
+                                debug("Connection error: " + e.getMessage());
+                                e.printStackTrace();
 
-                            lastCmdTime = System.currentTimeMillis();
-                        } catch (final Exception e) {
-                            debug("Connection error: " + e.getMessage());
-                            e.printStackTrace();
-
-                            // обрыв соединения - закроем потоки ввода/вывода,
-                            // отменим все команды в "очереди" и дожемся нового
-                            // подключения
-                            disconnectFromServer();
-                        }
-                    } else if (connectionStatus == ConnectionStatus.CONNECTED
-                            && System.currentTimeMillis() - lastCmdTime > DeviceConnectionWifi.MAX_IDLE_TIMEOUT) {
-                        // поддерживать связь с устройством, если на
-                        // него долго не отправляли команды - выполнять
-                        // команду PING вне очереди
-                        try {
-                            execCommandOnDevice(DeviceConnection.CMD_PING);
-                            lastCmdTime = System.currentTimeMillis();
-                        } catch (final Exception e) {
-                            debug("Connection error: " + e.getMessage());
-                            e.printStackTrace();
-
-                            disconnectFromServer();
+                                disconnectFromServer();
+                            }
+                        } else {
+                            // на всякий случай - не будем напрягать систему
+                            // холостыми циклами
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                            }
                         }
                     } else {
                         // на всякий случай - не будем напрягать систему
