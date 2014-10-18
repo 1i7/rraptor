@@ -16,7 +16,7 @@ static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 // использовать вместе с DEBUG_SERIAL)
 #define RR_SERIAL
 // Прямое управление через беспроводной канал WiFi
-//#define RR_TCP
+#define RR_TCP
 // Сервер Роботов
 //#define RR_ROBOT_SERVER
 // Аксессуар USB Android

@@ -29,12 +29,16 @@ static int handleCommand(char* buffer, char* reply_buffer) {
     
     // Разобьем команду на куски по пробелам
     char* token;
-    token = strtok(buffer, " ");
+    // указатель на строку для внутренних нужд strtok_r, позволяет
+    // одновременно обрабатывать несколько строк (strtok может работать 
+    // только с одной строкой за раз)
+    char* ptrptr;
+    token = strtok_r(buffer, " ", &ptrptr);
     while(token != NULL) {
         tokens[tokensNum] = token;
         tokensNum++;
         
-        token = strtok(NULL, " ");
+        token = strtok_r(NULL, " ", &ptrptr);
     }
     
     // Определим, с какой командой имеем дело    
@@ -277,15 +281,21 @@ int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
     // обнулим ответ
     reply_buffer[0] = 0;
     
+    char cmd_buffer[128];
     char cmd_reply_buffer[128];
         
     // Разобьем входящую строку на куски по разделителю команд ';'
     char* token;
+    // указатель на строку для внутренних нужд strtok_r, позволяет
+    // одновременно обрабатывать несколько строк (strtok может работать 
+    // только с одной строкой за раз)
+    char* ptrptr;
     // первая команда
-    token = strtok(buffer, ";");
+    token = strtok_r(buffer, ";", &ptrptr);
     bool firstToken = true;
     while(token != NULL) {
-        handleCommand(token, cmd_reply_buffer);
+        strcpy(cmd_buffer, token);
+        handleCommand(cmd_buffer, cmd_reply_buffer);
         
         // добавлять к ответу предваряющий разделитель ';' для всех команд,
         // кроме первой
@@ -302,7 +312,7 @@ int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
         strcat(reply_buffer, cmd_reply_buffer);
         
         // следующая команда
-        token = strtok(NULL, ";");
+        token = strtok_r(NULL, ";", &ptrptr);
     }
   
     return strlen(reply_buffer);
