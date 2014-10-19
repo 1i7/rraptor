@@ -31,6 +31,8 @@ public class Plotter2DActivity extends RRActivity {
 
     private static int REQUEST_CODE_PICK_FILE = 0;
 
+    private static final String SAVED_LINES_FILE_NAME = "saved_lines.txt";
+
     private VectorDrawing2DView plotterCanvas;
     private Button btnOpenFileYaDisk;
     private Button btnOpenFileSdcard;
@@ -88,7 +90,7 @@ public class Plotter2DActivity extends RRActivity {
         try {
             plotterCanvas.setDrawingLines(SimpleContourIO
                     .loadLines(new FileInputStream(new File(getFilesDir(),
-                            "saved_lines.txt"))));
+                            SAVED_LINES_FILE_NAME))));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -213,7 +215,7 @@ public class Plotter2DActivity extends RRActivity {
     private void saveDrawing() {
         try {
             final File savedLinesFile = new File(getFilesDir(),
-                    "saved_lines.txt");
+                    SAVED_LINES_FILE_NAME);
             if (!savedLinesFile.exists()) {
                 savedLinesFile.createNewFile();
             }

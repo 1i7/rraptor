@@ -192,7 +192,8 @@ public class DrawingProgressActivity extends RRActivity {
     }
 
     private void stopDrawing() {
-
+        getDeviceControlService().getDeviceDrawingManager()
+                .stopDrawingOnDevice();
     }
 
     private void updateViews() {
