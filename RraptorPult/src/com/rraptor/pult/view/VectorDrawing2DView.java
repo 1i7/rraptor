@@ -40,8 +40,9 @@ public class VectorDrawing2DView extends WorkingArea2DView {
             if (userPoint1 == null) {
                 userPoint1 = point;
             } else {
-                drawingLines.add(new Line2D(translateCanvasPoint(userPoint1),
-                        translateCanvasPoint((point))));
+                drawingLines.add(new Line2D(
+                        translateCanvasPointToDevice(userPoint1),
+                        translateCanvasPointToDevice((point))));
                 userPoint1 = null;
             }
             this.invalidate();
@@ -53,24 +54,5 @@ public class VectorDrawing2DView extends WorkingArea2DView {
     public void setEnabled(boolean enabled) {
         this.userPoint1 = null;
         super.setEnabled(enabled);
-    }
-
-    /**
-     * Convert canvas point to drawing coordinate system.
-     * 
-     * @param canvasPoint
-     * @return
-     */
-    private Point2D translateCanvasPoint(Point2D canvasPoint) {
-        int canvasWidth = this.getWidth();
-        int canvasHeight = this.getHeight();
-
-        float scaleFactor = (float) canvasWidth / (float) WORKING_AREA_WIDTH;
-        int dy = (int) (canvasHeight - WORKING_AREA_HEIGHT * scaleFactor) / 2;
-
-        final Point2D drawingPoint = new Point2D(
-                (int) (canvasPoint.getX() / scaleFactor), (int) ((canvasHeight
-                        - dy - canvasPoint.getY()) / scaleFactor));
-        return drawingPoint;
     }
 }

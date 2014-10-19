@@ -131,13 +131,51 @@ public class WorkingArea2DView extends View {
         paint.setStrokeWidth(2);
     }
 
+    /**
+     * Установить контуры для рисования на холсте в системе координат
+     * устройства.
+     * 
+     * @param lines
+     */
     public void setDrawingLines(final List<Line2D> lines) {
         drawingLines.clear();
         if (lines != null) {
             drawingLines.addAll(lines);
         }
+
         canvasDrawingLines.clear();
         this.invalidate();
+    }
+
+    /**
+     * Перевести точку на рабочей области холста в систему координат устройства.
+     * 
+     * @param canvasPoint
+     * @return
+     */
+    protected Point2D translateCanvasPointToDevice(final Point2D canvasPoint) {
+        // оставим свободное место для отступов по краям
+        int canvasWidth = this.getWidth() - canvasIndentLeft
+                - canvasIndentRight;
+        int canvasHeight = this.getHeight() - canvasIndentTop
+                - canvasIndentBottom;
+
+        float scaleFactorX = (float) canvasWidth / (float) WORKING_AREA_WIDTH;
+        float scaleFactorY = (float) canvasHeight / (float) WORKING_AREA_HEIGHT;
+        float scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+
+        // рабочая область сдвинута в центр по каждой из осей плюс отступ от
+        // границ
+        int dx = (int) (canvasWidth - WORKING_AREA_WIDTH * scaleFactor) / 2
+                + canvasIndentLeft;
+        int dy = (int) (canvasHeight - WORKING_AREA_HEIGHT * scaleFactor) / 2
+                + canvasIndentBottom;
+
+        final Point2D devicePoint = new Point2D(
+                (int) ((canvasPoint.getX() - dx) / scaleFactor),
+                // ось y нужно перевернуть вверх ногами
+                (int) ((this.getHeight() - (canvasPoint.getY() + dy)) / scaleFactor));
+        return devicePoint;
     }
 
     /**
@@ -173,6 +211,10 @@ public class WorkingArea2DView extends View {
         return canvasPoint;
     }
 
+    /**
+     * Перевести весь рисунок из системы координат устройства в систему
+     * координат холста.
+     */
     private void translateDrawing() {
         // translate working area bounds
         canvasP1 = translateDevicePointToCanvas(p1);
