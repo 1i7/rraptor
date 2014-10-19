@@ -32,8 +32,8 @@ static int handleCommand(char* buffer, char* reply_buffer) {
     // указатель на строку для внутренних нужд strtok_r, позволяет
     // одновременно обрабатывать несколько строк (strtok может работать 
     // только с одной строкой за раз)
-    char* ptrptr;
-    token = strtok_r(buffer, " ", &ptrptr);
+    char* last;
+    token = strtok_r(buffer, " ", &last);
     while(token != NULL) {
         tokens[tokensNum] = token;
         tokensNum++;
@@ -289,9 +289,9 @@ int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
     // указатель на строку для внутренних нужд strtok_r, позволяет
     // одновременно обрабатывать несколько строк (strtok может работать 
     // только с одной строкой за раз)
-    char* ptrptr;
+    char* last;
     // первая команда
-    token = strtok_r(buffer, ";", &ptrptr);
+    token = strtok_r(buffer, ";", &last);
     bool firstToken = true;
     while(token != NULL) {
         strcpy(cmd_buffer, token);
