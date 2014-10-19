@@ -38,7 +38,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         tokens[tokensNum] = token;
         tokensNum++;
         
-        token = strtok_r(NULL, " ", &ptrptr);
+        token = strtok_r(NULL, " ", &last);
     }
     
     // Определим, с какой командой имеем дело    
@@ -312,7 +312,7 @@ int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
         strcat(reply_buffer, cmd_reply_buffer);
         
         // следующая команда
-        token = strtok_r(NULL, ";", &ptrptr);
+        token = strtok_r(NULL, ";", &last);
     }
   
     return strlen(reply_buffer);
