@@ -3,6 +3,7 @@ package com.rraptor.pult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kabeja.parser.ParseException;
@@ -16,7 +17,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
-import com.rraptor.pult.dxf.DxfLoader;
+import com.rraptor.pult.io.DxfLoader;
+import com.rraptor.pult.io.SimpleContourIO;
 import com.rraptor.pult.view.VectorDrawing2DView;
 import com.rraptor.pult.yad.YaDiskActivity;
 
@@ -79,6 +81,24 @@ public class Plotter2DActivity extends RRActivity {
         }
     }
 
+    /**
+     * Загрузить сохраненный рисунок.
+     */
+    private void loadSavedDrawing() {
+        try {
+            plotterCanvas.setDrawingLines(SimpleContourIO
+                    .loadLines(new FileInputStream(new File(getFilesDir(),
+                            "saved_lines.txt"))));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // если рисунок пустой, загрузить демо
+        if (plotterCanvas.getDrawingLines().size() == 0) {
+            loadDemoDxf();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PICK_FILE) {
@@ -130,8 +150,6 @@ public class Plotter2DActivity extends RRActivity {
                 startDrawingOnDevice();
             }
         });
-
-        loadDemoDxf();
     }
 
     @Override
@@ -142,9 +160,16 @@ public class Plotter2DActivity extends RRActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        saveDrawing();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         updateViews();
+        loadSavedDrawing();
     }
 
     /**
@@ -160,7 +185,7 @@ public class Plotter2DActivity extends RRActivity {
             startDir = Environment.getExternalStorageDirectory().getPath();
         }
 
-        OpenFileDialog fileDialog = new OpenFileDialog(this, startDir)
+        final OpenFileDialog fileDialog = new OpenFileDialog(this, startDir)
                 .setFilter(".*\\.dxf").setOpenDialogListener(
                         new OpenFileDialog.OpenDialogListener() {
                             @Override
@@ -180,6 +205,25 @@ public class Plotter2DActivity extends RRActivity {
     private void openDrawingFileYaDisk() {
         startActivityForResult(new Intent(this, YaDiskActivity.class),
                 REQUEST_CODE_PICK_FILE);
+    }
+
+    /**
+     * Сохранить рисунок.
+     */
+    private void saveDrawing() {
+        try {
+            final File savedLinesFile = new File(getFilesDir(),
+                    "saved_lines.txt");
+            if (!savedLinesFile.exists()) {
+                savedLinesFile.createNewFile();
+            }
+            SimpleContourIO.saveLines(new FileOutputStream(savedLinesFile),
+                    plotterCanvas.getDrawingLines());
+        } catch (final FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

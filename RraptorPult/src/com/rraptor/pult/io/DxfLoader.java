@@ -1,4 +1,4 @@
-package com.rraptor.pult.dxf;
+package com.rraptor.pult.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +23,7 @@ import com.rraptor.pult.model.Point2D;
  * 
  * Example here:
  * http://stackoverflow.com/questions/6740736/reading-a-dxf-file-with-java
+ * http://kabeja.sourceforge.net/docs/devel/embedding.html
  * 
  * Download binary release, take kabeja-0.4.jar from lib folder, all other jars
  * are not necessary and some of them with fail to compile for android.
@@ -31,6 +32,14 @@ import com.rraptor.pult.model.Point2D;
  * 
  */
 public class DxfLoader {
+
+    /**
+     * Загрузить линии из файла в формате DXF.
+     * 
+     * @param input
+     * @return
+     * @throws ParseException
+     */
     public static List<Line2D> getLines(final InputStream input)
             throws ParseException {
         final Parser parser = ParserBuilder.createDefaultParser();
