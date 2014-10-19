@@ -293,6 +293,9 @@ public class DeviceControlService extends Service {
      */
     public void debug(String msg) {
         System.out.println(msg);
+        if (debugMessages.length() > 4000) {
+            debugMessages.delete(0, 500);
+        }
         debugMessages.append(msg + "\n");
         fireOnDebugMessagePosted(msg);
     }

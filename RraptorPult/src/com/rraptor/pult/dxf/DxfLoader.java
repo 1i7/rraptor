@@ -41,10 +41,12 @@ public class DxfLoader {
                 .getDXFEntities(DXFConstants.ENTITY_TYPE_LINE);
 
         final List<Line2D> lines2D = new ArrayList<Line2D>();
-        for (DXFLine line : lines) {
-            lines2D.add(new Line2D(new Point2D(line.getStartPoint().getX(),
-                    line.getStartPoint().getY()), new Point2D(line
-                    .getEndPoint().getX(), line.getEndPoint().getY())));
+        if (lines != null) {
+            for (DXFLine line : lines) {
+                lines2D.add(new Line2D(new Point2D(line.getStartPoint().getX(),
+                        line.getStartPoint().getY()), new Point2D(line
+                        .getEndPoint().getX(), line.getEndPoint().getY())));
+            }
         }
         return lines2D;
     }

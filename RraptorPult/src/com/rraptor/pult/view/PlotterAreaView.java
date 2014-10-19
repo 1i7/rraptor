@@ -1,5 +1,9 @@
 package com.rraptor.pult.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,6 +36,21 @@ public class PlotterAreaView extends WorkingArea2DView {
 
     // Точки в системе координат холста для рисования
     private Point3D canvasWorkingBlockPosition;
+
+    // Анимация для смены положения рабочего блока
+    private ValueAnimator wbPosAnimation;
+    private final TypeEvaluator<Point3D> point3DAnimTypeEvaluator = new TypeEvaluator<Point3D>() {
+        @Override
+        public Point3D evaluate(float fraction, final Point3D startValue,
+                final Point3D endValue) {
+
+            return new Point3D(startValue.getX() + fraction
+                    * (endValue.getX() - startValue.getX()), startValue.getY()
+                    + fraction * (endValue.getY() - startValue.getY()),
+                    startValue.getZ() + fraction
+                            * (endValue.getZ() - startValue.getZ()));
+        }
+    };
 
     public PlotterAreaView(final Context context, final AttributeSet attrs) {
         super(context, attrs, 30, 80, 30, 30);
@@ -178,8 +197,46 @@ public class PlotterAreaView extends WorkingArea2DView {
      * @param pos
      */
     public void setWorkingBlockPosition(final Point3D pos) {
-        this.workingBlockPosition = pos;
-        this.invalidate();
+        // попробуем сделать плавную анимацию для движения рабочего блока
+        // http://android-developers.blogspot.ru/2011/02/animation-in-honeycomb.html
+        if (wbPosAnimation != null && wbPosAnimation.isStarted()) {
+            wbPosAnimation.end();
+        }
+        if (this.workingBlockPosition != null) {
+            wbPosAnimation = ValueAnimator.ofObject(point3DAnimTypeEvaluator,
+                    this.workingBlockPosition, pos);
+            // продолжительнось анимации - лучше ставить близкой
+            // к периоду обновления текущего положения печатного блока
+            // с устройства, тогда процесс движения будет более плавным,
+            // хотя небольшие рывки все равно будут
+            wbPosAnimation.setDuration(1000);
+            wbPosAnimation
+                    .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(
+                                final ValueAnimator animation) {
+                            final Point3D value = (Point3D) animation
+                                    .getAnimatedValue();
+
+                            workingBlockPosition = value;
+                            invalidate();
+                        }
+                    });
+            wbPosAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(final Animator animation) {
+                    final Point3D value = (Point3D) ((ValueAnimator) animation)
+                            .getAnimatedValue();
+
+                    workingBlockPosition = value;
+                    invalidate();
+                }
+            });
+            wbPosAnimation.start();
+        } else {
+            this.workingBlockPosition = pos;
+            this.invalidate();
+        }
     }
 
     /**

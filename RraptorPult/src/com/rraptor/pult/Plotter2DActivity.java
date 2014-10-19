@@ -13,7 +13,6 @@ import android.os.Environment;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
@@ -31,7 +30,6 @@ public class Plotter2DActivity extends RRActivity {
     private static int REQUEST_CODE_PICK_FILE = 0;
 
     private VectorDrawing2DView plotterCanvas;
-    private ProgressBar drawingProgress;
     private Button btnOpenFileYaDisk;
     private Button btnOpenFileSdcard;
     private Button btnClearDrawing;
@@ -39,6 +37,10 @@ public class Plotter2DActivity extends RRActivity {
 
     private void clearDrawing() {
         plotterCanvas.clearDrawing();
+    }
+
+    private void gotoDrawingProgress() {
+        startActivity(new Intent(this, DrawingProgressActivity.class));
     }
 
     private void loadDemoDxf() {
@@ -54,7 +56,12 @@ public class Plotter2DActivity extends RRActivity {
         }
     }
 
-    private void loadDrawingFile(String filePath) {
+    /**
+     * Загрузить контур из dxf-файла.
+     * 
+     * @param filePath
+     */
+    private void loadDrawingFile(final String filePath) {
 
         try {
             plotterCanvas.setDrawingLines(DxfLoader
@@ -91,7 +98,6 @@ public class Plotter2DActivity extends RRActivity {
         super.initViews();
 
         plotterCanvas = (VectorDrawing2DView) findViewById(R.id.plotter_canvas);
-        drawingProgress = (ProgressBar) findViewById(R.id.drawing_progress);
 
         btnOpenFileYaDisk = (Button) findViewById(R.id.open_file_yadisk_btn);
         btnOpenFileYaDisk.setOnClickListener(new OnClickListener() {
@@ -121,8 +127,7 @@ public class Plotter2DActivity extends RRActivity {
         btnStartDrawing.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                getDeviceControlService().getDeviceDrawingManager()
-                        .startDrawingOnDevice(plotterCanvas.getDrawingLines());
+                startDrawingOnDevice();
             }
         });
 
@@ -142,6 +147,9 @@ public class Plotter2DActivity extends RRActivity {
         updateViews();
     }
 
+    /**
+     * Загрузить контур из файла на sd-карты.
+     */
     private void openDrawingFileSdCard() {
         // http://habrahabr.ru/post/203884/
         // https://github.com/Scogun/Android-OpenFileDialog
@@ -166,27 +174,32 @@ public class Plotter2DActivity extends RRActivity {
         fileDialog.show();
     }
 
+    /**
+     * Загрузить контур из файла на Яндекс.Диске.
+     */
     private void openDrawingFileYaDisk() {
         startActivityForResult(new Intent(this, YaDiskActivity.class),
                 REQUEST_CODE_PICK_FILE);
+    }
+
+    /**
+     * Начать процесс рисования контура на устройстве: отправить контур для
+     * рисования фоновому сервису, открыть экран с просмотром прогресса
+     * рисования.
+     */
+    private void startDrawingOnDevice() {
+        getDeviceControlService().getDeviceDrawingManager()
+                .startDrawingOnDevice(plotterCanvas.getDrawingLines());
+        gotoDrawingProgress();
+        this.finish();
     }
 
     private void updateViews() {
         if (getDeviceControlService() != null
                 && getDeviceControlService().getDeviceDrawingManager()
                         .isDrawing()) {
-            drawingProgress.setVisibility(View.VISIBLE);
-            plotterCanvas.setEnabled(false);
-            btnClearDrawing.setEnabled(false);
-            btnOpenFileYaDisk.setEnabled(false);
-            btnOpenFileSdcard.setEnabled(false);
             btnStartDrawing.setEnabled(false);
         } else {
-            drawingProgress.setVisibility(View.INVISIBLE);
-            plotterCanvas.setEnabled(true);
-            btnClearDrawing.setEnabled(true);
-            btnOpenFileYaDisk.setEnabled(true);
-            btnOpenFileSdcard.setEnabled(true);
             btnStartDrawing.setEnabled(true);
         }
     }

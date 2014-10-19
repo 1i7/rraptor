@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
@@ -56,6 +57,7 @@ public class DrawingProgressActivity extends RRActivity {
     private final Handler handler = new Handler();
 
     private PlotterAreaView plotterCanvas;
+    private ProgressBar drawingProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,7 @@ public class DrawingProgressActivity extends RRActivity {
         super.initViews();
 
         plotterCanvas = (PlotterAreaView) findViewById(R.id.plotter_canvas);
+        drawingProgress = (ProgressBar) findViewById(R.id.drawing_progress);
 
         final Button btnPause = (Button) findViewById(R.id.btn_pause);
         btnPause.setOnClickListener(new OnClickListener() {
@@ -193,6 +196,14 @@ public class DrawingProgressActivity extends RRActivity {
     }
 
     private void updateViews() {
-
+        if (getDeviceControlService() != null
+                && getDeviceControlService().getDeviceDrawingManager()
+                        .isDrawing()) {
+            drawingProgress.setVisibility(View.VISIBLE);
+            plotterCanvas.setEnabled(false);
+        } else {
+            drawingProgress.setVisibility(View.INVISIBLE);
+            plotterCanvas.setEnabled(true);
+        }
     }
 }
