@@ -65,12 +65,12 @@
         android:text="@string/rraptor_calibrate" />
 
     <Button
-        android:id="@+id/btn_goto_status"
+        android:id="@+id/btn_goto_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_weight="0"
-        android:text="@string/rraptor_status" />
+        android:text="@string/rraptor_info" />
 
     <Button
         android:id="@+id/btn_goto_debug"

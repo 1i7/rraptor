@@ -9,9 +9,12 @@ import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
+import com.rraptor.pult.model.Line2D;
+import com.rraptor.pult.view.PlotterAreaView;
+import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
 
 public class DrawingProgressActivity extends RRActivity {
 
@@ -27,30 +30,32 @@ public class DrawingProgressActivity extends RRActivity {
                 onDeviceStatusUpdate();
             } else if (DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusUpdate();
+                onDeviceCurrentPosChange();
+            } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
+                    .equals(intent.getAction())) {
+                onDeviceStartDrawing();
+            } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
+                    .equals(intent.getAction())) {
+                onDeviceFinishDrawing();
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_UPDATE
+                    .equals(intent.getAction())) {
+                final Line2D line = (Line2D) intent
+                        .getSerializableExtra(DeviceControlService.EXTRA_LINE);
+                final LineDrawingStatus lineStatus = (LineDrawingStatus) intent
+                        .getSerializableExtra(DeviceControlService.EXTRA_LINE_STATUS);
+                onDeviceDrawingUpdate(line, lineStatus);
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_ERROR
+                    .equals(intent.getAction())) {
+                final Exception e = (Exception) intent
+                        .getSerializableExtra(DeviceControlService.EXTRA_EXCEPTION);
+                onDeviceDrawingError(e);
             }
         }
     };
 
     private final Handler handler = new Handler();
 
-    private TextView txtConnectionType;
-    private TextView txtConnectionStatus;
-    private TextView txtConnectionInfo;
-    private TextView txtDeviceName;
-    private TextView txtDeviceModel;
-    private TextView txtDeviceSerialNumber;
-    private TextView txtDeviceDescription;
-    private TextView txtDeviceVersion;
-    private TextView txtDeviceManufacturer;
-    private TextView txtDeviceUri;
-    private TextView txtDeviceStatus;
-    private TextView txtDeviceWorkingAreaDim;
-    private TextView txtDeviceCurrentPos;
-
-    private void disconnectDevice() {
-
-    }
+    private PlotterAreaView plotterCanvas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +63,7 @@ public class DrawingProgressActivity extends RRActivity {
         setContentView(R.layout.activity_drawing_progress);
         super.initViews();
 
-        txtConnectionType = (TextView) findViewById(R.id.txt_connection_type);
-        txtConnectionStatus = (TextView) findViewById(R.id.txt_connection_status);
-        txtConnectionInfo = (TextView) findViewById(R.id.txt_connection_info);
-        txtDeviceName = (TextView) findViewById(R.id.txt_device_name);
-        txtDeviceModel = (TextView) findViewById(R.id.txt_device_model);
-        txtDeviceSerialNumber = (TextView) findViewById(R.id.txt_device_serial_number);
-        txtDeviceDescription = (TextView) findViewById(R.id.txt_device_description);
-        txtDeviceVersion = (TextView) findViewById(R.id.txt_device_version);
-        txtDeviceManufacturer = (TextView) findViewById(R.id.txt_device_manufacturer);
-        txtDeviceUri = (TextView) findViewById(R.id.txt_device_uri);
-        txtDeviceStatus = (TextView) findViewById(R.id.txt_device_status);
-        txtDeviceWorkingAreaDim = (TextView) findViewById(R.id.txt_working_area_dim);
-        txtDeviceCurrentPos = (TextView) findViewById(R.id.txt_current_pos);
+        plotterCanvas = (PlotterAreaView) findViewById(R.id.plotter_canvas);
 
         final Button btnPause = (Button) findViewById(R.id.btn_pause);
         btnPause.setOnClickListener(new OnClickListener() {
@@ -92,15 +85,7 @@ public class DrawingProgressActivity extends RRActivity {
         btnStop.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopDevice();
-            }
-        });
-
-        final Button btnDisconnect = (Button) findViewById(R.id.btn_disconnect);
-        btnDisconnect.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disconnectDevice();
+                stopDrawing();
             }
         });
 
@@ -109,6 +94,10 @@ public class DrawingProgressActivity extends RRActivity {
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_START_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_FINISH_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_UPDATE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_ERROR);
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
@@ -122,7 +111,56 @@ public class DrawingProgressActivity extends RRActivity {
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
         super.onDeviceControlServiceConnected(service);
-        updateStatusViews();
+        updateViews();
+        plotterCanvas.setDrawingLines(getDeviceControlService()
+                .getDeviceDrawingManager().getDrawingLines());
+        onDeviceCurrentPosChange();
+    }
+
+    /**
+     * Обновить текущее положение рабочего блока.
+     */
+    void onDeviceCurrentPosChange() {
+        if (getDeviceControlService() != null) {
+            plotterCanvas.setWorkingBlockPosition(getDeviceControlService()
+                    .getDeviceCurrentPosition());
+        }
+    }
+
+    private void onDeviceDrawingError(final Exception ex) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(DrawingProgressActivity.this,
+                        "Не получилось нарисовать: " + ex.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void onDeviceDrawingUpdate(final Line2D line,
+            final LineDrawingStatus lineStatus) {
+        plotterCanvas.postInvalidate();
+    }
+
+    private void onDeviceFinishDrawing() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateViews();
+            }
+        });
+    }
+
+    private void onDeviceStartDrawing() {
+        plotterCanvas.setDrawingLines(getDeviceControlService()
+                .getDeviceDrawingManager().getDrawingLines());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateViews();
+            }
+        });
     }
 
     private void onDeviceStatusUpdate() {
@@ -130,7 +168,7 @@ public class DrawingProgressActivity extends RRActivity {
 
             @Override
             public void run() {
-                updateStatusViews();
+                updateViews();
             }
 
         });
@@ -150,51 +188,11 @@ public class DrawingProgressActivity extends RRActivity {
         getDeviceControlService().getDeviceDrawingManager().resumeDrawing();
     }
 
-    private void stopDevice() {
-        getDeviceControlService().disconnectFromServer();
+    private void stopDrawing() {
+
     }
 
-    private void updateStatusViews() {
-        txtConnectionStatus.setText(getDeviceControlService()
-                .getConnectionStatus().name());
-        txtConnectionType
-                .setText(getDeviceControlService().getConnectionType());
-        txtConnectionInfo
-                .setText(getDeviceControlService().getConnectionInfo());
-        txtDeviceName.setText(getDeviceControlService().getDeviceName());
-        txtDeviceModel.setText(getDeviceControlService().getDeviceModel());
-        txtDeviceSerialNumber.setText(getDeviceControlService()
-                .getDeviceSerialNumber());
-        txtDeviceDescription.setText(getDeviceControlService()
-                .getDeviceDescription());
-        txtDeviceVersion.setText(getDeviceControlService().getDeviceVersion());
-        txtDeviceManufacturer.setText(getDeviceControlService()
-                .getDeviceManufacturer());
-        txtDeviceUri.setText(getDeviceControlService().getDeviceUri());
-        txtDeviceStatus.setText(getDeviceControlService().getDeviceStatus()
-                .name());
-        if (getDeviceControlService().getDeviceWorkingArea() != null) {
-            txtDeviceWorkingAreaDim.setText(getDeviceControlService()
-                    .getDeviceWorkingArea().getX()
-                    + "x"
-                    + getDeviceControlService().getDeviceWorkingArea().getY()
-                    + "x"
-                    + getDeviceControlService().getDeviceWorkingArea().getZ()
-                    + " ");
-        } else {
-            txtDeviceWorkingAreaDim.setText("");
-        }
-        if (getDeviceControlService().getDeviceCurrentPosition() != null) {
-            txtDeviceCurrentPos.setText(getDeviceControlService()
-                    .getDeviceCurrentPosition().getX()
-                    + " "
-                    + getDeviceControlService().getDeviceCurrentPosition()
-                            .getY()
-                    + " "
-                    + getDeviceControlService().getDeviceCurrentPosition()
-                            .getZ());
-        } else {
-            txtDeviceCurrentPos.setText("");
-        }
+    private void updateViews() {
+
     }
 }

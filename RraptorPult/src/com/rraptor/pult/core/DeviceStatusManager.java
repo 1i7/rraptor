@@ -9,7 +9,7 @@ import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 
 public class DeviceStatusManager {
 
-    private final int STATUS_UPDATE_TIMEOUT = 4000;
+    private final int STATUS_UPDATE_TIMEOUT = 500;
 
     private final DeviceControlService devControlService;
 

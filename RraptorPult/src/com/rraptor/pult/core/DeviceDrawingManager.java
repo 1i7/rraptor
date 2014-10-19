@@ -9,13 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.rraptor.pult.Plotter2DCanvasView.LineDrawingStatus;
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point2D;
+import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
 
 public class DeviceDrawingManager {
     private final DeviceControlService devControlService;
@@ -42,10 +42,13 @@ public class DeviceDrawingManager {
     private boolean isDrawing = false;
     private boolean isDrawingPaused = false;
 
-    private final Map<Line2D, LineDrawingStatus> lineStatus = new HashMap<Line2D, LineDrawingStatus>();
     private boolean drawingCmdWaiting = false;
     private boolean drawingCmdError = false;
     private boolean resendDrawingCmd = false;
+
+    // Информация о рисунке
+    private final Map<Line2D, LineDrawingStatus> lineStatus = new HashMap<Line2D, LineDrawingStatus>();
+    private List<Line2D> drawingLines;
 
     public DeviceDrawingManager(final DeviceControlService devControlService) {
         this.devControlService = devControlService;
@@ -129,6 +132,15 @@ public class DeviceDrawingManager {
                 throw new Exception("Error while drawing");
             }
         }
+    }
+
+    /**
+     * Получить линии рисунка в процессе рисования.
+     * 
+     * @return
+     */
+    public List<Line2D> getDrawingLines() {
+        return drawingLines;
     }
 
     /**
@@ -233,6 +245,7 @@ public class DeviceDrawingManager {
      */
     public void startDrawingOnDevice(final List<Line2D> drawingLines) {
         devControlService.debug("DeviceDrawingManager: startDrawingOnDevice");
+        this.drawingLines = drawingLines;
 
         new Thread(new Runnable() {
             @Override

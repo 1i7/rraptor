@@ -6,14 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.rraptor.pult.core.DeviceControlService;
 
-public class DeviceStatusActivity extends RRActivity {
+public class DeviceInfoActivity extends RRActivity {
 
     private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
 
@@ -45,14 +42,10 @@ public class DeviceStatusActivity extends RRActivity {
     private TextView txtDeviceWorkingAreaDim;
     private TextView txtDeviceCurrentPos;
 
-    private void disconnectDevice() {
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_status);
+        setContentView(R.layout.activity_device_info);
         super.initViews();
 
         txtConnectionType = (TextView) findViewById(R.id.txt_connection_type);
@@ -68,38 +61,6 @@ public class DeviceStatusActivity extends RRActivity {
         txtDeviceStatus = (TextView) findViewById(R.id.txt_device_status);
         txtDeviceWorkingAreaDim = (TextView) findViewById(R.id.txt_working_area_dim);
         txtDeviceCurrentPos = (TextView) findViewById(R.id.txt_current_pos);
-
-        final Button btnPause = (Button) findViewById(R.id.btn_pause);
-        btnPause.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pauseDevice();
-            }
-        });
-
-        final Button btnResume = (Button) findViewById(R.id.btn_resume);
-        btnResume.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resumeDevice();
-            }
-        });
-
-        final Button btnStop = (Button) findViewById(R.id.btn_stop);
-        btnStop.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopDevice();
-            }
-        });
-
-        final Button btnDisconnect = (Button) findViewById(R.id.btn_disconnect);
-        btnDisconnect.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disconnectDevice();
-            }
-        });
 
         // register broadcast receiver
         final IntentFilter filter = new IntentFilter(
@@ -130,18 +91,6 @@ public class DeviceStatusActivity extends RRActivity {
             }
 
         });
-    }
-
-    private void pauseDevice() {
-
-    }
-
-    private void resumeDevice() {
-
-    }
-
-    private void stopDevice() {
-
     }
 
     private void updateStatusViews() {

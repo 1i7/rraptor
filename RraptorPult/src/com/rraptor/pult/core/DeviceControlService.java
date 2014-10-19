@@ -15,7 +15,7 @@ import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.comm.DeviceConnectionWifi;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point3D;
-import com.rraptor.pult.view.PlotterArea2DView.LineDrawingStatus;
+import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
 
 public class DeviceControlService extends Service {
 
@@ -897,11 +897,12 @@ public class DeviceControlService extends Service {
                     @Override
                     public void onCommandExecuted(final String cmd,
                             final String reply) {
-                        // получить значения из строки
+                        // получить значения из строки, перевести микрометры в
+                        // миллиметры
                         final String[] pos_parts = reply.split(" ");
-                        double x = Double.parseDouble(pos_parts[0]);
-                        double y = Double.parseDouble(pos_parts[1]);
-                        double z = Double.parseDouble(pos_parts[2]);
+                        double x = Double.parseDouble(pos_parts[0]) / 1000;
+                        double y = Double.parseDouble(pos_parts[1]) / 1000;
+                        double z = Double.parseDouble(pos_parts[2]) / 1000;
 
                         final Point3D newPos = new Point3D(x, y, z);
 

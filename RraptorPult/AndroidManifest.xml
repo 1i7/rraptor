@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="18" />
+        android:minSdkVersion="14"
+        android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -16,12 +16,13 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppBaseTheme" >
         <activity
             android:name="com.rraptor.pult.ManualPultActivity"
             android:label="@string/title_activity_manual"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape" 
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
         </activity>
         <activity
             android:name="com.rraptor.pult.CalibrateActivity"
@@ -33,11 +34,12 @@
             android:name="com.rraptor.pult.Plotter2DActivity"
             android:label="@string/title_activity_plotter2d"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape" 
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
         </activity>
         <activity
-            android:name="com.rraptor.pult.DeviceStatusActivity"
-            android:label="@string/title_activity_status"
+            android:name="com.rraptor.pult.DeviceInfoActivity"
+            android:label="@string/title_activity_info"
             android:parentActivityName="@string/title_activity_rraptor"
             android:screenOrientation="sensor" >
         </activity>
@@ -45,7 +47,8 @@
             android:name="com.rraptor.pult.DrawingProgressActivity"
             android:label="@string/title_activity_drawing_progress"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.DebugActivity"

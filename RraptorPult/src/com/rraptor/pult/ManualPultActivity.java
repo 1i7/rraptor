@@ -3,7 +3,10 @@ package com.rraptor.pult;
 import java.util.ArrayList;
 
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.view.Menu;
@@ -15,11 +18,23 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.rraptor.pult.comm.DeviceConnection;
+import com.rraptor.pult.core.DeviceControlService;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
+import com.rraptor.pult.view.PlotterAreaView;
 
 public class ManualPultActivity extends RRActivity {
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1;
 
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE
+                    .equals(intent.getAction())) {
+                onDeviceCurrentPosChange();
+            }
+        }
+    };
     private final CommandListener devCommandListener = new CommandListener() {
 
         @Override
@@ -34,7 +49,6 @@ public class ManualPultActivity extends RRActivity {
 
         }
     };
-
     private final OnTouchListener onTouchListener = new OnTouchListener() {
 
         @Override
@@ -79,6 +93,8 @@ public class ManualPultActivity extends RRActivity {
             return false;
         }
     };
+
+    private PlotterAreaView plotterCanvas;
 
     /**
      * http://www.youtube.com/watch?v=gGbYVvU0Z5s&feature=player_embedded
@@ -195,6 +211,8 @@ public class ManualPultActivity extends RRActivity {
         setContentView(R.layout.activity_manual_pult);
         super.initViews();
 
+        plotterCanvas = (PlotterAreaView) findViewById(R.id.plotter_canvas);
+
         final ImageButton btnXF = (ImageButton) findViewById(R.id.x_forward_btn);
         btnXF.setOnTouchListener(onTouchListener);
         final ImageButton btnXB = (ImageButton) findViewById(R.id.x_backward_btn);
@@ -216,6 +234,11 @@ public class ManualPultActivity extends RRActivity {
                 commandVoice();
             }
         });
+
+        // register broadcast receiver
+        final IntentFilter filter = new IntentFilter(
+                DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE);
+        registerReceiver(deviceBroadcastReceiver, filter);
     }
 
     @Override
@@ -223,6 +246,27 @@ public class ManualPultActivity extends RRActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.rraptor_pult, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(deviceBroadcastReceiver);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onDeviceControlServiceConnected(
+            final DeviceControlService service) {
+        super.onDeviceControlServiceConnected(service);
+        onDeviceCurrentPosChange();
+    }
+
+    /**
+     * Обновить текущее положение рабочего блока.
+     */
+    void onDeviceCurrentPosChange() {
+        plotterCanvas.setWorkingBlockPosition(getDeviceControlService()
+                .getDeviceCurrentPosition());
     }
 
     @Override

@@ -179,34 +179,7 @@
             android:id="@+id/txt_current_pos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        
-        <Button
-            android:id="@+id/btn_pause"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/pause" />
-        <Button
-            android:id="@+id/btn_resume"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/resume" />
-        
-        <Button
-            android:id="@+id/btn_stop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/stop" />
-        
-        <Button
-            android:id="@+id/btn_disconnect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/disconnect" />
-        
+                
     </LinearLayout>
 
 </ScrollView>

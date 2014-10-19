@@ -7,7 +7,7 @@
     <string name="title_activity_plotter2d">Рраптор: 2д Плоттер</string>
     <string name="title_activity_manual">Рраптор: Ручное управление</string>
     <string name="title_activity_calibrate">Рраптор: Калибровка</string>
-    <string name="title_activity_status">Рраптор: Статус</string>
+    <string name="title_activity_info">Рраптор: Информация об устройстве</string>
     <string name="title_activity_drawing_progress">RRaptor: Процесс рисования</string>
     <string name="title_activity_debug">Рраптор: Отладка</string>
     
@@ -15,7 +15,7 @@
     <string name="rraptor_plotter2d">2D плоттер</string>
     <string name="rraptor_manual_pult">Ручное управление</string>
     <string name="rraptor_calibrate">Калибровка</string>
-    <string name="rraptor_status">Статус устройства</string>
+    <string name="rraptor_info">Информация об устройстве</string>
     <string name="rraptor_drawing_progress">Процесс рисования</string>
     <string name="rraptor_debug">Отладка</string>
        

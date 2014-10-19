@@ -21,16 +21,16 @@ public class RRaptorActivity extends RRActivity {
         startActivity(new Intent(this, DrawingProgressActivity.class));
     }
 
+    private void gotoInfo() {
+        startActivity(new Intent(this, DeviceInfoActivity.class));
+    }
+
     private void gotoPlotter2D() {
         startActivity(new Intent(this, Plotter2DActivity.class));
     }
 
     private void gotoPult() {
         startActivity(new Intent(this, ManualPultActivity.class));
-    }
-
-    private void gotoStatus() {
-        startActivity(new Intent(this, DeviceStatusActivity.class));
     }
 
     @Override
@@ -71,11 +71,11 @@ public class RRaptorActivity extends RRActivity {
             }
         });
 
-        final Button btnGotoStatus = (Button) findViewById(R.id.btn_goto_status);
-        btnGotoStatus.setOnClickListener(new OnClickListener() {
+        final Button btnGotoInfo = (Button) findViewById(R.id.btn_goto_info);
+        btnGotoInfo.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotoStatus();
+                gotoInfo();
             }
         });
 

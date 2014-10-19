@@ -83,6 +83,13 @@ public abstract class RRActivity extends Activity {
     }
 
     /**
+     * Разорвать связь с устройством.
+     */
+    protected void disconnectDevice() {
+        getDeviceControlService().disconnectFromServer();
+    }
+
+    /**
      * Ссылка на фоновый сервис, работающий с устройством.
      * 
      * @return
