@@ -258,6 +258,8 @@ public class ManualPultActivity extends RRActivity {
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
         super.onDeviceControlServiceConnected(service);
+        plotterCanvas.setDrawingLines(getDeviceControlService()
+                .getDeviceDrawingManager().getDrawingLines());
         onDeviceCurrentPosChange();
     }
 
