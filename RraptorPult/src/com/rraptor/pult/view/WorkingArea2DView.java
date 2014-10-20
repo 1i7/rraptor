@@ -80,8 +80,10 @@ public class WorkingArea2DView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
+
+        paint.setAntiAlias(true);
 
         translateDrawing();
 

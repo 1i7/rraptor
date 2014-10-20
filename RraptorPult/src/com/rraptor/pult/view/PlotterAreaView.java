@@ -104,6 +104,8 @@ public class PlotterAreaView extends WorkingArea2DView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        paint.setAntiAlias(true);
+
         translateDrawing();
 
         // дорисовать ось Z - справа от рабочей области
