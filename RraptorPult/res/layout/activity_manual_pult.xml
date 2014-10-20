@@ -40,26 +40,42 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0"
-            android:gravity="center_horizontal"
+            android:gravity="center_vertical"
             android:orientation="vertical" >
 
-            <ImageButton
-                android:id="@+id/y_forward_btn"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_right"
-                android:contentDescription="y forward"
-                android:minHeight="100dip"
-                android:minWidth="100dip" />
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal" >
 
-            <ImageButton
-                android:id="@+id/y_backward_btn"
+                <ImageButton
+                    android:id="@+id/y_forward_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_up"
+                    android:contentDescription="y forward"
+                    android:minHeight="100dip"
+                    android:minWidth="100dip" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_left"
-                android:contentDescription="y backward"
-                android:minHeight="100dip"
-                android:minWidth="100dip" />
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/y_backward_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_down"
+                    android:contentDescription="y backward"
+                    android:minHeight="100dip"
+                    android:minWidth="100dip" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -82,23 +98,39 @@
                 android:gravity="center_horizontal"
                 android:orientation="horizontal" >
 
-                <ImageButton
-                    android:id="@+id/x_backward_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/btn_left"
-                    android:contentDescription="x backward"
-                    android:minHeight="100dip"
-                    android:minWidth="100dip" />
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
 
-                <ImageButton
-                    android:id="@+id/x_forward_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/btn_right"
-                    android:contentDescription="x forward"
-                    android:minHeight="100dip"
-                    android:minWidth="100dip" />
+                    <ImageButton
+                        android:id="@+id/x_backward_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_left"
+                        android:contentDescription="x backward"
+                        android:minHeight="100dip"
+                        android:minWidth="100dip" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
+
+                    <ImageButton
+                        android:id="@+id/x_forward_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_right"
+                        android:contentDescription="x forward"
+                        android:minHeight="100dip"
+                        android:minWidth="100dip" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -106,32 +138,49 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0"
-            android:gravity="center_horizontal"
+            android:gravity="center_vertical"
             android:orientation="vertical" >
 
-            <ImageButton
-                android:id="@+id/z_forward_btn"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_right"
-                android:contentDescription="z forward"
-                android:minHeight="100dip"
-                android:minWidth="100dip" />
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal" >
 
-            <ImageButton
-                android:id="@+id/z_backward_btn"
+                <ImageButton
+                    android:id="@+id/z_forward_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_up"
+                    android:contentDescription="z forward"
+                    android:minHeight="100dip"
+                    android:minWidth="100dip" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_left"
-                android:contentDescription="z backward"
-                android:minHeight="100dip"
-                android:minWidth="100dip" />
+                android:layout_height="0dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/z_backward_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_down"
+                    android:contentDescription="z backward"
+                    android:minHeight="100dip"
+                    android:minWidth="100dip" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/command_voice_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right|bottom"
+                android:layout_weight="0"
                 android:text="Голос" />
         </LinearLayout>
     </LinearLayout>
