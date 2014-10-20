@@ -244,6 +244,7 @@ public class Plotter2DActivity extends RRActivity {
         if (getDeviceControlService() != null
                 && getDeviceControlService().getDeviceDrawingManager()
                         .isDrawing()) {
+            // Выключить кнопку "Рисовать", если уже рисуем
             btnStartDrawing.setEnabled(false);
         } else {
             btnStartDrawing.setEnabled(true);

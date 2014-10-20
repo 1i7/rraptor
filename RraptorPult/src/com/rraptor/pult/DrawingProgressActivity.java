@@ -118,6 +118,12 @@ public class DrawingProgressActivity extends RRActivity {
         plotterCanvas.setDrawingLines(getDeviceControlService()
                 .getDeviceDrawingManager().getDrawingLines());
         onDeviceCurrentPosChange();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateViews();
+            }
+        });
     }
 
     /**
@@ -137,6 +143,7 @@ public class DrawingProgressActivity extends RRActivity {
                 Toast.makeText(DrawingProgressActivity.this,
                         "Не получилось нарисовать: " + ex.getMessage(),
                         Toast.LENGTH_LONG).show();
+                updateViews();
             }
         });
     }
@@ -173,8 +180,13 @@ public class DrawingProgressActivity extends RRActivity {
             public void run() {
                 updateViews();
             }
-
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateViews();
     }
 
     /**
@@ -191,6 +203,9 @@ public class DrawingProgressActivity extends RRActivity {
         getDeviceControlService().getDeviceDrawingManager().resumeDrawing();
     }
 
+    /**
+     * Остановить процесс рисования.
+     */
     private void stopDrawing() {
         getDeviceControlService().getDeviceDrawingManager()
                 .stopDrawingOnDevice();
@@ -201,10 +216,8 @@ public class DrawingProgressActivity extends RRActivity {
                 && getDeviceControlService().getDeviceDrawingManager()
                         .isDrawing()) {
             drawingProgress.setVisibility(View.VISIBLE);
-            plotterCanvas.setEnabled(false);
         } else {
             drawingProgress.setVisibility(View.INVISIBLE);
-            plotterCanvas.setEnabled(true);
         }
     }
 }
