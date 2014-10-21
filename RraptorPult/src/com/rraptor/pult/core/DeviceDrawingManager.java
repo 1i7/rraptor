@@ -174,7 +174,8 @@ public class DeviceDrawingManager {
     }
 
     /**
-     * Обновить статус подключения к устройству.
+     * Обновить статус подключения к устройству. Если нет подключения, поставить
+     * рисование на паузу.
      * 
      * @param connectionStatus
      * 
@@ -243,7 +244,10 @@ public class DeviceDrawingManager {
      * 
      * @param drawingLines
      */
-    public void startDrawingOnDevice(final List<Line2D> drawingLines) {
+    public boolean startDrawingOnDevice(final List<Line2D> drawingLines) {
+        if (isDrawing) {
+            return false;
+        }
         devControlService.debug("DeviceDrawingManager: startDrawingOnDevice");
         this.drawingLines = drawingLines;
 
@@ -266,7 +270,7 @@ public class DeviceDrawingManager {
 
                 try {
                     Point2D endPoint = null;
-                    for (final Line2D line : drawingLines) {
+                    for (final Line2D line : DeviceDrawingManager.this.drawingLines) {
                         currentLine = line;
                         setLineStatus(line, LineDrawingStatus.DRAWING_PROGRESS);
                         devControlService.fireOnDrawingUpdate(line,
@@ -317,13 +321,19 @@ public class DeviceDrawingManager {
                 devControlService.fireOnFinishDrawing();
             }
         }).start();
+        return true;
     }
 
     /**
      * Прекратить процесс рисования на устройстве.
      */
     public void stopDrawingOnDevice() {
-        devControlService.sendCommand(DeviceConnection.CMD_RR_STOP, null);
+        // перестать пробовать отправлять новую команду рисования на устройство
+        // - это приведет к выбросу AbortedException внутри executeCommand,
+        // и поток внутри startDrawingOnDevice тоже завершится
         isDrawing = false;
+
+        // остановить печатный блок на устройстве
+        devControlService.sendCommand(DeviceConnection.CMD_RR_STOP, null);
     }
 }

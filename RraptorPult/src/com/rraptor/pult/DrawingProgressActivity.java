@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
+import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.view.PlotterAreaView;
 import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
@@ -58,6 +59,9 @@ public class DrawingProgressActivity extends RRActivity {
 
     private PlotterAreaView plotterCanvas;
     private ProgressBar drawingProgress;
+    private Button btnStop;
+    private Button btnPause;
+    private Button btnResume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,15 @@ public class DrawingProgressActivity extends RRActivity {
         plotterCanvas = (PlotterAreaView) findViewById(R.id.plotter_canvas);
         drawingProgress = (ProgressBar) findViewById(R.id.drawing_progress);
 
-        final Button btnPause = (Button) findViewById(R.id.btn_pause);
+        btnStop = (Button) findViewById(R.id.btn_stop);
+        btnStop.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopDrawing();
+            }
+        });
+
+        btnPause = (Button) findViewById(R.id.btn_pause);
         btnPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,19 +88,11 @@ public class DrawingProgressActivity extends RRActivity {
             }
         });
 
-        final Button btnResume = (Button) findViewById(R.id.btn_resume);
+        btnResume = (Button) findViewById(R.id.btn_resume);
         btnResume.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 resumeDrawing();
-            }
-        });
-
-        final Button btnStop = (Button) findViewById(R.id.btn_stop);
-        btnStop.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopDrawing();
             }
         });
 
@@ -213,11 +217,29 @@ public class DrawingProgressActivity extends RRActivity {
 
     private void updateViews() {
         if (getDeviceControlService() != null
-                && getDeviceControlService().getDeviceDrawingManager()
-                        .isDrawing()) {
-            drawingProgress.setVisibility(View.VISIBLE);
+                && getDeviceControlService().getConnectionStatus() == ConnectionStatus.CONNECTED) {
+            if (getDeviceControlService().getDeviceDrawingManager().isDrawing()) {
+                drawingProgress.setVisibility(View.VISIBLE);
+                btnStop.setEnabled(true);
+                if (getDeviceControlService().getDeviceDrawingManager()
+                        .isDrawingPaused()) {
+                    btnPause.setEnabled(false);
+                    btnResume.setEnabled(true);
+                } else {
+                    btnPause.setEnabled(true);
+                    btnResume.setEnabled(false);
+                }
+            } else {
+                drawingProgress.setVisibility(View.INVISIBLE);
+                btnStop.setEnabled(false);
+                btnPause.setEnabled(false);
+                btnResume.setEnabled(false);
+            }
         } else {
             drawingProgress.setVisibility(View.INVISIBLE);
+            btnStop.setEnabled(false);
+            btnPause.setEnabled(false);
+            btnResume.setEnabled(false);
         }
     }
 }

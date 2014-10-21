@@ -329,10 +329,6 @@ public class DeviceControlService extends Service {
             serverOut = null;
             socket = null;
 
-            // остановить рисование
-            deviceDrawindManager.stopDrawingOnDevice();
-            deviceStatusManager.stopPollingDeviceStatus();
-
             // очистим "очередь" команд
             cancelCommands();
 

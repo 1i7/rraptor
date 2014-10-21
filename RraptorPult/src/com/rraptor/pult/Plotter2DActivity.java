@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
+import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.io.DxfLoader;
 import com.rraptor.pult.io.SimpleContourIO;
 import com.rraptor.pult.view.VectorDrawing2DView;
@@ -242,12 +243,15 @@ public class Plotter2DActivity extends RRActivity {
 
     private void updateViews() {
         if (getDeviceControlService() != null
-                && getDeviceControlService().getDeviceDrawingManager()
-                        .isDrawing()) {
-            // Выключить кнопку "Рисовать", если уже рисуем
-            btnStartDrawing.setEnabled(false);
+                && getDeviceControlService().getConnectionStatus() == ConnectionStatus.CONNECTED) {
+            if (getDeviceControlService().getDeviceDrawingManager().isDrawing()) {
+                // Выключить кнопку "Рисовать", если уже рисуем
+                btnStartDrawing.setEnabled(false);
+            } else {
+                btnStartDrawing.setEnabled(true);
+            }
         } else {
-            btnStartDrawing.setEnabled(true);
+            btnStartDrawing.setEnabled(false);
         }
     }
 }
