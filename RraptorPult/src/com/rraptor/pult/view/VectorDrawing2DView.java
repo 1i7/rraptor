@@ -26,7 +26,7 @@ public class VectorDrawing2DView extends WorkingArea2DView {
 
         // draw user point if set ()
         if (userPoint1 != null) {
-            paint.setColor(Color.BLUE);
+            paint.setColor(Color.GRAY);
             canvas.drawCircle((float) userPoint1.getX(),
                     (float) userPoint1.getY(), 5, paint);
         }
