@@ -235,10 +235,13 @@ public class Plotter2DActivity extends RRActivity {
      * рисования.
      */
     private void startDrawingOnDevice() {
-        getDeviceControlService().getDeviceDrawingManager()
-                .startDrawingOnDevice(plotterCanvas.getDrawingLines());
-        gotoDrawingProgress();
-        this.finish();
+        if (getDeviceControlService().getDeviceDrawingManager()
+                .setDrawingLines(plotterCanvas.getDrawingLines())) {
+            getDeviceControlService().getDeviceDrawingManager()
+                    .startDrawingOnDevice();
+            gotoDrawingProgress();
+            this.finish();
+        }
     }
 
     private void updateViews() {

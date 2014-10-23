@@ -224,6 +224,24 @@ public class DeviceDrawingManager {
     }
 
     /**
+     * Задать фигуру для рисования на устройстве. Фигуру нельзя поменять, если
+     * процесс рисования уже запущен - нужно дождаться, пока он завершится или
+     * будет прерван вызовом stopDrawingOnDevice.
+     * 
+     * @param drawingLines
+     * @return true, если удалось задать фигуру; false, если процесс рисования
+     *         уже запущен, изменить фигуру нельзя.
+     */
+    public boolean setDrawingLines(final List<Line2D> drawingLines) {
+        if (isDrawing) {
+            return false;
+        } else {
+            this.drawingLines = drawingLines;
+            return true;
+        }
+    }
+
+    /**
      * Установить статус линии.
      * 
      * @param line
@@ -234,22 +252,17 @@ public class DeviceDrawingManager {
     }
 
     /**
-     * Начать рисование двумерной фигуры в отдельном потоке. Этот поток живет
-     * параллельно с основным потоком выполнения команд из DeviceControlService
-     * и добавляет команды рисования в общую очередь в нужный момент. Новая
-     * команда рисования добавляется в очередь после того, как завершился
-     * процесс рисования для предыдущей команды. Пока идет процесс рисования,
-     * устройство может принимать и отвечать на другие команды (например команды
-     * статуса и остановки).
+     * Начать рисование фигуры в отдельном потоке. Этот поток живет параллельно
+     * с основным потоком выполнения команд из DeviceControlService и добавляет
+     * команды рисования в общую очередь в нужный момент. Новая команда
+     * рисования добавляется в очередь после того, как завершился процесс
+     * рисования для предыдущей команды. Пока идет процесс рисования, устройство
+     * может принимать и отвечать на другие команды (например команды статуса и
+     * остановки).
      * 
      * @param drawingLines
      */
-    public boolean startDrawingOnDevice(final List<Line2D> drawingLines) {
-        if (isDrawing) {
-            return false;
-        }
-        devControlService.debug("DeviceDrawingManager: startDrawingOnDevice");
-        this.drawingLines = drawingLines;
+    public void startDrawingOnDevice() {
 
         new Thread(new Runnable() {
             @Override
@@ -257,6 +270,8 @@ public class DeviceDrawingManager {
                 if (isDrawing) {
                     return;
                 }
+                devControlService
+                        .debug("DeviceDrawingManager: startDrawingOnDevice");
 
                 isDrawing = true;
                 drawingCmdWaiting = false;
@@ -321,7 +336,6 @@ public class DeviceDrawingManager {
                 devControlService.fireOnFinishDrawing();
             }
         }).start();
-        return true;
     }
 
     /**
