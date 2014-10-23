@@ -21,6 +21,8 @@ public class PlotterAreaView extends WorkingArea2DView {
         NORMAL, DRAWING_PROGRESS, DRAWING_ERROR, DRAWN
     }
 
+    private final static boolean WORKING_BLOCK_PROJECTION_LOG = true;
+
     /**
      * Высота рабочей области по Z, мм
      */
@@ -134,7 +136,7 @@ public class PlotterAreaView extends WorkingArea2DView {
 
         // нарисовать текущее положение рабочего блока
         if (canvasWorkingBlockPosition != null) {
-            paint.setColor(Color.BLUE);
+            paint.setColor(Color.GRAY);
             paint.setStrokeWidth(2);
 
             // на рабочей области XY
@@ -143,10 +145,13 @@ public class PlotterAreaView extends WorkingArea2DView {
             // (float) canvasWorkingBlockPosition.getY(),
             // getWorkingBlockProjectionRadius(workingBlockPosition.getZ()),
             // paint);
-            canvas.drawCircle((float) canvasWorkingBlockPosition.getX(),
+            canvas.drawCircle(
+                    (float) canvasWorkingBlockPosition.getX(),
                     (float) canvasWorkingBlockPosition.getY(),
-                    getWorkingBlockLogProjectionRadius(workingBlockPosition
-                            .getZ()), paint);
+                    (WORKING_BLOCK_PROJECTION_LOG ? getWorkingBlockLogProjectionRadius(workingBlockPosition
+                            .getZ())
+                            : getWorkingBlockProjectionRadius(workingBlockPosition
+                                    .getZ())), paint);
 
             canvas.drawLine((float) canvasWorkingBlockPosition.getX() - 3,
                     (float) canvasWorkingBlockPosition.getY(),
