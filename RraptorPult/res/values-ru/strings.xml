@@ -26,24 +26,33 @@
     <string name="status_error">Ошибка</string>
     <string name="connect">Подключиться</string>
     
-    <!-- Стус устройства -->
-    <string name="status_connection_status">Статус подключения</string>
-    <string name="status_connection_type">Тип подключения</string>
-    <string name="status_connection_info">Информация о подключении</string>
-    <string name="status_device_name">Имя</string>
-    <string name="status_device_model">Модель</string>
-    <string name="status_device_serial_number">Серийный номер</string>
-    <string name="status_device_description">Описание</string>
-    <string name="status_device_version">Версия</string>
-    <string name="status_device_manufacturer">Производитель</string>
-    <string name="status_device_uri">Сайт</string>
-    <string name="status_device_status">Статус устройства</string>
-    <string name="status_working_area_dim">Рабочая область</string>
-    <string name="status_current_pos">Положение блока</string>
+    <!-- Информация об устройстве -->
+    <string name="info_connection_status">Статус подключения</string>
+    <string name="info_connection_type">Тип подключения</string>
+    <string name="info_connection_info">Информация о подключении</string>
+    <string name="info_device_name">Имя</string>
+    <string name="info_device_model">Модель</string>
+    <string name="info_device_serial_number">Серийный номер</string>
+    <string name="info_device_description">Описание</string>
+    <string name="info_device_version">Версия</string>
+    <string name="info_device_manufacturer">Производитель</string>
+    <string name="info_device_uri">Сайт</string>
+    <string name="info_device_status">Статус устройства</string>
+    <string name="info_working_area_dim">Рабочая область</string>
+    <string name="info_current_pos">Положение блока</string>
+    
+    <!-- Процесс рисования -->
+    <string name="start_drawing">Рисовать</string>
     <string name="pause">Пауза</string>
     <string name="resume">Возобновить</string>
     <string name="stop">Остановить</string>
     <string name="disconnect">Отключить</string>
+    
+    <string name="drawing_status_not_connected">Не подключен</string>
+    <string name="drawing_status_load_drawing">Загрузите рисунок</string>
+    <string name="drawing_status_ready_to_draw">Готов рисовать</string>
+    <string name="drawing_status_drawing">Рисую</string>
+    <string name="drawing_status_paused">На паузе</string>
     
     <!-- Отладка -->
     <string name="clear_log">Очистить отладочные сообщения</string>

@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.core.DeviceControlService;
@@ -26,21 +24,19 @@ public class CalibrateActivity extends RRActivity {
         public void onReceive(final Context context, final Intent intent) {
             if (DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusUpdate();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusUpdate();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceStartDrawing();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceFinishDrawing();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_DRAWING_ERROR
                     .equals(intent.getAction())) {
-                final Exception e = (Exception) intent
-                        .getSerializableExtra(DeviceControlService.EXTRA_EXCEPTION);
-                onDeviceDrawingError(e);
+                updateViews();
             }
         }
     };
@@ -105,8 +101,6 @@ public class CalibrateActivity extends RRActivity {
         }
     };
 
-    private final Handler handler = new Handler();
-
     private ImageButton btnXF;
     private ImageButton btnXB;
     private ImageButton btnYF;
@@ -133,7 +127,8 @@ public class CalibrateActivity extends RRActivity {
         btnZB = (ImageButton) findViewById(R.id.z_backward_btn);
         btnZB.setOnTouchListener(onTouchListener);
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
@@ -150,44 +145,18 @@ public class CalibrateActivity extends RRActivity {
         return true;
     }
 
-    private void onDeviceDrawingError(final Exception ex) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(CalibrateActivity.this,
-                        "Не получилось нарисовать: " + ex.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                updateViews();
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(deviceBroadcastReceiver);
+        super.onDestroy();
     }
 
-    private void onDeviceFinishDrawing() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
+    @Override
+    protected void onDeviceControlServiceConnected(
+            final DeviceControlService service) {
+        super.onDeviceControlServiceConnected(service);
 
-    private void onDeviceStartDrawing() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
-
-    private void onDeviceStatusUpdate() {
-        handler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+        updateViews();
     }
 
     @Override

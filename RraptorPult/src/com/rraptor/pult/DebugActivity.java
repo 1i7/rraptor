@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -27,8 +26,6 @@ public class DebugActivity extends RRActivity {
         }
     };
 
-    private final Handler handler = new Handler();
-
     private TextView txtDebug;
 
     /**
@@ -37,22 +34,6 @@ public class DebugActivity extends RRActivity {
     private void clearDebugMessages() {
         getDeviceControlService().clearDebugMessages();
         txtDebug.setText("");
-    }
-
-    /**
-     * Напечатать отладочное сообщение.
-     * 
-     * @param msg
-     */
-    @Override
-    protected void debug(final String msg) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                txtDebug.append(msg + "\n");
-            }
-        });
-        System.out.println(msg);
     }
 
     @Override
@@ -71,14 +52,21 @@ public class DebugActivity extends RRActivity {
             }
         });
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_DEBUG_MESSAGE_POSTED);
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
+    /**
+     * Напечатать отладочное сообщение.
+     * 
+     * @param msg
+     */
     private void onDebugMessagePosted(final String msg) {
-        debug(msg);
+        txtDebug.append(msg + "\n");
+        System.out.println(msg);
     }
 
     @Override

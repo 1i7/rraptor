@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.TextView;
 
 import com.rraptor.pult.core.DeviceControlService;
@@ -25,8 +24,6 @@ public class DeviceInfoActivity extends RRActivity {
             }
         }
     };
-
-    private final Handler handler = new Handler();
 
     private TextView txtConnectionType;
     private TextView txtConnectionStatus;
@@ -62,7 +59,8 @@ public class DeviceInfoActivity extends RRActivity {
         txtDeviceWorkingAreaDim = (TextView) findViewById(R.id.txt_working_area_dim);
         txtDeviceCurrentPos = (TextView) findViewById(R.id.txt_current_pos);
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
@@ -79,21 +77,14 @@ public class DeviceInfoActivity extends RRActivity {
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
         super.onDeviceControlServiceConnected(service);
-        updateStatusViews();
+        updateViews();
     }
 
     private void onDeviceStatusUpdate() {
-        handler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                updateStatusViews();
-            }
-
-        });
+        updateViews();
     }
 
-    private void updateStatusViews() {
+    private void updateViews() {
         txtConnectionStatus.setText(getDeviceControlService()
                 .getConnectionStatus().name());
         txtConnectionType

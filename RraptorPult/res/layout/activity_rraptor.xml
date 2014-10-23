@@ -10,26 +10,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".RRaptorActivity" >
 
-    <LinearLayout
+    <com.rraptor.pult.view.SystemStatusView
+        android:id="@+id/rr_system_status"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/txt_status"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <Button
-            android:id="@+id/btn_connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="@string/connect" />
-    </LinearLayout>
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/btn_goto_plotter_2d"
@@ -38,8 +22,7 @@
         android:layout_marginTop="12dp"
         android:layout_weight="0"
         android:text="@string/rraptor_plotter2d" />
-    
-    
+
     <Button
         android:id="@+id/btn_goto_drawing_progress"
         android:layout_width="match_parent"

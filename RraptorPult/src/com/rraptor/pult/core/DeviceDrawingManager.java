@@ -1,5 +1,6 @@
 package com.rraptor.pult.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class DeviceDrawingManager {
 
     // Информация о рисунке
     private final Map<Line2D, LineDrawingStatus> lineStatus = new HashMap<Line2D, LineDrawingStatus>();
-    private List<Line2D> drawingLines;
+    private final List<Line2D> drawingLines = new ArrayList<Line2D>();
 
     public DeviceDrawingManager(final DeviceControlService devControlService) {
         this.devControlService = devControlService;
@@ -58,12 +59,13 @@ public class DeviceDrawingManager {
      * Выполнить команду на устройстве. Блокируется до тех пор, пока не будет
      * получен ответ о выполнении команды на устройстве или сообщение об ошибке
      * отправки команды на устройство или операция не будет прервана
-     * пользотелем.
+     * пользователем.
      * 
      * @param cmd
      * @throws Exception
      */
-    private void executeCommand(final String cmd) throws Exception {
+    private void executeCommand(final String cmd) throws InterruptedException,
+            Exception {
         resendDrawingCmd = true;
         while (resendDrawingCmd) {
             // Дождёмся момента, когда устройство закончит
@@ -74,13 +76,7 @@ public class DeviceDrawingManager {
             // может не быть актуальной - если окажется, что устройство не
             // готово принять команду, оно просто вернет статус возврата BUSY и
             // мы повторим отправку команды.
-            while (isDrawing
-                    && (isDrawingPaused || devControlService.getDeviceStatus() != DeviceStatus.IDLE)) {
-                Thread.sleep(100);
-            }
-            if (!isDrawing) {
-                throw new Exception("Aborted");
-            }
+            waitForDeviceStatusIdle();
 
             // TODO: не слишком хороший способ организовать выход из блокировки
             drawingCmdWaiting = devControlService.sendCommand(cmd,
@@ -122,11 +118,15 @@ public class DeviceDrawingManager {
             }
             // обновим статус устройства до актуального состояния
             // (просто так, на логику работы это не повлияет)
+            // TODO: ОТПРАВЛЯТЬ ЗАПРОС СТАТУСА вместе с командой G-кода в одном
+            // пакете через точку с запятой, чтобы гарантированно иметь
+            // обновленное значение статуса сразу после старта работы на
+            // устройстве
             devControlService.updateDeviceStatus();
 
             // Проверим условия выхода
             if (!isDrawing) {
-                throw new Exception("Aborted");
+                throw new InterruptedException("Aborted");
             }
             if (drawingCmdError) {
                 throw new Exception("Error while drawing");
@@ -236,7 +236,10 @@ public class DeviceDrawingManager {
         if (isDrawing) {
             return false;
         } else {
-            this.drawingLines = drawingLines;
+            this.drawingLines.clear();
+            if (drawingLines != null) {
+                this.drawingLines.addAll(drawingLines);
+            }
             return true;
         }
     }
@@ -321,6 +324,9 @@ public class DeviceDrawingManager {
 
                         endPoint = line.getEnd();
                     }
+
+                    // Дождаться выполнения последней команды
+                    waitForDeviceStatusIdle();
                 } catch (final Exception e) {
                     if (currentLine != null) {
                         setLineStatus(currentLine,
@@ -349,5 +355,31 @@ public class DeviceDrawingManager {
 
         // остановить печатный блок на устройстве
         devControlService.sendCommand(DeviceConnection.CMD_RR_STOP, null);
+    }
+
+    /**
+     * Дождаться, пока устройство перейдет в состояние IDLE и при этом процесс
+     * рисования не будет на паузе.
+     * 
+     * Возвращается после того, как первый раз поймает статус устройство IDLE.
+     * Это не гарантирует того, что после этого вызова устройство не вернется в
+     * состояние WORKING.
+     * 
+     * @throws InterruptedException
+     *             рисование прекращено в процессе ожидания
+     */
+    private void waitForDeviceStatusIdle() throws InterruptedException {
+        // Типа дождаться, что статус после предыдущей команды точно обновился
+        // TODO: ОТПРАВЛЯТЬ ЗАПРОС СТАТУСА вместе с командой G-кода в одном
+        // пакете через точку с запятой, чтобы гарантированно иметь обновленное
+        // значение статуса сразу после старта работы на устройстве
+        Thread.sleep(2000);
+        while (isDrawing
+                && (isDrawingPaused || devControlService.getDeviceStatus() != DeviceStatus.IDLE)) {
+            Thread.sleep(100);
+        }
+        if (!isDrawing) {
+            throw new InterruptedException("Aborted");
+        }
     }
 }

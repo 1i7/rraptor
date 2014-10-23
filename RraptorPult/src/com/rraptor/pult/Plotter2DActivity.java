@@ -8,7 +8,10 @@ import java.io.IOException;
 
 import org.kabeja.parser.ParseException;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -34,6 +37,26 @@ public class Plotter2DActivity extends RRActivity {
 
     private static final String SAVED_LINES_FILE_NAME = "saved_lines.txt";
 
+    private final BroadcastReceiver deviceBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            if (DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE
+                    .equals(intent.getAction())) {
+                updateViews();
+            } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
+                    .equals(intent.getAction())) {
+                updateViews();
+            } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
+                    .equals(intent.getAction())) {
+                updateViews();
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_ERROR
+                    .equals(intent.getAction())) {
+                updateViews();
+            }
+        }
+    };
+
     private VectorDrawing2DView plotterCanvas;
     private Button btnOpenFileYaDisk;
     private Button btnOpenFileSdcard;
@@ -48,6 +71,9 @@ public class Plotter2DActivity extends RRActivity {
         startActivity(new Intent(this, DrawingProgressActivity.class));
     }
 
+    /**
+     * Загрузить демонстрационный контур из файла DXF.
+     */
     private void loadDemoDxf() {
         try {
             plotterCanvas.setDrawingLines(DxfLoader.getLines(DxfLoader
@@ -153,6 +179,22 @@ public class Plotter2DActivity extends RRActivity {
                 startDrawingOnDevice();
             }
         });
+
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
+        final IntentFilter filter = new IntentFilter(
+                DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_START_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_FINISH_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_ERROR);
+
+        registerReceiver(deviceBroadcastReceiver, filter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(deviceBroadcastReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -237,8 +279,6 @@ public class Plotter2DActivity extends RRActivity {
     private void startDrawingOnDevice() {
         if (getDeviceControlService().getDeviceDrawingManager()
                 .setDrawingLines(plotterCanvas.getDrawingLines())) {
-            getDeviceControlService().getDeviceDrawingManager()
-                    .startDrawingOnDevice();
             gotoDrawingProgress();
             this.finish();
         }

@@ -7,17 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Color;
-import android.os.Handler;
 import android.os.IBinder;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceControlBinder;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
+import com.rraptor.pult.view.SystemStatusView;
 
 public abstract class RRActivity extends Activity {
 
@@ -55,12 +53,29 @@ public abstract class RRActivity extends Activity {
         public void onReceive(final Context context, final Intent intent) {
             if (DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onConnectionStatusChanged((DeviceControlService.ConnectionStatus) intent
+                onConnectionStatusChange((DeviceControlService.ConnectionStatus) intent
                         .getSerializableExtra(DeviceControlService.EXTRA_CONNECTION_STATUS));
             } else if (DeviceControlService.ACTION_DEVICE_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusChanged((DeviceControlService.DeviceStatus) intent
+                onDeviceStatusChange((DeviceControlService.DeviceStatus) intent
                         .getSerializableExtra(DeviceControlService.EXTRA_DEVICE_STATUS));
+            } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
+            } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_ERROR
+                    .equals(intent.getAction())) {
+                final Exception e = (Exception) intent
+                        .getSerializableExtra(DeviceControlService.EXTRA_EXCEPTION);
+                onDeviceDrawingError(e);
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_PAUSED
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_RESUMED
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
             }
         }
     };
@@ -68,10 +83,7 @@ public abstract class RRActivity extends Activity {
     private DeviceControlService devControlService;
     private boolean isBound = false;
 
-    private TextView txtStatus;
-    private Button btnConnect;
-
-    private final Handler handler = new Handler();
+    private SystemStatusView pnlSystemStatus;
 
     /**
      * Напечатать отладочное сообщение.
@@ -103,23 +115,26 @@ public abstract class RRActivity extends Activity {
      * onCreate после вызова setContentView)
      */
     protected void initViews() {
-        txtStatus = (TextView) findViewById(R.id.txt_status);
-
-        btnConnect = (Button) findViewById(R.id.btn_connect);
-        btnConnect.setOnClickListener(new View.OnClickListener() {
+        pnlSystemStatus = (SystemStatusView) findViewById(R.id.rr_system_status);
+        pnlSystemStatus.setConnectOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 // подключиться/переподключиться к устройству
                 devControlService.connectToDeviceTcp();
-
             }
         });
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_START_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_FINISH_DRAWING);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_ERROR);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_PAUSED);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_RESUMED);
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
@@ -130,14 +145,9 @@ public abstract class RRActivity extends Activity {
      * 
      * @param status
      */
-    protected void onConnectionStatusChanged(
+    protected void onConnectionStatusChange(
             final ConnectionStatus connectionStatus) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+        updateViews();
     }
 
     @Override
@@ -162,19 +172,32 @@ public abstract class RRActivity extends Activity {
     }
 
     /**
+     * Процесс рисования завершился с ошибкой
+     * 
+     * @param ex
+     */
+    private void onDeviceDrawingError(final Exception ex) {
+        Toast.makeText(this, "Не получилось нарисовать: " + ex.getMessage(),
+                Toast.LENGTH_LONG).show();
+        updateViews();
+    }
+
+    /**
+     * Обновить информацию о процессе рисования.
+     */
+    private void onDeviceDrawingStatusChange() {
+        updateViews();
+    }
+
+    /**
      * Обновить статус устройства.
      * 
      * @param deviceStatus
      * 
      * @param status
      */
-    protected void onDeviceStatusChanged(DeviceStatus deviceStatus) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+    protected void onDeviceStatusChange(final DeviceStatus deviceStatus) {
+        updateViews();
     }
 
     @Override
@@ -205,65 +228,33 @@ public abstract class RRActivity extends Activity {
      * Обновить элементы управления в зависимости от текущего состояния.
      */
     private void updateViews() {
+        pnlSystemStatus.setConnectionStatus(devControlService
+                .getConnectionStatus());
 
         switch (devControlService.getConnectionStatus()) {
-        case DISCONNECTED:
-            txtStatus.setText(R.string.status_disconnected);
-
-            btnConnect.setVisibility(View.VISIBLE);
-            btnConnect.setEnabled(true);
-
-            break;
         case CONNECTED:
-            txtStatus.setText(getString(R.string.status_connected) + ": "
-                    + devControlService.getConnectionInfo());
-
-            btnConnect.setVisibility(View.GONE);
-            btnConnect.setEnabled(false);
-
+            pnlSystemStatus.setConnectionInfo(devControlService
+                    .getConnectionInfo());
             break;
         case CONNECTING:
-            txtStatus.setText(R.string.status_connecting);
-
-            btnConnect.setVisibility(View.VISIBLE);
-            btnConnect.setEnabled(false);
-
+            break;
+        case DISCONNECTED:
             break;
         case ERROR:
-            txtStatus.setText(getString(R.string.status_error) + ": "
-                    + devControlService.getConnectionErrorMessage());
-
-            btnConnect.setVisibility(View.VISIBLE);
-            btnConnect.setEnabled(true);
-
+            pnlSystemStatus.setConnectionErrorMessage(devControlService
+                    .getConnectionErrorMessage());
             break;
         default:
             break;
         }
 
         if (devControlService.getConnectionStatus() == ConnectionStatus.CONNECTED) {
-            switch (devControlService.getDeviceStatus()) {
-            case IDLE:
-                txtStatus.setTextColor(Color.GREEN);
-                break;
-            case WORKING:
-                txtStatus.setTextColor(Color.RED);
-                break;
-            case UNKNOWN:
-            default:
-                txtStatus.setTextColor(Color.BLACK);
-                break;
-            }
-        } else {
-            txtStatus.setTextColor(Color.BLACK);
-        }
+            pnlSystemStatus.setDrawingStatus(devControlService
+                    .getDeviceDrawingManager().isDrawing(), devControlService
+                    .getDeviceDrawingManager().isDrawingPaused());
 
-        // if (ConnectionStatus.CONNECTED.equals(connectionStatus)) {
-        // btnCmdLedOn.setEnabled(true);
-        // btnCmdLedOff.setEnabled(true);
-        // } else {
-        // btnCmdLedOn.setEnabled(false);
-        // btnCmdLedOff.setEnabled(false);
-        // }
+            pnlSystemStatus
+                    .setDeviceStatus(devControlService.getDeviceStatus());
+        }
     }
 }

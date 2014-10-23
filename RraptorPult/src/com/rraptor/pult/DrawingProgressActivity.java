@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rraptor.pult.core.DeviceControlService;
@@ -35,10 +35,10 @@ public class DrawingProgressActivity extends RRActivity {
                 onDeviceCurrentPosChange();
             } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceStartDrawing();
+                onDeviceDrawingStatusChange();
             } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceFinishDrawing();
+                onDeviceDrawingStatusChange();
             } else if (DeviceControlService.ACTION_DEVICE_DRAWING_UPDATE
                     .equals(intent.getAction())) {
                 final Line2D line = (Line2D) intent
@@ -51,17 +51,23 @@ public class DrawingProgressActivity extends RRActivity {
                 final Exception e = (Exception) intent
                         .getSerializableExtra(DeviceControlService.EXTRA_EXCEPTION);
                 onDeviceDrawingError(e);
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_PAUSED
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
+            } else if (DeviceControlService.ACTION_DEVICE_DRAWING_RESUMED
+                    .equals(intent.getAction())) {
+                onDeviceDrawingStatusChange();
             }
         }
     };
 
-    private final Handler handler = new Handler();
-
     private PlotterAreaView plotterCanvas;
     private ProgressBar drawingProgress;
+    private Button btnStart;
     private Button btnStop;
     private Button btnPause;
     private Button btnResume;
+    private TextView txtDrawingStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +77,15 @@ public class DrawingProgressActivity extends RRActivity {
 
         plotterCanvas = (PlotterAreaView) findViewById(R.id.plotter_canvas);
         drawingProgress = (ProgressBar) findViewById(R.id.drawing_progress);
+        txtDrawingStatus = (TextView) findViewById(R.id.txt_drawing_status);
+
+        btnStart = (Button) findViewById(R.id.btn_start);
+        btnStart.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDrawing();
+            }
+        });
 
         btnStop = (Button) findViewById(R.id.btn_stop);
         btnStop.setOnClickListener(new OnClickListener() {
@@ -96,7 +111,8 @@ public class DrawingProgressActivity extends RRActivity {
             }
         });
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
@@ -105,6 +121,9 @@ public class DrawingProgressActivity extends RRActivity {
         filter.addAction(DeviceControlService.ACTION_DEVICE_FINISH_DRAWING);
         filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_UPDATE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_ERROR);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_PAUSED);
+        filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_RESUMED);
+
         registerReceiver(deviceBroadcastReceiver, filter);
     }
 
@@ -118,16 +137,11 @@ public class DrawingProgressActivity extends RRActivity {
     protected void onDeviceControlServiceConnected(
             final DeviceControlService service) {
         super.onDeviceControlServiceConnected(service);
-        updateViews();
         plotterCanvas.setDrawingLines(getDeviceControlService()
                 .getDeviceDrawingManager().getDrawingLines());
         onDeviceCurrentPosChange();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+
+        updateViews();
     }
 
     /**
@@ -141,15 +155,14 @@ public class DrawingProgressActivity extends RRActivity {
     }
 
     private void onDeviceDrawingError(final Exception ex) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(DrawingProgressActivity.this,
-                        "Не получилось нарисовать: " + ex.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                updateViews();
-            }
-        });
+        Toast.makeText(DrawingProgressActivity.this,
+                "Не получилось нарисовать: " + ex.getMessage(),
+                Toast.LENGTH_LONG).show();
+        updateViews();
+    }
+
+    private void onDeviceDrawingStatusChange() {
+        updateViews();
     }
 
     private void onDeviceDrawingUpdate(final Line2D line,
@@ -157,34 +170,8 @@ public class DrawingProgressActivity extends RRActivity {
         plotterCanvas.postInvalidate();
     }
 
-    private void onDeviceFinishDrawing() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
-
-    private void onDeviceStartDrawing() {
-        plotterCanvas.setDrawingLines(getDeviceControlService()
-                .getDeviceDrawingManager().getDrawingLines());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
-
     private void onDeviceStatusUpdate() {
-        handler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+        updateViews();
     }
 
     @Override
@@ -208,6 +195,14 @@ public class DrawingProgressActivity extends RRActivity {
     }
 
     /**
+     * Начать процесс рисования.
+     */
+    private void startDrawing() {
+        getDeviceControlService().getDeviceDrawingManager()
+                .startDrawingOnDevice();
+    }
+
+    /**
      * Остановить процесс рисования.
      */
     private void stopDrawing() {
@@ -220,23 +215,39 @@ public class DrawingProgressActivity extends RRActivity {
                 && getDeviceControlService().getConnectionStatus() == ConnectionStatus.CONNECTED) {
             if (getDeviceControlService().getDeviceDrawingManager().isDrawing()) {
                 drawingProgress.setVisibility(View.VISIBLE);
+                btnStart.setEnabled(false);
                 btnStop.setEnabled(true);
                 if (getDeviceControlService().getDeviceDrawingManager()
                         .isDrawingPaused()) {
+                    txtDrawingStatus.setText(R.string.drawing_status_paused);
                     btnPause.setEnabled(false);
                     btnResume.setEnabled(true);
                 } else {
+                    txtDrawingStatus.setText(R.string.drawing_status_drawing);
                     btnPause.setEnabled(true);
                     btnResume.setEnabled(false);
                 }
             } else {
                 drawingProgress.setVisibility(View.INVISIBLE);
+                if (getDeviceControlService().getDeviceDrawingManager()
+                        .getDrawingLines().size() > 0) {
+                    txtDrawingStatus
+                            .setText(R.string.drawing_status_ready_to_draw);
+                    btnStart.setEnabled(true);
+                } else {
+                    txtDrawingStatus
+                            .setText(R.string.drawing_status_load_drawing);
+                    btnStart.setEnabled(false);
+                }
                 btnStop.setEnabled(false);
                 btnPause.setEnabled(false);
                 btnResume.setEnabled(false);
             }
         } else {
+            txtDrawingStatus.setText(R.string.drawing_status_not_connected);
+
             drawingProgress.setVisibility(View.INVISIBLE);
+            btnStart.setEnabled(false);
             btnStop.setEnabled(false);
             btnPause.setEnabled(false);
             btnResume.setEnabled(false);

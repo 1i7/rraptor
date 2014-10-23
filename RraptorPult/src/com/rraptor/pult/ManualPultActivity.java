@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -33,24 +32,22 @@ public class ManualPultActivity extends RRActivity {
         public void onReceive(final Context context, final Intent intent) {
             if (DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusUpdate();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_STATUS_CHANGE
                     .equals(intent.getAction())) {
-                onDeviceStatusUpdate();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_CURRENT_POS_CHANGE
                     .equals(intent.getAction())) {
                 onDeviceCurrentPosChange();
             } else if (DeviceControlService.ACTION_DEVICE_START_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceStartDrawing();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_FINISH_DRAWING
                     .equals(intent.getAction())) {
-                onDeviceFinishDrawing();
+                updateViews();
             } else if (DeviceControlService.ACTION_DEVICE_DRAWING_ERROR
                     .equals(intent.getAction())) {
-                final Exception e = (Exception) intent
-                        .getSerializableExtra(DeviceControlService.EXTRA_EXCEPTION);
-                onDeviceDrawingError(e);
+                updateViews();
             }
         }
     };
@@ -113,8 +110,6 @@ public class ManualPultActivity extends RRActivity {
             return false;
         }
     };
-
-    private final Handler handler = new Handler();
 
     private PlotterAreaView plotterCanvas;
 
@@ -266,7 +261,8 @@ public class ManualPultActivity extends RRActivity {
             }
         });
 
-        // register broadcast receiver
+        // зарегистрировать приёмник широковещательных сообщений (broadcast
+        // receiver)
         final IntentFilter filter = new IntentFilter(
                 DeviceControlService.ACTION_CONNECTION_STATUS_CHANGE);
         filter.addAction(DeviceControlService.ACTION_DEVICE_STATUS_CHANGE);
@@ -297,12 +293,8 @@ public class ManualPultActivity extends RRActivity {
         plotterCanvas.setDrawingLines(getDeviceControlService()
                 .getDeviceDrawingManager().getDrawingLines());
         onDeviceCurrentPosChange();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
+
+        updateViews();
     }
 
     /**
@@ -311,48 +303,6 @@ public class ManualPultActivity extends RRActivity {
     void onDeviceCurrentPosChange() {
         plotterCanvas.setWorkingBlockPosition(getDeviceControlService()
                 .getDeviceCurrentPosition());
-    }
-
-    private void onDeviceDrawingError(final Exception ex) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(ManualPultActivity.this,
-                        "Не получилось нарисовать: " + ex.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                updateViews();
-            }
-        });
-    }
-
-    private void onDeviceFinishDrawing() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
-
-    private void onDeviceStartDrawing() {
-        plotterCanvas.setDrawingLines(getDeviceControlService()
-                .getDeviceDrawingManager().getDrawingLines());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
-    }
-
-    private void onDeviceStatusUpdate() {
-        handler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                updateViews();
-            }
-        });
     }
 
     @Override

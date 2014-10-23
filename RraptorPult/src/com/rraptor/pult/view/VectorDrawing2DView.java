@@ -24,7 +24,7 @@ public class VectorDrawing2DView extends WorkingArea2DView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // draw user point if set ()
+        // нарисовать точку, указанную пользователем
         if (userPoint1 != null) {
             paint.setColor(Color.GRAY);
             canvas.drawCircle((float) userPoint1.getX(),

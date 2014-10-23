@@ -109,13 +109,13 @@ public class DeviceControlService extends Service {
     public static String EXTRA_DEBUG_MESSAGE = "EXTRA_DEBUG_MESSAGE";
 
     // Рисование
-    public static String ACTION_DEVICE_START_DRAWING = "com.rraptor.pult.START_DRAWING";
-    public static String ACTION_DEVICE_FINISH_DRAWING = "com.rraptor.pult.FINISH_DRAWING";
-    public static String ACTION_DEVICE_DRAWING_UPDATE = "com.rraptor.pult.DRAWING_UPDATE";
-    public static String ACTION_DEVICE_DRAWING_ERROR = "com.rraptor.pult.DRAWING_ERROR";
+    public static String ACTION_DEVICE_START_DRAWING = "com.rraptor.pult.ACTION_DEVICE_START_DRAWING";
+    public static String ACTION_DEVICE_FINISH_DRAWING = "com.rraptor.pult.ACTION_DEVICE_FINISH_DRAWING";
+    public static String ACTION_DEVICE_DRAWING_UPDATE = "com.rraptor.pult.ACTION_DEVICE_DRAWING_UPDATE";
+    public static String ACTION_DEVICE_DRAWING_ERROR = "com.rraptor.pult.ACTION_DEVICE_DRAWING_ERROR";
     // Очередь команд рисования
-    public static String ACTION_DRAWING_PAUSED = "com.rraptor.pult.ACTION_DRAWING_PAUSED";
-    public static String ACTION_DRAWING_RESUMED = "com.rraptor.pult.ACTION_DRAWING_RESUMED";
+    public static String ACTION_DEVICE_DRAWING_PAUSED = "com.rraptor.pult.ACTION_DRAWING_PAUSED";
+    public static String ACTION_DEVICE_DRAWING_RESUMED = "com.rraptor.pult.ACTION_DEVICE_DRAWING_RESUMED";
 
     public static String EXTRA_EXCEPTION = "EXTRA_EXCEPTION";
     public static String EXTRA_LINE = "EXTRA_LINE";
@@ -446,7 +446,7 @@ public class DeviceControlService extends Service {
      * @param e
      */
     protected void fireOnDrawingPaused() {
-        final Intent intent = new Intent(ACTION_DRAWING_PAUSED);
+        final Intent intent = new Intent(ACTION_DEVICE_DRAWING_PAUSED);
         getApplicationContext().sendBroadcast(intent);
     }
 
@@ -457,7 +457,7 @@ public class DeviceControlService extends Service {
      * @param e
      */
     protected void fireOnDrawingResumed() {
-        final Intent intent = new Intent(ACTION_DRAWING_RESUMED);
+        final Intent intent = new Intent(ACTION_DEVICE_DRAWING_RESUMED);
         getApplicationContext().sendBroadcast(intent);
     }
 
@@ -785,8 +785,10 @@ public class DeviceControlService extends Service {
      * @param status
      */
     private void setConnectionStatus(final ConnectionStatus status) {
-        this.connectionStatus = status;
-        fireOnConnectionStatusChange(status);
+        if (this.connectionStatus != status) {
+            this.connectionStatus = status;
+            fireOnConnectionStatusChange(status);
+        }
     }
 
     /**
@@ -795,8 +797,10 @@ public class DeviceControlService extends Service {
      * @param status
      */
     private void setDeviceStatus(final DeviceStatus status) {
-        this.deviceStatus = status;
-        fireOnDeviceStatusChange(status);
+        if (this.deviceStatus != status) {
+            this.deviceStatus = status;
+            fireOnDeviceStatusChange(status);
+        }
     }
 
     /**
