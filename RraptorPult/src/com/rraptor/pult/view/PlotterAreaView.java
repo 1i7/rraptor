@@ -136,7 +136,7 @@ public class PlotterAreaView extends WorkingArea2DView {
 
         // нарисовать текущее положение рабочего блока
         if (canvasWorkingBlockPosition != null) {
-            paint.setColor(Color.GRAY);
+            paint.setColor(Color.BLUE);
             paint.setStrokeWidth(2);
 
             // на рабочей области XY
