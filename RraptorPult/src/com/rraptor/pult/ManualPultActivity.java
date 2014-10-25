@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -327,13 +326,6 @@ public class ManualPultActivity extends RRActivity {
         filter.addAction(DeviceControlService.ACTION_DEVICE_FINISH_DRAWING);
         filter.addAction(DeviceControlService.ACTION_DEVICE_DRAWING_ERROR);
         registerReceiver(deviceBroadcastReceiver, filter);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.rraptor_pult, menu);
-        return true;
     }
 
     @Override

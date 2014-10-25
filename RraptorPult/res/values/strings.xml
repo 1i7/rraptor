@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">RRaptor</string>
-    <string name="action_settings">Settings</string>
     <string name="title_activity_rraptor">RRaptor: Control panel</string>
     <string name="title_activity_plotter2d">RRaptor: 2D plotter</string>
     <string name="title_activity_manual">RRaptor: Manual pult</string>
@@ -11,14 +10,14 @@
     <string name="title_activity_drawing_progress">RRaptor: Drawing progress</string>
     <string name="title_activity_debug">RRaptor: Debug</string>
     
-    
     <!-- Control panel -->
     <string name="rraptor_plotter2d">2D plotter</string>
     <string name="rraptor_manual_pult">Manual pult</string>
     <string name="rraptor_calibrate">Calibrate</string>
     <string name="rraptor_info">Device info</string>
     <string name="rraptor_drawing_progress">Drawing progress</string>
-    <string name="rraptor_debug">Debug</string>    
+    
+    <string name="action_debug">Debug</string>
     
     <!-- Device connection -->
     <string name="status_disconnected">Disconnected</string>

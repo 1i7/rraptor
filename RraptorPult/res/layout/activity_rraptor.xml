@@ -2,73 +2,85 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".RRaptorActivity" >
+    android:paddingTop="@dimen/activity_vertical_margin" >
 
     <com.rraptor.pult.view.SystemStatusView
         android:id="@+id/rr_system_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btn_goto_plotter_2d"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_plotter2d" />
+        android:layout_height="match_parent" >
 
-    <Button
-        android:id="@+id/btn_goto_drawing_progress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_drawing_progress" />
+        <ImageView
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:layout_gravity="right|bottom"
+            android:contentDescription="Dinosaur"
+            android:src="@drawable/logo2" />
 
-    <Button
-        android:id="@+id/btn_goto_manual_pult"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_manual_pult" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/btn_goto_calibrate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_calibrate" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1" >
 
-    <Button
-        android:id="@+id/btn_goto_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_info" />
+                <Button
+                    android:id="@+id/btn_goto_plotter_2d"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/rraptor_plotter2d" />
 
-    <Button
-        android:id="@+id/btn_goto_debug"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_weight="0"
-        android:text="@string/rraptor_debug" />
+                <Button
+                    android:id="@+id/btn_goto_drawing_progress"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/rraptor_drawing_progress" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="0dip"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1"
-        android:contentDescription="Dinosaur"
-        android:src="@drawable/logo2" />
+                <Button
+                    android:id="@+id/btn_goto_manual_pult"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/rraptor_manual_pult" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1" >
+
+                <Button
+                    android:id="@+id/btn_goto_calibrate"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/rraptor_calibrate" />
+
+                <Button
+                    android:id="@+id/btn_goto_info"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/rraptor_info" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

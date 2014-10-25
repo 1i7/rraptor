@@ -21,27 +21,29 @@
             android:name="com.rraptor.pult.ManualPultActivity"
             android:label="@string/title_activity_manual"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensorLandscape" 
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.CalibrateActivity"
             android:label="@string/title_activity_calibrate"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.Plotter2DActivity"
             android:label="@string/title_activity_plotter2d"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensorLandscape" 
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.DeviceInfoActivity"
             android:label="@string/title_activity_info"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensor"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.DrawingProgressActivity"
@@ -54,12 +56,14 @@
             android:name="com.rraptor.pult.DebugActivity"
             android:label="@string/title_activity_debug"
             android:parentActivityName="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.rraptor.pult.RRaptorActivity"
             android:label="@string/title_activity_rraptor"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
