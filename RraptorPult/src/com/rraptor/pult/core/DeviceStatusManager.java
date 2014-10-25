@@ -9,7 +9,7 @@ import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 
 public class DeviceStatusManager {
 
-    private final int STATUS_UPDATE_TIMEOUT = 500;
+    private static final int STATUS_UPDATE_TIMEOUT = 500;
 
     private final DeviceControlService devControlService;
 
@@ -72,13 +72,8 @@ public class DeviceStatusManager {
                 isPolling = true;
 
                 while (isPolling) {
-                    devControlService.updateDeviceCurrentPosition();
+                    devControlService.updateDeviceStatusAndPosition();
 
-                    try {
-                        Thread.sleep(STATUS_UPDATE_TIMEOUT);
-                    } catch (InterruptedException e) {
-                    }
-                    devControlService.updateDeviceStatus();
                     try {
                         Thread.sleep(STATUS_UPDATE_TIMEOUT);
                     } catch (InterruptedException e) {

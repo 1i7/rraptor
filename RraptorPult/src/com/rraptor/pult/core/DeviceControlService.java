@@ -143,8 +143,20 @@ public class DeviceControlService extends Service {
      */
     private CommandInfo nextCommand;
 
-    // Информация об устройстве
+    // Информация о подключенном устройстве
+    private String deviceName;
+    private String deviceModel;
+    private String deviceSerialNumber;
+    private String deviceDescription;
+    private String deviceVersion;
+    private String deviceManufacturer;
+    private String deviceUri;
+
+    private Point3D deviceWorkingArea;
     private DeviceStatus deviceStatus = DeviceStatus.UNKNOWN;
+    private Point3D deviceCurrentPosition;
+
+    // Информация об устройстве
     private final CommandListener deviceStatusCommandListener = new CommandListener() {
 
         @Override
@@ -166,17 +178,32 @@ public class DeviceControlService extends Service {
         }
     };
 
-    // Информация о подключенном устройстве
-    private String deviceName;
-    private String deviceModel;
-    private String deviceSerialNumber;
-    private String deviceDescription;
-    private String deviceVersion;
-    private String deviceManufacturer;
-    private String deviceUri;
+    private final CommandListener deviceCurrentPositionCommandListener = new CommandListener() {
 
-    private Point3D deviceWorkingArea;
-    private Point3D deviceCurrentPosition;
+        @Override
+        public void onCommandCanceled(final String cmd) {
+            // ничего не делать
+        }
+
+        @Override
+        public void onCommandExecuted(final String cmd, final String reply) {
+            // получить значения из строки, перевести микрометры в
+            // миллиметры
+            final String[] pos_parts = reply.split(" ");
+            double x = Double.parseDouble(pos_parts[0]) / 1000;
+            double y = Double.parseDouble(pos_parts[1]) / 1000;
+            double z = Double.parseDouble(pos_parts[2]) / 1000;
+
+            final Point3D newPos = new Point3D(x, y, z);
+
+            if (deviceCurrentPosition == null
+                    || !deviceCurrentPosition.equals(newPos)) {
+                // обновить значения свойств устройства
+                deviceCurrentPosition = newPos;
+                fireOnDeviceCurrentPosChange(deviceCurrentPosition);
+            }
+        }
+    };
 
     // Отладочные сообщения
     private final StringBuilder debugMessages = new StringBuilder();
@@ -891,32 +918,7 @@ public class DeviceControlService extends Service {
      */
     public boolean updateDeviceCurrentPosition() {
         return sendCommand(DeviceConnection.CMD_RR_CURRENT_POSITION,
-                new CommandListener() {
-
-                    @Override
-                    public void onCommandCanceled(final String cmd) {
-                    }
-
-                    @Override
-                    public void onCommandExecuted(final String cmd,
-                            final String reply) {
-                        // получить значения из строки, перевести микрометры в
-                        // миллиметры
-                        final String[] pos_parts = reply.split(" ");
-                        double x = Double.parseDouble(pos_parts[0]) / 1000;
-                        double y = Double.parseDouble(pos_parts[1]) / 1000;
-                        double z = Double.parseDouble(pos_parts[2]) / 1000;
-
-                        final Point3D newPos = new Point3D(x, y, z);
-
-                        if (deviceCurrentPosition == null
-                                || !deviceCurrentPosition.equals(newPos)) {
-                            // обновить значения свойств устройства
-                            deviceCurrentPosition = newPos;
-                            fireOnDeviceCurrentPosChange(deviceCurrentPosition);
-                        }
-                    }
-                });
+                deviceCurrentPositionCommandListener);
     }
 
     /**
@@ -929,5 +931,36 @@ public class DeviceControlService extends Service {
     public boolean updateDeviceStatus() {
         return sendCommand(DeviceConnection.CMD_RR_STATUS,
                 deviceStatusCommandListener);
+    }
+
+    /**
+     * Обновить текущий статус устройство и положение рабочего блока.
+     * 
+     * @return
+     */
+    public boolean updateDeviceStatusAndPosition() {
+        return sendCommand(DeviceConnection.CMD_RR_STATUS
+                + DeviceConnection.COMMAND_SEPARATOR
+                + DeviceConnection.CMD_RR_CURRENT_POSITION,
+                new CommandListener() {
+
+                    @Override
+                    public void onCommandCanceled(final String cmd) {
+                    }
+
+                    @Override
+                    public void onCommandExecuted(final String cmd, String reply) {
+                        // разбить склеенную команду и склеенный ответ на части:
+                        final String[] commands = cmd
+                                .split(DeviceConnection.COMMAND_SEPARATOR);
+                        final String[] replies = reply
+                                .split(DeviceConnection.COMMAND_SEPARATOR);
+
+                        deviceStatusCommandListener.onCommandExecuted(
+                                commands[0], replies[0]);
+                        deviceCurrentPositionCommandListener.onCommandExecuted(
+                                commands[1], replies[1]);
+                    }
+                });
     }
 }

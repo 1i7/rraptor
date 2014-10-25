@@ -21,6 +21,14 @@ public class PlotterAreaView extends WorkingArea2DView {
         NORMAL, DRAWING_PROGRESS, DRAWING_ERROR, DRAWN
     }
 
+    /**
+     * продолжительнось анимации - лучше ставить близкой к периоду обновления
+     * текущего положения печатного блока с устройства
+     * (DeviceStatusManager.STATUS_UPDATE_TIMEOUT), тогда процесс движения будет
+     * более плавным, хотя небольшие рывки все равно будут
+     */
+    private static final int WORKING_BLOCK_ANIMATE_DURATION = 500;
+
     private final static boolean WORKING_BLOCK_PROJECTION_LOG = true;
 
     /**
@@ -216,7 +224,9 @@ public class PlotterAreaView extends WorkingArea2DView {
             // к периоду обновления текущего положения печатного блока
             // с устройства, тогда процесс движения будет более плавным,
             // хотя небольшие рывки все равно будут
-            wbPosAnimation.setDuration(1000);
+            // TODO: вынести значение в настройку, чтобы не импортировать
+            // DeviceStatusManager ради константы
+            wbPosAnimation.setDuration(WORKING_BLOCK_ANIMATE_DURATION);
             wbPosAnimation
                     .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override

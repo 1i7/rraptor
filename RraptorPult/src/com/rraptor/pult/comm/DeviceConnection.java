@@ -71,6 +71,8 @@ public interface DeviceConnection {
     public static final String REPLY_ERROR = "error";
     public static final String REPLY_BUSY = "busy";
 
+    public static final String COMMAND_SEPARATOR = ";";
+
     public static final String STATUS_WORKING = "working";
     public static final String STATUS_IDLE = "idle";
 
