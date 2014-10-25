@@ -20,6 +20,12 @@ import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
 
 public class DeviceControlService extends Service {
 
+    /**
+     * Информация о команде для выполнения на устройстве.
+     * 
+     * @author Anton Moiseev
+     * 
+     */
     private class CommandInfo {
         private final String command;
         private final CommandListener commandListener;
@@ -93,6 +99,52 @@ public class DeviceControlService extends Service {
         UNKNOWN, WORKING, IDLE
     }
 
+    /**
+     * Слушает результат выполнения группы команд (команды следуют одна за
+     * одной, склеены разделителем) и распределяет ответы между слушателями
+     * каждой из комманд в группе.
+     * 
+     * @author Anton Moiseev
+     * 
+     */
+    public static class MultyCommandListener implements CommandListener {
+        private final CommandListener[] cmdListeners;
+
+        public MultyCommandListener(final CommandListener[] cmdListeners) {
+            this.cmdListeners = cmdListeners;
+        }
+
+        @Override
+        public void onCommandCanceled(final String cmd) {
+            // разбить склеенную команду на части:
+            final String[] commands = cmd
+                    .split(DeviceProtocol.COMMAND_SEPARATOR);
+
+            // количество элементов во всех массивах должно совпадать
+            for (int i = 0; i < commands.length; i++) {
+                if (cmdListeners != null && cmdListeners[i] != null) {
+                    cmdListeners[i].onCommandCanceled(commands[i]);
+                }
+            }
+        }
+
+        @Override
+        public void onCommandExecuted(final String cmd, final String reply) {
+            // разбить склеенную команду и склеенный ответ на части:
+            final String[] commands = cmd
+                    .split(DeviceProtocol.COMMAND_SEPARATOR);
+            final String[] replies = reply
+                    .split(DeviceProtocol.COMMAND_SEPARATOR);
+
+            // количество элементов во всех массивах должно совпадать
+            for (int i = 0; i < commands.length; i++) {
+                if (cmdListeners != null && cmdListeners[i] != null) {
+                    cmdListeners[i].onCommandExecuted(commands[i], replies[i]);
+                }
+            }
+        }
+    }
+
     // Публичные события
     // Подключение к устройству
     public static String ACTION_CONNECTION_STATUS_CHANGE = "com.rraptor.pult.CONNECTION_STATUS_CHANGE";
@@ -159,7 +211,11 @@ public class DeviceControlService extends Service {
     private Point3D deviceCurrentPosition;
 
     // Информация об устройстве
-    private final CommandListener deviceStatusCommandListener = new CommandListener() {
+    /**
+     * Обрабатывает результат команды получения текущего статуса устройства -
+     * устанавливает значение deviceStatus.
+     */
+    final CommandListener deviceStatusCommandListener = new CommandListener() {
 
         @Override
         public void onCommandCanceled(final String cmd) {
@@ -180,7 +236,11 @@ public class DeviceControlService extends Service {
         }
     };
 
-    private final CommandListener deviceCurrentPositionCommandListener = new CommandListener() {
+    /**
+     * Обрабатывает результат команды получения текущей позиции рабочего блока
+     * устройства - устанавливает новое положение deviceCurrentPosition.
+     */
+    final CommandListener deviceCurrentPositionCommandListener = new CommandListener() {
 
         @Override
         public void onCommandCanceled(final String cmd) {
@@ -944,25 +1004,8 @@ public class DeviceControlService extends Service {
         return sendCommand(DeviceProtocol.CMD_RR_STATUS
                 + DeviceProtocol.COMMAND_SEPARATOR
                 + DeviceProtocol.CMD_RR_CURRENT_POSITION,
-                new CommandListener() {
-
-                    @Override
-                    public void onCommandCanceled(final String cmd) {
-                    }
-
-                    @Override
-                    public void onCommandExecuted(final String cmd, String reply) {
-                        // разбить склеенную команду и склеенный ответ на части:
-                        final String[] commands = cmd
-                                .split(DeviceProtocol.COMMAND_SEPARATOR);
-                        final String[] replies = reply
-                                .split(DeviceProtocol.COMMAND_SEPARATOR);
-
-                        deviceStatusCommandListener.onCommandExecuted(
-                                commands[0], replies[0]);
-                        deviceCurrentPositionCommandListener.onCommandExecuted(
-                                commands[1], replies[1]);
-                    }
-                });
+                new MultyCommandListener(new CommandListener[] {
+                        deviceStatusCommandListener,
+                        deviceCurrentPositionCommandListener }));
     }
 }

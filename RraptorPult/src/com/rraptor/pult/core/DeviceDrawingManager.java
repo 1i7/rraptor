@@ -14,6 +14,7 @@ import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
+import com.rraptor.pult.core.DeviceControlService.MultyCommandListener;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point2D;
 import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
@@ -78,9 +79,19 @@ public class DeviceDrawingManager {
             // мы повторим отправку команды.
             waitForDeviceStatusIdle();
 
-            // TODO: не слишком хороший способ организовать выход из блокировки
-            drawingCmdWaiting = devControlService.sendCommand(cmd,
-                    new CommandListener() {
+            // попробуем отправить команду рисовать на устройстве и заодно сразу
+            // обновим статус устройства до актуального состояния;
+            // ЗАПРОС СТАТУСА отправляется вместе с командой G-кода в одном
+            // пакете через точку с запятой, чтобы гарантированно иметь
+            // обновленное значение статуса сразу после старта работы на
+            // устройстве
+            // TODO: не слишком хороший способ организовать выход из блокировки,
+            // а может и нормальный - пользователь всегда может прервать процесс
+            // ожидания
+            drawingCmdWaiting = devControlService.sendCommand(cmd
+                    + DeviceProtocol.COMMAND_SEPARATOR
+                    + DeviceProtocol.CMD_RR_STATUS, new MultyCommandListener(
+                    new CommandListener[] { new CommandListener() {
                         @Override
                         public void onCommandCanceled(final String cmd) {
                             // отмена отправки команды на устройство (например
@@ -101,8 +112,7 @@ public class DeviceDrawingManager {
                             if (DeviceProtocol.REPLY_OK.equals(reply)) {
                                 resendDrawingCmd = false;
                                 drawingCmdError = false;
-                            } else if (DeviceProtocol.REPLY_BUSY
-                                    .equals(reply)) {
+                            } else if (DeviceProtocol.REPLY_BUSY.equals(reply)) {
                                 resendDrawingCmd = true;
                                 drawingCmdError = false;
                             } else {
@@ -111,18 +121,11 @@ public class DeviceDrawingManager {
                             }
                             drawingCmdWaiting = false;
                         }
-                    });
+                    }, devControlService.deviceStatusCommandListener }));
             // дождаться результата команды здесь
             while (isDrawing && drawingCmdWaiting) {
                 Thread.sleep(100);
             }
-            // обновим статус устройства до актуального состояния
-            // (просто так, на логику работы это не повлияет)
-            // TODO: ОТПРАВЛЯТЬ ЗАПРОС СТАТУСА вместе с командой G-кода в одном
-            // пакете через точку с запятой, чтобы гарантированно иметь
-            // обновленное значение статуса сразу после старта работы на
-            // устройстве
-            devControlService.updateDeviceStatus();
 
             // Проверим условия выхода
             if (!isDrawing) {
@@ -369,11 +372,6 @@ public class DeviceDrawingManager {
      *             рисование прекращено в процессе ожидания
      */
     private void waitForDeviceStatusIdle() throws InterruptedException {
-        // Типа дождаться, что статус после предыдущей команды точно обновился
-        // TODO: ОТПРАВЛЯТЬ ЗАПРОС СТАТУСА вместе с командой G-кода в одном
-        // пакете через точку с запятой, чтобы гарантированно иметь обновленное
-        // значение статуса сразу после старта работы на устройстве
-        Thread.sleep(2000);
         while (isDrawing
                 && (isDrawingPaused || devControlService.getDeviceStatus() != DeviceStatus.IDLE)) {
             Thread.sleep(100);
