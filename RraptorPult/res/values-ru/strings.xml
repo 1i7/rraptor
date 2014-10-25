@@ -19,6 +19,12 @@
     
     <string name="action_debug">Отладка</string>
     
+    <!-- System status -->
+    <string name="rr_device_status_idle">ожидаю</string>
+    <string name="rr_device_status_working">работаю</string>
+    <string name="rr_drawing_status_drawing">рисую</string>
+    <string name="rr_drawing_status_paused">на паузе</string>
+    
     <!-- Подключение к устройству -->
     <string name="status_disconnected">Отключен</string>
     <string name="status_connecting">Подключаем...</string>

@@ -110,11 +110,11 @@ public class SystemStatusView extends LinearLayout {
     public void setDeviceStatus(final DeviceStatus status) {
         switch (status) {
         case IDLE:
-            txtDeviceStatus.setText("ожидаю");
+            txtDeviceStatus.setText(R.string.rr_device_status_idle);
             txtDeviceStatus.setTextColor(Color.GREEN);
             break;
         case WORKING:
-            txtDeviceStatus.setText("работаю");
+            txtDeviceStatus.setText(R.string.rr_device_status_working);
             txtDeviceStatus.setTextColor(Color.RED);
             break;
         case UNKNOWN:
@@ -129,10 +129,8 @@ public class SystemStatusView extends LinearLayout {
             final boolean isDrawingPaused) {
         if (isDrawing) {
             txtIsDrawing.setVisibility(View.VISIBLE);
-            txtIsDrawing.setText("рисую");
             if (isDrawingPaused) {
                 txtIsDrawingPaused.setVisibility(View.VISIBLE);
-                txtIsDrawingPaused.setText("на паузе");
             } else {
                 txtIsDrawingPaused.setVisibility(View.GONE);
             }

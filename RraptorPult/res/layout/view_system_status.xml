@@ -50,6 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
+                android:text="@string/rr_drawing_status_drawing"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <TextView
@@ -57,6 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
+                android:text="@string/rr_drawing_status_paused"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <TextView

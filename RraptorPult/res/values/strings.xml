@@ -19,6 +19,12 @@
     
     <string name="action_debug">Debug</string>
     
+    <!-- System status -->
+    <string name="rr_device_status_idle">idle</string>
+    <string name="rr_device_status_working">working</string>
+    <string name="rr_drawing_status_drawing">drawing</string>
+    <string name="rr_drawing_status_paused">paused</string>
+        
     <!-- Device connection -->
     <string name="status_disconnected">Disconnected</string>
     <string name="status_connecting">Connecting...</string>
@@ -42,7 +48,7 @@
     <string name="info_current_pos">Current position</string>
     
     <!-- Drawing status -->
-    <string name="start_drawing">Pause</string>
+    <string name="start_drawing">Draw</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="stop">Stop</string>
