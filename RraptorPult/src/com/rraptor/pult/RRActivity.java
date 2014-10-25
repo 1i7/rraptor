@@ -238,7 +238,7 @@ public abstract class RRActivity extends Activity {
                         .getConnectionInfo());
                 break;
             case CONNECTING:
-                break;
+            case HANDSHAKE:
             case DISCONNECTED:
                 break;
             case ERROR:

@@ -70,6 +70,7 @@ public class SystemStatusView extends LinearLayout {
 
             break;
         case CONNECTING:
+        case HANDSHAKE:
             frmDeviceInfo.setVisibility(View.GONE);
             frmNotConnected.setVisibility(View.GONE);
 
