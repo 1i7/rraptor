@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.rraptor.pult.comm.DeviceConnection;
+import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.core.DeviceControlService;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
@@ -74,38 +74,38 @@ public class ManualPultActivity extends RRActivity {
                 switch (v.getId()) {
                 case R.id.x_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_X_FORWARD,
+                            DeviceProtocol.CMD_RR_GO_X_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.x_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_X_BACKWARD,
+                            DeviceProtocol.CMD_RR_GO_X_BACKWARD,
                             devCommandListener);
                     break;
                 case R.id.y_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_Y_FORWARD,
+                            DeviceProtocol.CMD_RR_GO_Y_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.y_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_Y_BACKWARD,
+                            DeviceProtocol.CMD_RR_GO_Y_BACKWARD,
                             devCommandListener);
                     break;
                 case R.id.z_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_Z_FORWARD,
+                            DeviceProtocol.CMD_RR_GO_Z_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.z_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_GO_Z_BACKWARD,
+                            DeviceProtocol.CMD_RR_GO_Z_BACKWARD,
                             devCommandListener);
                     break;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 getDeviceControlService().sendCommand(
-                        DeviceConnection.CMD_RR_STOP, devCommandListener);
+                        DeviceProtocol.CMD_RR_STOP, devCommandListener);
             }
             return false;
         }
@@ -177,37 +177,37 @@ public class ManualPultActivity extends RRActivity {
             Toast.makeText(this, "Голосовая команда: " + "вправо",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_X_FORWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_X_FORWARD, devCommandListener);
         } else if (cmd.contains("влево") || cmd.contains("лево")
                 || cmd.contains("лего")) {
             Toast.makeText(this, "Голосовая команда: " + "влево",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_X_BACKWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_X_BACKWARD, devCommandListener);
         } else if (cmd.contains("вперед") || cmd.contains("перед")) {
             Toast.makeText(this, "Голосовая команда: " + "вперед",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_Y_FORWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_Y_FORWARD, devCommandListener);
         } else if (cmd.contains("назад")) {
             Toast.makeText(this, "Голосовая команда: " + "назад",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_Y_BACKWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_Y_BACKWARD, devCommandListener);
         } else if (cmd.contains("вверх") || cmd.contains("верх")) {
             Toast.makeText(this, "Голосовая команда: " + "вверх",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_Z_FORWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_Z_FORWARD, devCommandListener);
         } else if (cmd.contains("вниз") || cmd.contains("низ")) {
             Toast.makeText(this, "Голосовая команда: " + "вниз",
                     Toast.LENGTH_LONG).show();
             getDeviceControlService().sendCommand(
-                    DeviceConnection.CMD_RR_GO_Z_BACKWARD, devCommandListener);
+                    DeviceProtocol.CMD_RR_GO_Z_BACKWARD, devCommandListener);
         } else if (cmd.contains("стоп")) {
             Toast.makeText(this, "Голосовая команда: " + "стоп",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(DeviceConnection.CMD_RR_STOP,
+            getDeviceControlService().sendCommand(DeviceProtocol.CMD_RR_STOP,
                     devCommandListener);
         } else {
             Toast.makeText(this, "Не понимаю: " + cmd, Toast.LENGTH_LONG)

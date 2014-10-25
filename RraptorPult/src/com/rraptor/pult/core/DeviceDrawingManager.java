@@ -10,7 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.rraptor.pult.comm.DeviceConnection;
+import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
@@ -98,10 +98,10 @@ public class DeviceDrawingManager {
                                 final String reply) {
                             // убедимся, что команда была
                             // принята и приступила к исполнению
-                            if (DeviceConnection.REPLY_OK.equals(reply)) {
+                            if (DeviceProtocol.REPLY_OK.equals(reply)) {
                                 resendDrawingCmd = false;
                                 drawingCmdError = false;
-                            } else if (DeviceConnection.REPLY_BUSY
+                            } else if (DeviceProtocol.REPLY_BUSY
                                     .equals(reply)) {
                                 resendDrawingCmd = true;
                                 drawingCmdError = false;
@@ -297,23 +297,23 @@ public class DeviceDrawingManager {
                         if (!line.getStart().equals(endPoint)) {
 
                             // поднимем блок
-                            cmd = DeviceConnection.CMD_GCODE_G0 + " " + "Z" + 5;
+                            cmd = DeviceProtocol.CMD_GCODE_G0 + " " + "Z" + 5;
                             executeCommand(cmd);
 
                             // переместимся в начальную точку
-                            cmd = DeviceConnection.CMD_GCODE_G0 + " " + "X"
+                            cmd = DeviceProtocol.CMD_GCODE_G0 + " " + "X"
                                     + line.getStart().getX() + " " + "Y"
                                     + line.getStart().getY();
                             executeCommand(cmd);
                         }
 
                         // опустим блок на уровень для рисования
-                        cmd = DeviceConnection.CMD_GCODE_G01 + " " + "Z" + 0
+                        cmd = DeviceProtocol.CMD_GCODE_G01 + " " + "Z" + 0
                                 + " F7.5";
                         executeCommand(cmd);
 
                         // прочертим линию со скоростью 2мм/с
-                        cmd = DeviceConnection.CMD_GCODE_G01 + " " + "X"
+                        cmd = DeviceProtocol.CMD_GCODE_G01 + " " + "X"
                                 + line.getEnd().getX() + " " + "Y"
                                 + line.getEnd().getY() + " F7.5";
                         executeCommand(cmd);
@@ -354,7 +354,7 @@ public class DeviceDrawingManager {
         isDrawing = false;
 
         // остановить печатный блок на устройстве
-        devControlService.sendCommand(DeviceConnection.CMD_RR_STOP, null);
+        devControlService.sendCommand(DeviceProtocol.CMD_RR_STOP, null);
     }
 
     /**

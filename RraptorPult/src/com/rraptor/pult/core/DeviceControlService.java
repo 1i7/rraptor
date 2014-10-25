@@ -13,6 +13,7 @@ import android.os.IBinder;
 
 import com.rraptor.pult.comm.DeviceConnection;
 import com.rraptor.pult.comm.DeviceConnectionWifi;
+import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point3D;
 import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
@@ -113,6 +114,7 @@ public class DeviceControlService extends Service {
     public static String ACTION_DEVICE_FINISH_DRAWING = "com.rraptor.pult.ACTION_DEVICE_FINISH_DRAWING";
     public static String ACTION_DEVICE_DRAWING_UPDATE = "com.rraptor.pult.ACTION_DEVICE_DRAWING_UPDATE";
     public static String ACTION_DEVICE_DRAWING_ERROR = "com.rraptor.pult.ACTION_DEVICE_DRAWING_ERROR";
+
     // Очередь команд рисования
     public static String ACTION_DEVICE_DRAWING_PAUSED = "com.rraptor.pult.ACTION_DRAWING_PAUSED";
     public static String ACTION_DEVICE_DRAWING_RESUMED = "com.rraptor.pult.ACTION_DEVICE_DRAWING_RESUMED";
@@ -166,10 +168,10 @@ public class DeviceControlService extends Service {
 
         @Override
         public void onCommandExecuted(final String cmd, final String reply) {
-            if (DeviceConnection.CMD_RR_STATUS.equals(cmd)) {
-                if (DeviceConnection.STATUS_IDLE.equals(reply)) {
+            if (DeviceProtocol.CMD_RR_STATUS.equals(cmd)) {
+                if (DeviceProtocol.STATUS_IDLE.equals(reply)) {
                     setDeviceStatus(DeviceStatus.IDLE);
-                } else if (DeviceConnection.STATUS_WORKING.equals(reply)) {
+                } else if (DeviceProtocol.STATUS_WORKING.equals(reply)) {
                     setDeviceStatus(DeviceStatus.WORKING);
                 } else {
                     setDeviceStatus(DeviceStatus.UNKNOWN);
@@ -727,13 +729,13 @@ public class DeviceControlService extends Service {
      */
     private boolean retrieveDeviceInfo() throws IOException, TimeoutException {
         // получить значения свойств с устройства
-        final String name = execCommandOnDevice(DeviceConnection.CMD_NAME);
-        final String model = execCommandOnDevice(DeviceConnection.CMD_MODEL);
-        final String serialNumber = execCommandOnDevice(DeviceConnection.CMD_SERIAL_NUMBER);
-        final String description = execCommandOnDevice(DeviceConnection.CMD_DESCRIPTION);
-        final String version = execCommandOnDevice(DeviceConnection.CMD_VERSION);
-        final String manufacturer = execCommandOnDevice(DeviceConnection.CMD_MANUFACTURER);
-        final String uri = execCommandOnDevice(DeviceConnection.CMD_URI);
+        final String name = execCommandOnDevice(DeviceProtocol.CMD_NAME);
+        final String model = execCommandOnDevice(DeviceProtocol.CMD_MODEL);
+        final String serialNumber = execCommandOnDevice(DeviceProtocol.CMD_SERIAL_NUMBER);
+        final String description = execCommandOnDevice(DeviceProtocol.CMD_DESCRIPTION);
+        final String version = execCommandOnDevice(DeviceProtocol.CMD_VERSION);
+        final String manufacturer = execCommandOnDevice(DeviceProtocol.CMD_MANUFACTURER);
+        final String uri = execCommandOnDevice(DeviceProtocol.CMD_URI);
 
         // проверить, является ли подключенное устройство тем же, что было
         // подключено в прошлый раз
@@ -770,7 +772,7 @@ public class DeviceControlService extends Service {
     private void retrieveDeviceWorkingArea() throws IOException,
             TimeoutException {
         // получить значения свойств с устройства
-        final String workingAreaStr = execCommandOnDevice(DeviceConnection.CMD_RR_WORKING_AREA_DIM);
+        final String workingAreaStr = execCommandOnDevice(DeviceProtocol.CMD_RR_WORKING_AREA_DIM);
 
         // получить значения из строки
         final String[] wa_parts = workingAreaStr.split(" ");
@@ -882,7 +884,7 @@ public class DeviceControlService extends Service {
                             // него долго не отправляли команды - выполнять
                             // команду PING вне очереди
                             try {
-                                execCommandOnDevice(DeviceConnection.CMD_PING);
+                                execCommandOnDevice(DeviceProtocol.CMD_PING);
                                 lastCmdTime = System.currentTimeMillis();
                             } catch (final Exception e) {
                                 debug("Connection error: " + e.getMessage());
@@ -917,7 +919,7 @@ public class DeviceControlService extends Service {
      * @return
      */
     public boolean updateDeviceCurrentPosition() {
-        return sendCommand(DeviceConnection.CMD_RR_CURRENT_POSITION,
+        return sendCommand(DeviceProtocol.CMD_RR_CURRENT_POSITION,
                 deviceCurrentPositionCommandListener);
     }
 
@@ -929,7 +931,7 @@ public class DeviceControlService extends Service {
      *         очередь переполнена и команда не может быть добавлена.
      */
     public boolean updateDeviceStatus() {
-        return sendCommand(DeviceConnection.CMD_RR_STATUS,
+        return sendCommand(DeviceProtocol.CMD_RR_STATUS,
                 deviceStatusCommandListener);
     }
 
@@ -939,9 +941,9 @@ public class DeviceControlService extends Service {
      * @return
      */
     public boolean updateDeviceStatusAndPosition() {
-        return sendCommand(DeviceConnection.CMD_RR_STATUS
-                + DeviceConnection.COMMAND_SEPARATOR
-                + DeviceConnection.CMD_RR_CURRENT_POSITION,
+        return sendCommand(DeviceProtocol.CMD_RR_STATUS
+                + DeviceProtocol.COMMAND_SEPARATOR
+                + DeviceProtocol.CMD_RR_CURRENT_POSITION,
                 new CommandListener() {
 
                     @Override
@@ -952,9 +954,9 @@ public class DeviceControlService extends Service {
                     public void onCommandExecuted(final String cmd, String reply) {
                         // разбить склеенную команду и склеенный ответ на части:
                         final String[] commands = cmd
-                                .split(DeviceConnection.COMMAND_SEPARATOR);
+                                .split(DeviceProtocol.COMMAND_SEPARATOR);
                         final String[] replies = reply
-                                .split(DeviceConnection.COMMAND_SEPARATOR);
+                                .split(DeviceProtocol.COMMAND_SEPARATOR);
 
                         deviceStatusCommandListener.onCommandExecuted(
                                 commands[0], replies[0]);

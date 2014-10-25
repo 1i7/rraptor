@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 
-import com.rraptor.pult.comm.DeviceConnection;
+import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.core.DeviceControlService;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
@@ -64,38 +64,38 @@ public class CalibrateActivity extends RRActivity {
                 switch (v.getId()) {
                 case R.id.x_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_X_FORWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_X_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.x_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_X_BACKWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_X_BACKWARD,
                             devCommandListener);
                     break;
                 case R.id.y_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_Y_FORWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_Y_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.y_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_Y_BACKWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_Y_BACKWARD,
                             devCommandListener);
                     break;
                 case R.id.z_forward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_Z_FORWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_Z_FORWARD,
                             devCommandListener);
                     break;
                 case R.id.z_backward_btn:
                     getDeviceControlService().sendCommand(
-                            DeviceConnection.CMD_RR_CALIBRATE_Z_BACKWARD,
+                            DeviceProtocol.CMD_RR_CALIBRATE_Z_BACKWARD,
                             devCommandListener);
                     break;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 getDeviceControlService().sendCommand(
-                        DeviceConnection.CMD_RR_STOP, devCommandListener);
+                        DeviceProtocol.CMD_RR_STOP, devCommandListener);
             }
             return false;
         }
