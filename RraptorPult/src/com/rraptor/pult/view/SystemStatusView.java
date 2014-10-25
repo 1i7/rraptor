@@ -137,6 +137,7 @@ public class SystemStatusView extends LinearLayout {
             }
         } else {
             txtIsDrawing.setVisibility(View.GONE);
+            txtIsDrawingPaused.setVisibility(View.GONE);
         }
     }
 }

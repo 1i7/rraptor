@@ -228,33 +228,36 @@ public abstract class RRActivity extends Activity {
      * Обновить элементы управления в зависимости от текущего состояния.
      */
     private void updateViews() {
-        pnlSystemStatus.setConnectionStatus(devControlService
-                .getConnectionStatus());
+        if (devControlService != null) {
+            pnlSystemStatus.setConnectionStatus(devControlService
+                    .getConnectionStatus());
 
-        switch (devControlService.getConnectionStatus()) {
-        case CONNECTED:
-            pnlSystemStatus.setConnectionInfo(devControlService
-                    .getConnectionInfo());
-            break;
-        case CONNECTING:
-            break;
-        case DISCONNECTED:
-            break;
-        case ERROR:
-            pnlSystemStatus.setConnectionErrorMessage(devControlService
-                    .getConnectionErrorMessage());
-            break;
-        default:
-            break;
-        }
+            switch (devControlService.getConnectionStatus()) {
+            case CONNECTED:
+                pnlSystemStatus.setConnectionInfo(devControlService
+                        .getConnectionInfo());
+                break;
+            case CONNECTING:
+                break;
+            case DISCONNECTED:
+                break;
+            case ERROR:
+                pnlSystemStatus.setConnectionErrorMessage(devControlService
+                        .getConnectionErrorMessage());
+                break;
+            default:
+                break;
+            }
 
-        if (devControlService.getConnectionStatus() == ConnectionStatus.CONNECTED) {
-            pnlSystemStatus.setDrawingStatus(devControlService
-                    .getDeviceDrawingManager().isDrawing(), devControlService
-                    .getDeviceDrawingManager().isDrawingPaused());
+            if (devControlService.getConnectionStatus() == ConnectionStatus.CONNECTED) {
+                pnlSystemStatus.setDrawingStatus(devControlService
+                        .getDeviceDrawingManager().isDrawing(),
+                        devControlService.getDeviceDrawingManager()
+                                .isDrawingPaused());
 
-            pnlSystemStatus
-                    .setDeviceStatus(devControlService.getDeviceStatus());
+                pnlSystemStatus.setDeviceStatus(devControlService
+                        .getDeviceStatus());
+            }
         }
     }
 }
