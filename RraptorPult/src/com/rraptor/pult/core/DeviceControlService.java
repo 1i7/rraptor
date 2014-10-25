@@ -210,12 +210,13 @@ public class DeviceControlService extends Service {
     private DeviceStatus deviceStatus = DeviceStatus.UNKNOWN;
     private Point3D deviceCurrentPosition;
 
-    // Информация об устройстве
+    // TODO: не очень хорошо иметь эти поля публичными, но так пока удобнее
+
     /**
      * Обрабатывает результат команды получения текущего статуса устройства -
      * устанавливает значение deviceStatus.
      */
-    final CommandListener deviceStatusCommandListener = new CommandListener() {
+    public final CommandListener deviceStatusCommandListener = new CommandListener() {
 
         @Override
         public void onCommandCanceled(final String cmd) {
@@ -240,7 +241,7 @@ public class DeviceControlService extends Service {
      * Обрабатывает результат команды получения текущей позиции рабочего блока
      * устройства - устанавливает новое положение deviceCurrentPosition.
      */
-    final CommandListener deviceCurrentPositionCommandListener = new CommandListener() {
+    public final CommandListener deviceCurrentPositionCommandListener = new CommandListener() {
 
         @Override
         public void onCommandCanceled(final String cmd) {
@@ -788,14 +789,27 @@ public class DeviceControlService extends Service {
      * @throws IOException
      */
     private boolean retrieveDeviceInfo() throws IOException, TimeoutException {
+        final String allInfoReply = execCommandOnDevice(DeviceProtocol.CMD_NAME
+                + DeviceProtocol.COMMAND_SEPARATOR + DeviceProtocol.CMD_MODEL
+                + DeviceProtocol.COMMAND_SEPARATOR
+                + DeviceProtocol.CMD_SERIAL_NUMBER
+                + DeviceProtocol.COMMAND_SEPARATOR
+                + DeviceProtocol.CMD_DESCRIPTION
+                + DeviceProtocol.COMMAND_SEPARATOR + DeviceProtocol.CMD_VERSION
+                + DeviceProtocol.COMMAND_SEPARATOR
+                + DeviceProtocol.CMD_MANUFACTURER
+                + DeviceProtocol.COMMAND_SEPARATOR + DeviceProtocol.CMD_URI);
+        final String[] allInfo = allInfoReply
+                .split(DeviceProtocol.COMMAND_SEPARATOR);
+
         // получить значения свойств с устройства
-        final String name = execCommandOnDevice(DeviceProtocol.CMD_NAME);
-        final String model = execCommandOnDevice(DeviceProtocol.CMD_MODEL);
-        final String serialNumber = execCommandOnDevice(DeviceProtocol.CMD_SERIAL_NUMBER);
-        final String description = execCommandOnDevice(DeviceProtocol.CMD_DESCRIPTION);
-        final String version = execCommandOnDevice(DeviceProtocol.CMD_VERSION);
-        final String manufacturer = execCommandOnDevice(DeviceProtocol.CMD_MANUFACTURER);
-        final String uri = execCommandOnDevice(DeviceProtocol.CMD_URI);
+        final String name = allInfo[0];
+        final String model = allInfo[1];
+        final String serialNumber = allInfo[2];
+        final String description = allInfo[3];
+        final String version = allInfo[4];
+        final String manufacturer = allInfo[5];
+        final String uri = allInfo[6];
 
         // проверить, является ли подключенное устройство тем же, что было
         // подключено в прошлый раз
@@ -866,6 +880,26 @@ public class DeviceControlService extends Service {
             debug("Rejected cmd: " + cmd);
             return false;
         }
+    }
+
+    /**
+     * Выполнить группу команд на устройстве за один сеанс связи. Количество
+     * элементов в массивах commands и cmdListeners должно совпадать.
+     * 
+     * @param commands
+     * @param cmdListeners
+     * @return
+     */
+    public boolean sendCommands(final String[] commands,
+            final CommandListener[] cmdListeners) {
+        String cmdGroup = "";
+        for (int i = 0; i < commands.length; i++) {
+            cmdGroup += commands[i];
+            if (i < commands.length - 1) {
+                cmdGroup += DeviceProtocol.COMMAND_SEPARATOR;
+            }
+        }
+        return sendCommand(cmdGroup, new MultyCommandListener(cmdListeners));
     }
 
     /**
@@ -1001,11 +1035,9 @@ public class DeviceControlService extends Service {
      * @return
      */
     public boolean updateDeviceStatusAndPosition() {
-        return sendCommand(DeviceProtocol.CMD_RR_STATUS
-                + DeviceProtocol.COMMAND_SEPARATOR
-                + DeviceProtocol.CMD_RR_CURRENT_POSITION,
-                new MultyCommandListener(new CommandListener[] {
-                        deviceStatusCommandListener,
-                        deviceCurrentPositionCommandListener }));
+        return sendCommands(new String[] { DeviceProtocol.CMD_RR_STATUS,
+                DeviceProtocol.CMD_RR_CURRENT_POSITION },
+                new CommandListener[] { deviceStatusCommandListener,
+                        deviceCurrentPositionCommandListener });
     }
 }

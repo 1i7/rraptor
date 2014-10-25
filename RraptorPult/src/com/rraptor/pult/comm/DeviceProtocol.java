@@ -1,6 +1,5 @@
 package com.rraptor.pult.comm;
 
-
 public interface DeviceProtocol {
 
     /**************************************/
@@ -69,8 +68,15 @@ public interface DeviceProtocol {
     public static final String REPLY_ERROR = "error";
     public static final String REPLY_BUSY = "busy";
 
+    /**
+     * Разделитель команд в группе. Команды выполняются на устройстве за один
+     * сеанс связи одна за одной. Ответы от выполнения каждой из командв в
+     * группе объединяются и присылаются одним пакетом, также разделенные этим
+     * же разделителем, в порядке выполнения команд.
+     */
     public static final String COMMAND_SEPARATOR = ";";
 
+    // Статус устройства
     public static final String STATUS_WORKING = "working";
     public static final String STATUS_IDLE = "idle";
 }

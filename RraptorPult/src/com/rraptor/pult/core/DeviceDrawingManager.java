@@ -14,7 +14,6 @@ import com.rraptor.pult.comm.DeviceProtocol;
 import com.rraptor.pult.core.DeviceControlService.CommandListener;
 import com.rraptor.pult.core.DeviceControlService.ConnectionStatus;
 import com.rraptor.pult.core.DeviceControlService.DeviceStatus;
-import com.rraptor.pult.core.DeviceControlService.MultyCommandListener;
 import com.rraptor.pult.model.Line2D;
 import com.rraptor.pult.model.Point2D;
 import com.rraptor.pult.view.PlotterAreaView.LineDrawingStatus;
@@ -88,10 +87,9 @@ public class DeviceDrawingManager {
             // TODO: не слишком хороший способ организовать выход из блокировки,
             // а может и нормальный - пользователь всегда может прервать процесс
             // ожидания
-            drawingCmdWaiting = devControlService.sendCommand(cmd
-                    + DeviceProtocol.COMMAND_SEPARATOR
-                    + DeviceProtocol.CMD_RR_STATUS, new MultyCommandListener(
-                    new CommandListener[] { new CommandListener() {
+            drawingCmdWaiting = devControlService.sendCommands(new String[] {
+                    cmd, DeviceProtocol.CMD_RR_STATUS }, new CommandListener[] {
+                    new CommandListener() {
                         @Override
                         public void onCommandCanceled(final String cmd) {
                             // отмена отправки команды на устройство (например
@@ -121,7 +119,7 @@ public class DeviceDrawingManager {
                             }
                             drawingCmdWaiting = false;
                         }
-                    }, devControlService.deviceStatusCommandListener }));
+                    }, devControlService.deviceStatusCommandListener });
             // дождаться результата команды здесь
             while (isDrawing && drawingCmdWaiting) {
                 Thread.sleep(100);

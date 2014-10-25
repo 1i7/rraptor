@@ -52,20 +52,6 @@ public class ManualPultActivity extends RRActivity {
         }
     };
 
-    private final CommandListener devCommandListener = new CommandListener() {
-
-        @Override
-        public void onCommandCanceled(final String cmd) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onCommandExecuted(final String cmd, final String reply) {
-            // TODO Auto-generated method stub
-
-        }
-    };
     private final OnTouchListener onTouchListener = new OnTouchListener() {
 
         @Override
@@ -73,39 +59,74 @@ public class ManualPultActivity extends RRActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 switch (v.getId()) {
                 case R.id.x_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_X_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_X_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.x_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_X_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_X_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.y_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_Y_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_Y_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.y_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_Y_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_Y_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.z_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_Z_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_Z_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.z_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_GO_Z_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_GO_Z_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                getDeviceControlService().sendCommand(
-                        DeviceProtocol.CMD_RR_STOP, devCommandListener);
+                getDeviceControlService()
+                        .sendCommands(
+                                new String[] { DeviceProtocol.CMD_RR_STOP,
+                                        DeviceProtocol.CMD_RR_STATUS },
+                                new CommandListener[] {
+                                        null,
+                                        getDeviceControlService().deviceStatusCommandListener });
             }
             return false;
         }
@@ -176,39 +197,74 @@ public class ManualPultActivity extends RRActivity {
                 || cmd.contains("права")) {
             Toast.makeText(this, "Голосовая команда: " + "вправо",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_X_FORWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_X_FORWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("влево") || cmd.contains("лево")
                 || cmd.contains("лего")) {
             Toast.makeText(this, "Голосовая команда: " + "влево",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_X_BACKWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_X_BACKWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("вперед") || cmd.contains("перед")) {
             Toast.makeText(this, "Голосовая команда: " + "вперед",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_Y_FORWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_Y_FORWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("назад")) {
             Toast.makeText(this, "Голосовая команда: " + "назад",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_Y_BACKWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_Y_BACKWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("вверх") || cmd.contains("верх")) {
             Toast.makeText(this, "Голосовая команда: " + "вверх",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_Z_FORWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_Z_FORWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("вниз") || cmd.contains("низ")) {
             Toast.makeText(this, "Голосовая команда: " + "вниз",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(
-                    DeviceProtocol.CMD_RR_GO_Z_BACKWARD, devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_GO_Z_BACKWARD,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else if (cmd.contains("стоп")) {
             Toast.makeText(this, "Голосовая команда: " + "стоп",
                     Toast.LENGTH_LONG).show();
-            getDeviceControlService().sendCommand(DeviceProtocol.CMD_RR_STOP,
-                    devCommandListener);
+            getDeviceControlService()
+                    .sendCommands(
+                            new String[] { DeviceProtocol.CMD_RR_STOP,
+                                    DeviceProtocol.CMD_RR_STATUS },
+                            new CommandListener[] {
+                                    null,
+                                    getDeviceControlService().deviceStatusCommandListener });
         } else {
             Toast.makeText(this, "Не понимаю: " + cmd, Toast.LENGTH_LONG)
                     .show();

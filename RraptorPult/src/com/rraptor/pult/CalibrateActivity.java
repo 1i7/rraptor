@@ -41,21 +41,6 @@ public class CalibrateActivity extends RRActivity {
         }
     };
 
-    private final CommandListener devCommandListener = new CommandListener() {
-
-        @Override
-        public void onCommandCanceled(final String cmd) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onCommandExecuted(final String cmd, final String reply) {
-            // TODO Auto-generated method stub
-
-        }
-    };
-
     private final OnTouchListener onTouchListener = new OnTouchListener() {
 
         @Override
@@ -63,39 +48,74 @@ public class CalibrateActivity extends RRActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 switch (v.getId()) {
                 case R.id.x_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_X_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_X_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.x_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_X_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_X_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.y_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_Y_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_Y_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.y_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_Y_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_Y_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.z_forward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_Z_FORWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_Z_FORWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 case R.id.z_backward_btn:
-                    getDeviceControlService().sendCommand(
-                            DeviceProtocol.CMD_RR_CALIBRATE_Z_BACKWARD,
-                            devCommandListener);
+                    getDeviceControlService()
+                            .sendCommands(
+                                    new String[] {
+                                            DeviceProtocol.CMD_RR_CALIBRATE_Z_BACKWARD,
+                                            DeviceProtocol.CMD_RR_STATUS },
+                                    new CommandListener[] {
+                                            null,
+                                            getDeviceControlService().deviceStatusCommandListener });
                     break;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                getDeviceControlService().sendCommand(
-                        DeviceProtocol.CMD_RR_STOP, devCommandListener);
+                getDeviceControlService()
+                        .sendCommands(
+                                new String[] { DeviceProtocol.CMD_RR_STOP,
+                                        DeviceProtocol.CMD_RR_STATUS },
+                                new CommandListener[] {
+                                        null,
+                                        getDeviceControlService().deviceStatusCommandListener });
             }
             return false;
         }
