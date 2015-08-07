@@ -14,16 +14,16 @@
 // Значения для подключений
 
 // Точка доступа ВайФай
-//static const char* wifi_ssid = "lasto4ka";
-//static const char* wifi_wpa2_passphrase = "robotguest";
-static const char* wifi_ssid = "helen";
-static const char* wifi_wpa2_passphrase = "13april1987";
+static const char* wifi_ssid = "lasto4ka";
+static const char* wifi_wpa2_passphrase = "robotguest";
+//static const char* wifi_ssid = "helen";
+//static const char* wifi_wpa2_passphrase = "13april1987";
 
 // статический IP-адрес для текущего хоста - попросим у 
 // точки Wifi (иначе Пульт не узнает, куда подключаться)
 //IPv4 host_ip = {192,168,115,115};
-//static IPv4 host_ip = {192,168,43,115};
-static IPv4 host_ip = {192,168,1,115};
+static IPv4 host_ip = {192,168,43,115};
+//static IPv4 host_ip = {192,168,1,115};
 
 // Порт для tcp-сервера
 static const int tcp_server_port = DNETcK::iPersonalPorts44 + 114;

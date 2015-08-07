@@ -20,8 +20,8 @@ public class DeviceConnectionWifi implements DeviceConnection {
      */
     public final static long MAX_IDLE_TIMEOUT = 5000;// 5000;
 
-    // public static final String DEFAULT_SERVER_HOST = "192.168.43.115";
-    public static final String DEFAULT_SERVER_HOST = "192.168.1.115";
+    public static final String DEFAULT_SERVER_HOST = "192.168.43.115";
+    // public static final String DEFAULT_SERVER_HOST = "192.168.1.115";
     public static final int DEFAULT_SERVER_PORT = 44114;
 
     /**
