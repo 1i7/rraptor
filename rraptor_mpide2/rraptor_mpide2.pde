@@ -129,18 +129,34 @@ int prevTime = 0;
 void loop() {
   
     #ifdef RR_SERIAL
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Serial communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorSerialTasks();
     #endif // RR_SERIAL
   
-    #ifdef RR_TCP
+        #ifdef RR_TCP
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable TCP communicatin module");
+        #endif // DEBUG_SERIAL
+    
         rraptorTcpTasks();
     #endif // RR_TCP
     
     #ifdef RR_ROBOT_SERVER
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Robot Server communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorRobotServerTasks();
     #endif // RR_ROBOT_SERVER
 
     #ifdef RR_USB_ACCESSORY
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Android USB Accessory communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorUSBAccessoryTasks();
     #endif // RR_USB_ACCESSORY
 
