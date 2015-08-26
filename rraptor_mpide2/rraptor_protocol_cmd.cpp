@@ -189,7 +189,7 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
             int step_delay = spd > 0 ? spd : -spd;
             
             // подготовить вращение
-            prepare_whirl(sm, dir, 0, true);
+            prepare_whirl(sm, dir, 0, NONE);
             // запустить шаги
             start_stepper_cycle();
             
@@ -226,7 +226,7 @@ int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
             int step_delay = spd > 0 ? spd : -spd;
             
             // подготовить вращение
-            prepare_whirl(sm, dir, 0, false);
+            prepare_whirl(sm, dir, 0, CALIBRATE_START_MIN_POS);
             // запустить шаги
             start_stepper_cycle();
             

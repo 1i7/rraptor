@@ -37,8 +37,8 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB/usb.h"
-#include "USB/usb_host_android.h"
+#include "usb/usb.h"
+#include "usb/usb_host_android.h"
 
 // *****************************************************************************
 // Client Driver Function Pointer Table for the USB Embedded Host foundation

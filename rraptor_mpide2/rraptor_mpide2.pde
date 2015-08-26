@@ -80,10 +80,19 @@ void setup() {
     // init_stepper(stepper* smotor,  char* name, 
     //     int pin_step, int pin_dir, int pin_en,
     //     int dir_inv, int pulse_delay,
-    //     float distance_per_step, float max_pos)
-    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5, 300000); // X - синий драйвер
-    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5, 216000); // Y - желтый драйвер
-    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5, 100000); // Z - черный драйвер
+    //     float distance_per_step)
+//    init_stepper_ends(stepper* smotor,
+//        end_limit_strategy min_limit_strategy, end_limit_strategy max_limit_strategy,
+//        double min_pos, double max_pos);
+    // X - синий драйвер
+    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5); 
+    init_stepper_ends(&sm_x, -1, -1, CONST, CONST, 0, 300000);
+    // Y - желтый драйвер
+    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5);
+    init_stepper_ends(&sm_y, -1, -1, CONST, CONST, 0, 216000);
+    // Z - черный драйвер
+    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5);
+    init_stepper_ends(&sm_z, -1, -1, CONST, CONST, 0, 100000);
     
     init_device_motors(&sm_x, &sm_y, &sm_z);
     

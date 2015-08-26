@@ -18,7 +18,7 @@
 void init_stepper(stepper* smotor,  char name, 
         int pin_step, int pin_dir, int pin_en,
         int dir_inv, int pulse_delay,
-        double distance_per_step, double max_pos) {
+        double distance_per_step) {
   
     smotor->name = name;
     
@@ -30,7 +30,6 @@ void init_stepper(stepper* smotor,  char name,
     smotor->pulse_delay = pulse_delay;
     
     smotor->distance_per_step = distance_per_step;
-    smotor->max_pos = max_pos;
     
     // задать настройки пинов
     pinMode(pin_step, OUTPUT);
@@ -39,5 +38,31 @@ void init_stepper(stepper* smotor,  char name,
     
     // пока выключить мотор
     digitalWrite(pin_en, HIGH);
+}
+
+/**
+ * Задать настройки границ рабочей области для шагового мотора.
+ */
+void init_stepper_ends(stepper* smotor,
+        int pin_min, int pin_max,
+        end_limit_strategy_t min_limit_strategy, end_limit_strategy_t max_limit_strategy,
+        double min_pos, double max_pos) {
+          
+    smotor->pin_min = pin_min;
+    smotor->pin_max = pin_max;
+          
+    smotor->min_limit_strategy;
+    smotor->max_limit_strategy;
+    
+    smotor->min_pos = min_pos;
+    smotor->max_pos = max_pos;
+    
+    // задать настройки пинов
+    if(pin_min != -1) {
+        pinMode(pin_min, INPUT);
+    }
+    if(pin_min != -1) {
+        pinMode(pin_max, INPUT);
+    }
 }
 
