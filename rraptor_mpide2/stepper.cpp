@@ -61,7 +61,7 @@ void init_stepper_ends(stepper* smotor,
     if(pin_min != -1) {
         pinMode(pin_min, INPUT);
     }
-    if(pin_min != -1) {
+    if(pin_max != -1) {
         pinMode(pin_max, INPUT);
     }
 }
