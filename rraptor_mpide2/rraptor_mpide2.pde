@@ -85,7 +85,7 @@ void setup() {
 //        end_limit_strategy min_limit_strategy, end_limit_strategy max_limit_strategy,
 //        double min_pos, double max_pos);
     // X - синий драйвер
-    init_stepper(&sm_x, 'x', 8, 9, 10,     1, 1000, 7.5); 
+    init_stepper(&sm_x, 'x', 8, 9, 10, 1, 1000, 7.5); 
     init_stepper_ends(&sm_x, -1, -1, CONST, CONST, 0, 300000);
     // Y - желтый драйвер
     init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5);
@@ -99,18 +99,34 @@ void setup() {
     
     // Модули связи
     #ifdef RR_SERIAL
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Serial communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorSerialSetup();
     #endif // RR_SERIAL
     
     #ifdef RR_TCP
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable TCP communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorTcpSetup();
     #endif // RR_TCP
     
     #ifdef RR_ROBOT_SERVER
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Robot Server communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorTcpSetup();
     #endif // RR_ROBOT_SERVER
 
     #ifdef RR_USB_ACCESSORY
+        #ifdef DEBUG_SERIAL
+            Serial.println("Enable Android USB Accessory communicatin module");
+        #endif // DEBUG_SERIAL
+        
         rraptorUSBAccessorySetup();
     #endif // RR_USB_ACCESSORY
         
@@ -138,34 +154,18 @@ int prevTime = 0;
 void loop() {
   
     #ifdef RR_SERIAL
-        #ifdef DEBUG_SERIAL
-            Serial.println("Enable Serial communicatin module");
-        #endif // DEBUG_SERIAL
-        
         rraptorSerialTasks();
     #endif // RR_SERIAL
   
-        #ifdef RR_TCP
-        #ifdef DEBUG_SERIAL
-            Serial.println("Enable TCP communicatin module");
-        #endif // DEBUG_SERIAL
-    
+    #ifdef RR_TCP
         rraptorTcpTasks();
     #endif // RR_TCP
     
     #ifdef RR_ROBOT_SERVER
-        #ifdef DEBUG_SERIAL
-            Serial.println("Enable Robot Server communicatin module");
-        #endif // DEBUG_SERIAL
-        
         rraptorRobotServerTasks();
     #endif // RR_ROBOT_SERVER
 
     #ifdef RR_USB_ACCESSORY
-        #ifdef DEBUG_SERIAL
-            Serial.println("Enable Android USB Accessory communicatin module");
-        #endif // DEBUG_SERIAL
-        
         rraptorUSBAccessoryTasks();
     #endif // RR_USB_ACCESSORY
 
