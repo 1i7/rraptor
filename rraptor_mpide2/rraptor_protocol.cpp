@@ -153,6 +153,27 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // до прихода команды на остановку               
                 cmd_rr_go(motor_name, spd, reply_buffer);
             }
+        } else if(strcmp(tokens[0], CMD_RR_MOTOR_INFO) == 0) {
+            // синтаксис:
+            //     rr_motor_info motor_name [pd] [dps] [mls] [Mls] [mp] [Mp] [cp]
+            if(tokensNum >= 2) {
+                char motor_name = tokens[1][0];
+                char* params[7];
+                int pcount = 0;
+                
+                for(int i = 2; i < tokensNum; i++) {
+                    if(pcount < 7) {
+                        params[pcount] = tokens[i];
+                        pcount++;
+                    }
+                }
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_motor_info(motor_name, params, pcount, reply_buffer);
+            }
         } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
             // синтаксис:
             //     rr_calibrate motor_name speed
@@ -198,7 +219,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_GCODE_G01) == 0) {
             // синтаксис:
-            //     G01 [Xv1] [Yv] [Zv3] Fv4
+            //     G01 [Xv1] [Yv2] [Zv3] Fv4
             // v1, v2, v3 - значения перемещения для координаты, мм
             // v4 - скорость перемещения, мм/с
             if(tokensNum >= 3) {

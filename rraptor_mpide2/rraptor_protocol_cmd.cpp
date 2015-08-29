@@ -41,6 +41,8 @@ void init_device_motors(stepper *sm_x, stepper *sm_y, stepper *sm_z) {
 
 /**
  * Получить шаговый двигатель по уникальному имени.
+ *
+ * @param id - имя мотора, состоит из одной буквы, регистр не учитывается.
  */
 static stepper* stepper_by_id(char id) {
     if(id == 'x' || id == 'X') {
@@ -200,6 +202,67 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
             strcpy(reply_buffer, REPLY_ERROR);
         }
     }
+    return strlen(reply_buffer);
+}
+
+/**
+ * Информация о выбранном моторе.
+ * На входе: список запрашиваемых параметров через пробел.
+ * На выходе: список значений запрошенный параметров через пробел в 
+ * порядке, указанном на входе.
+ *
+ * например:
+ * запрос: x min_pos max_pos current_pos
+ * ответ: 0 300000 12083
+ *
+ * @param motor_name имя мотора.
+ * @param params запрашиваемые параметры (через пробел):
+ *     pd (pulse_delay)
+ *     dps (distance_per_step)
+ *     mls (min_limit_strategy)
+ *     Mls (max_limit_strategy)
+ *     mp (min_pos)
+ *     Mp (max_pos)
+ *     cp (current_pos)
+ * @param pcount количество параметров.
+ *     
+ * @reply_buffer ссылка на буфер для записи результата
+ */
+int cmd_rr_motor_info(char motor_name, char* params[], int pcount, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_motor_info: ");
+        Serial.print(motor_name);
+        Serial.print(" ");
+        
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(params[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
+    #endif // DEBUG_SERIAL
+    
+    stepper *sm = stepper_by_id(motor_name);
+    if(sm != NULL) {
+        if(pcount == 0) {
+            // TODO конвертировать min/max_limit_strategy в строки
+//            sprintf(reply_buffer, "pd=%d dps=%f mls=%f Mls=%f mp=%f Mp=%f cp=%f", 
+            sprintf(reply_buffer, "pd=%d dps=%f mp=%f Mp=%f cp=%f", 
+                sm->pulse_delay,
+                sm->distance_per_step,
+                //sm->min_limit_strategy,
+                //sm->max_limit_strategy,
+                sm->min_pos,
+                sm->max_pos,
+                sm->current_pos
+            );
+        } else {
+            // TODO: реализовать запрос отдельных параметров
+        }
+    } else {
+        // ошибка - не нашли нужный мотор
+        strcpy(reply_buffer, REPLY_ERROR);
+    }
+    
     return strlen(reply_buffer);
 }
 

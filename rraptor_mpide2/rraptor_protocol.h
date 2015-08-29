@@ -41,6 +41,9 @@ static const char* CMD_RR_STATUS = "rr_status";
 /** Получить текущее положение печатающего блока */
 static const char* CMD_RR_CURRENT_POSITION = "rr_current_pos";
 
+/** Получить информацию о моторе */
+static const char* CMD_RR_MOTOR_INFO = "rr_motor_info";
+
 // Команды
 /** Остановить все моторы */
 static const char* CMD_RR_STOP = "rr_stop";
@@ -80,6 +83,38 @@ static const char GCODE_PARAM_X = 'X';
 static const char GCODE_PARAM_Y = 'Y';
 static const char GCODE_PARAM_Z = 'Z';
 static const char GCODE_PARAM_F = 'F';
+
+/**************************************/
+// Параметры информации о моторе
+/**
+ * pd (pulse_delay)
+ */
+static const char MOTOR_INFO_PARAM_PULSE_DELAY = 'pd';
+/**
+ * dps (distance_per_step)
+ */
+static const char MOTOR_INFO_PARAM_DISTANCE_PER_STEP = 'dps';
+/**
+ * mls (min_limit_strategy)
+ */
+static const char MOTOR_INFO_PARAM_MIN_LIMIT_STRATEGY = 'mls';
+/**
+ * Mls (max_limit_strategy)
+ */
+static const char MOTOR_INFO_PARAM_MAX_LIMIT_STRATEGY = 'Mls';
+/**
+ * mp (min_pos)
+ */
+static const char MOTOR_INFO_PARAM_MIN_POS = 'mp';
+/**
+ * Mp (max_pos)
+ */
+static const char MOTOR_INFO_PARAM_MAX_POS = 'Mp';
+/**
+ * cp (current_pos)
+ */
+static const char MOTOR_INFO_PARAM_CURRENT_POS = 'cp';
+
 
 /**
  * Установить информацию об устройстве. 
@@ -137,7 +172,8 @@ int cmd_uri(char* reply_buffer);
 int cmd_ping(char* reply_buffer);
 
 /** 
- * Получить размер рабочей области.
+ * Получить размер рабочей области в формате:
+ * max_x max_y max_z
  */
 int cmd_rr_working_area_dim(char* reply_buffer);
 
@@ -147,7 +183,8 @@ int cmd_rr_working_area_dim(char* reply_buffer);
 int cmd_rr_status(char* reply_buffer);
 
 /** 
- * Получить текущее положение печатающего блока.
+ * Получить текущее положение печатающего блока в формате:
+ * x y z 
  */
 int cmd_rr_current_position(char* reply_buffer);
 
@@ -160,6 +197,31 @@ int cmd_rr_stop(char* reply_buffer);
  * Запустить мотор с заданной скоростью на непрерывное вращение.
  */
 int cmd_rr_go(char motor_name, int spd, char* reply_buffer);
+
+/**
+ * Информация о выбранном моторе.
+ * На входе: список запрашиваемых параметров через пробел.
+ * На выходе: список значений запрошенный параметров через пробел в 
+ * порядке, указанном на входе.
+ *
+ * например:
+ * запрос: x min_pos max_pos current_pos
+ * ответ: 0 300000 12083
+ *
+ * @param motor_name имя мотора.
+ * @param params запрашиваемые параметры (через пробел):
+ *     pd (pulse_delay)
+ *     dps (distance_per_step)
+ *     mls (min_limit_strategy)
+ *     Mls (max_limit_strategy)
+ *     mp (min_pos)
+ *     Mp (max_pos)
+ *     cp (current_pos)
+ * @param pcount количество параметров.
+ *     
+ * @reply_buffer ссылка на буфер для записи результата
+ */
+int cmd_rr_motor_info(char motor_name, char* params[], int  pcount, char* reply_buffer);
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
