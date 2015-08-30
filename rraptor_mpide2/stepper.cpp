@@ -45,14 +45,14 @@ void init_stepper(stepper* smotor,  char name,
  */
 void init_stepper_ends(stepper* smotor,
         int pin_min, int pin_max,
-        end_limit_strategy_t min_limit_strategy, end_limit_strategy_t max_limit_strategy,
+        end_strategy_t min_end_strategy, end_strategy_t max_end_strategy,
         double min_pos, double max_pos) {
           
     smotor->pin_min = pin_min;
     smotor->pin_max = pin_max;
           
-    smotor->min_limit_strategy;
-    smotor->max_limit_strategy;
+    smotor->min_end_strategy = min_end_strategy;
+    smotor->max_end_strategy = max_end_strategy;
     
     smotor->min_pos = min_pos;
     smotor->max_pos = max_pos;

@@ -20,7 +20,7 @@
  *       (значение min/max _pos обновляется после калибровки; после калибровки аналогично CONST)
  * - INF: не органичивать движение координаты в этом направлении (значение min/max _pos игнорируется)
  */
-typedef enum {CONST, AUTO, INF} end_limit_strategy_t;
+typedef enum {CONST, AUTO, INF} end_strategy_t;
 
 /**
  * Режим цикла вращения мотора
@@ -121,12 +121,12 @@ typedef struct {
     /**
      * Стратегия определения конечного положения для минимальной позиции координаты.
      */
-    end_limit_strategy_t min_limit_strategy;
+    end_strategy_t min_end_strategy;
     
     /**
      * Стратегия определения конечного положения для максимальной позиции координаты.
      */
-    end_limit_strategy_t max_limit_strategy;
+    end_strategy_t max_end_strategy;
     
     /** 
      * Минимальное значение положения координаты, микрометры 
@@ -182,7 +182,7 @@ void init_stepper(stepper* smotor,  char name,
  */
 void init_stepper_ends(stepper* smotor,
         int pin_min, int pin_max,
-        end_limit_strategy_t min_limit_strategy, end_limit_strategy_t max_limit_strategy,
+        end_strategy_t min_end_strategy, end_strategy_t max_end_strategy,
         double min_pos, double max_pos);
         
 /**

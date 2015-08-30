@@ -245,12 +245,12 @@ int cmd_rr_motor_info(char motor_name, char* params[], int pcount, char* reply_b
     if(sm != NULL) {
         if(pcount == 0) {
             // TODO конвертировать min/max_limit_strategy в строки
-//            sprintf(reply_buffer, "pd=%d dps=%f mls=%f Mls=%f mp=%f Mp=%f cp=%f", 
+//            sprintf(reply_buffer, "pd=%d dps=%f mes=%f Mes=%f mp=%f Mp=%f cp=%f", 
             sprintf(reply_buffer, "pd=%d dps=%f mp=%f Mp=%f cp=%f", 
                 sm->pulse_delay,
                 sm->distance_per_step,
-                //sm->min_limit_strategy,
-                //sm->max_limit_strategy,
+                //sm->min_end_strategy,
+                //sm->max_end_strategy,
                 sm->min_pos,
                 sm->max_pos,
                 sm->current_pos

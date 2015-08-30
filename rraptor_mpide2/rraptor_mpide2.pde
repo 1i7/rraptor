@@ -82,7 +82,7 @@ void setup() {
     //     int dir_inv, int pulse_delay,
     //     float distance_per_step)
 //    init_stepper_ends(stepper* smotor,
-//        end_limit_strategy min_limit_strategy, end_limit_strategy max_limit_strategy,
+//        end_strategy min_end_strategy, end_strategy max_end_strategy,
 //        double min_pos, double max_pos);
     // X - синий драйвер
     init_stepper(&sm_x, 'x', 8, 9, 10, 1, 1000, 7.5); 

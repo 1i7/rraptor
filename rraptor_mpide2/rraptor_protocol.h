@@ -95,13 +95,13 @@ static const char MOTOR_INFO_PARAM_PULSE_DELAY = 'pd';
  */
 static const char MOTOR_INFO_PARAM_DISTANCE_PER_STEP = 'dps';
 /**
- * mls (min_limit_strategy)
+ * mls (min_end_strategy)
  */
-static const char MOTOR_INFO_PARAM_MIN_LIMIT_STRATEGY = 'mls';
+static const char MOTOR_INFO_PARAM_MIN_END_STRATEGY = 'mes';
 /**
- * Mls (max_limit_strategy)
+ * Mls (max_end_strategy)
  */
-static const char MOTOR_INFO_PARAM_MAX_LIMIT_STRATEGY = 'Mls';
+static const char MOTOR_INFO_PARAM_MAX_END_STRATEGY = 'Mes';
 /**
  * mp (min_pos)
  */
@@ -212,16 +212,16 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer);
  * @param params запрашиваемые параметры (через пробел):
  *     pd (pulse_delay)
  *     dps (distance_per_step)
- *     mls (min_limit_strategy)
- *     Mls (max_limit_strategy)
+ *     mes (min_end_strategy)
+ *     Mes (max_end_strategy)
  *     mp (min_pos)
  *     Mp (max_pos)
  *     cp (current_pos)
  * @param pcount количество параметров.
- *     
  * @reply_buffer ссылка на буфер для записи результата
  */
 int cmd_rr_motor_info(char motor_name, char* params[], int  pcount, char* reply_buffer);
+
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 

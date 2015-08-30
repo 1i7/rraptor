@@ -14,10 +14,10 @@
 // Значения для подключений
 
 // Точка доступа ВайФай
-static const char* wifi_ssid = "lasto4ka";
-static const char* wifi_wpa2_passphrase = "robotguest";
-//static const char* wifi_ssid = "helen";
-//static const char* wifi_wpa2_passphrase = "13april1987";
+//static const char* wifi_ssid = "lasto4ka";
+//static const char* wifi_wpa2_passphrase = "robotguest";
+static const char* wifi_ssid = "helen";
+static const char* wifi_wpa2_passphrase = "13april1987";
 
 // статический IP-адрес для текущего хоста - попросим у 
 // точки Wifi (иначе Пульт не узнает, куда подключаться)
