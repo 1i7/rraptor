@@ -155,7 +155,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_RR_MOTOR_INFO) == 0) {
             // синтаксис:
-            //     rr_motor_info motor_name [pd] [dps] [mes] [Mes] [mp] [Mp] [cp]
+            //     rr_motor_info motor_name [pulse_delay] [distance_per_step] [min_end_strategy] [max_end_strategy] [min_pos] [max_pos] [current_pos]
             if(tokensNum >= 2) {
                 char motor_name = tokens[1][0];
                 char* params[7];

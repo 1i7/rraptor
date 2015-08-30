@@ -217,13 +217,13 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
  *
  * @param motor_name имя мотора.
  * @param params запрашиваемые параметры (через пробел):
- *     pd (pulse_delay)
- *     dps (distance_per_step)
- *     mls (min_end_strategy)
- *     Mls (max_end_strategy)
- *     mp (min_pos)
- *     Mp (max_pos)
- *     cp (current_pos)
+ *     pulse_delay
+ *     distance_per_step
+ *     min_end_strategy
+ *     max_end_strategy
+ *     min_pos
+ *     max_pos
+ *     current_pos
  * @param pcount количество параметров (если 0, вывести все параметры).
  * @param reply_buffer ссылка на буфер для записи результата.
  */
@@ -244,8 +244,8 @@ int cmd_rr_motor_info(char motor_name, char* params[], int pcount, char* reply_b
     if(sm != NULL) {
         if(pcount == 0) {
             // TODO конвертировать min/max_limit_strategy в строки
-//            sprintf(reply_buffer, "pd=%d dps=%f mes=%f Mes=%f mp=%f Mp=%f cp=%f", 
-            sprintf(reply_buffer, "pd=%d dps=%f mp=%f Mp=%f cp=%f", 
+//            sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_end_strategy=%f max_end_strategy=%f min_pos=%f max_pos=%f current_pos=%f", 
+            sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_pos=%f max_pos=%f current_pos=%f", 
                 sm->pulse_delay,
                 sm->distance_per_step,
                 //sm->min_end_strategy,

@@ -46,6 +46,11 @@ static const char* CMD_RR_MOTOR_INFO = "rr_motor_info";
 /** Получить информацию о подключении мотора */
 static const char* CMD_RR_MOTOR_PIN_INFO = "rr_motor_pin_info";
 
+/** Задать настройки мотора */
+static const char* CMD_RR_CONFIGURE_MOTOR = "rr_configure_motor";
+/** Задать настройки подключения мотора */
+static const char* CMD_RR_CONFIGURE_MOTOR_PINS = "rr_configure_motor_pins";
+
 // Команды
 /** Остановить все моторы */
 static const char* CMD_RR_STOP = "rr_stop";
@@ -89,33 +94,33 @@ static const char GCODE_PARAM_F = 'F';
 /**************************************/
 // Параметры информации о моторе
 /**
- * pd (pulse_delay)
+ * pulse_delay
  */
-static const char MOTOR_INFO_PARAM_PULSE_DELAY = 'pd';
+static const char MOTOR_INFO_PARAM_PULSE_DELAY = 'pulse_delay';
 /**
- * dps (distance_per_step)
+ * distance_per_step
  */
-static const char MOTOR_INFO_PARAM_DISTANCE_PER_STEP = 'dps';
+static const char MOTOR_INFO_PARAM_DISTANCE_PER_STEP = 'distance_per_step';
 /**
- * mls (min_end_strategy)
+ * min_end_strategy
  */
-static const char MOTOR_INFO_PARAM_MIN_END_STRATEGY = 'mes';
+static const char MOTOR_INFO_PARAM_MIN_END_STRATEGY = 'min_end_strategy';
 /**
- * Mls (max_end_strategy)
+ * max_end_strategy
  */
-static const char MOTOR_INFO_PARAM_MAX_END_STRATEGY = 'Mes';
+static const char MOTOR_INFO_PARAM_MAX_END_STRATEGY = 'max_end_strategy';
 /**
- * mp (min_pos)
+ * min_pos
  */
-static const char MOTOR_INFO_PARAM_MIN_POS = 'mp';
+static const char MOTOR_INFO_PARAM_MIN_POS = 'min_pos';
 /**
- * Mp (max_pos)
+ * max_pos
  */
-static const char MOTOR_INFO_PARAM_MAX_POS = 'Mp';
+static const char MOTOR_INFO_PARAM_MAX_POS = 'max_pos';
 /**
- * cp (current_pos)
+ * current_pos
  */
-static const char MOTOR_INFO_PARAM_CURRENT_POS = 'cp';
+static const char MOTOR_INFO_PARAM_CURRENT_POS = 'current_pos';
 
 
 /**
@@ -212,13 +217,13 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer);
  *
  * @param motor_name имя мотора.
  * @param params запрашиваемые параметры (через пробел):
- *     pd (pulse_delay)
- *     dps (distance_per_step)
- *     mes (min_end_strategy)
- *     Mes (max_end_strategy)
- *     mp (min_pos)
- *     Mp (max_pos)
- *     cp (current_pos)
+ *     pulse_delay
+ *     distance_per_step
+ *     min_end_strategy
+ *     max_end_strategy
+ *     min_pos
+ *     max_pos
+ *     current_pos
  * @param pcount количество параметров (если 0, вывести все параметры).
  * @param reply_buffer ссылка на буфер для записи результата.
  */
