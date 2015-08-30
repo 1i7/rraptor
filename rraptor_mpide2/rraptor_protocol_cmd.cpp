@@ -243,13 +243,14 @@ int cmd_rr_motor_info(char motor_name, char* pnames[], int pcount, char* reply_b
     stepper *sm = stepper_by_id(motor_name);
     if(sm != NULL) {
         if(pcount == 0) {
-            // TODO конвертировать min/max_limit_strategy в строки
-//            sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_end_strategy=%f max_end_strategy=%f min_pos=%f max_pos=%f current_pos=%f", 
-            sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_pos=%f max_pos=%f current_pos=%f", 
+            // конвертировать min/max_end_strategy в строки
+            const char *end_strategy_names[] = { "CONST", "AUTO", "INF" };
+            
+            sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_end_strategy=%s max_end_strategy=%s min_pos=%f max_pos=%f current_pos=%f",
                 sm->pulse_delay,
                 sm->distance_per_step,
-                //sm->min_end_strategy,
-                //sm->max_end_strategy,
+                end_strategy_names[sm->min_end_strategy],
+                end_strategy_names[sm->max_end_strategy],
                 sm->min_pos,
                 sm->max_pos,
                 sm->current_pos
@@ -375,9 +376,23 @@ int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_DISTANCE_PER_STEP) == 0 ) {
                         sm->distance_per_step = atof(pvalues[i]);
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_END_STRATEGY) == 0 ) {
-                        // TODO
+                        // найти значение min/max_end_strategy из строки
+                        if( strcmp(pvalues[i], "CONST") == 0 ) {
+                            sm->min_end_strategy = CONST;
+                        } else if( strcmp(pvalues[i], "AUTO") == 0 ) {
+                            sm->min_end_strategy = AUTO;
+                        } else if( strcmp(pvalues[i], "INF") == 0 ) {
+                            sm->min_end_strategy = INF;
+                        }
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_END_STRATEGY) == 0 ) {
-                        // TODO
+                        // найти значение min/max_end_strategy из строки
+                        if( strcmp(pvalues[i], "CONST") == 0 ) {
+                            sm->max_end_strategy = CONST;
+                        } else if( strcmp(pvalues[i], "AUTO") == 0 ) {
+                            sm->max_end_strategy = AUTO;
+                        } else if( strcmp(pvalues[i], "INF") == 0 ) {
+                            sm->max_end_strategy = INF;
+                        }
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_POS) == 0 ) {
                         sm->min_pos = atof(pvalues[i]);
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_POS) == 0 ) {
