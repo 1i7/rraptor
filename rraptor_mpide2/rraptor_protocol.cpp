@@ -4,11 +4,35 @@
 #include "rraptor_protocol.h"
 
 /**
- * Разбить параметр команды на составляющие:
+ * Разбить параметр в формате "имя=значение" на отдельные составляющие "имя" и "значение".
+ * 
+ * @param param исходный параметр в формате "имя=значение"
+ * @param pname имя параметра или NULL
+ * @param pvalue значение параметра или NULL
+ */
+static void parseParam(char* param, char** pname, char** pvalue) {
+    // Разобьем команду на куски по пробелам
+    char* token;
+    // указатель на строку для внутренних нужд strtok_r, позволяет
+    // одновременно обрабатывать несколько строк (strtok может работать 
+    // только с одной строкой за раз)
+    char* last;
+    // имя параметра или NULL
+    *pname = strtok_r(param, "=", &last);
+    // значение параметра или NULL
+    *pvalue = strtok_r(NULL, "=", &last);
+}
+
+/**
+ * Разбить параметр команды G-кода на составляющие:
  * 1й символ - имя параметра,
  * подстрока начиная со 2го символа - значение параметра, число с плавающей точкой.
+ * 
+ * @param param исходный параметр
+ * @param pname указатель на символ - в него будет записано имя параметра
+ * @param pvalue указатель на число с плавающей точкой - в него будет записано значение параметра
  */
-static void parseParam(char* param, char* pname, double* pvalue) {
+static void parseGcodeParam(char* param, char* pname, double* pvalue) {
     if(strlen(param) > 1) {
         *pname = param[0];
         *pvalue = atof(param + 1);
@@ -19,12 +43,13 @@ static void parseParam(char* param, char* pname, double* pvalue) {
  * Распознать и выполнить единственную команду.
  */
 static int handleCommand(char* buffer, char* reply_buffer) {    
-    // ответ
+    // по умолчанию обнулим ответ
     reply_buffer[0] = 0;
     
     bool success = false;
     
-    char* tokens[8];
+    int max_tokens = 20;
+    char* tokens[max_tokens];
     int tokensNum = 0;
     
     // Разобьем команду на куски по пробелам
@@ -158,12 +183,14 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             //     rr_motor_info motor_name [pulse_delay] [distance_per_step] [min_end_strategy] [max_end_strategy] [min_pos] [max_pos] [current_pos]
             if(tokensNum >= 2) {
                 char motor_name = tokens[1][0];
-                char* params[7];
+                
+                int max_params = 7;
+                char* pnames[max_params];
                 int pcount = 0;
                 
                 for(int i = 2; i < tokensNum; i++) {
-                    if(pcount < 7) {
-                        params[pcount] = tokens[i];
+                    if(pcount < max_params) {
+                        pnames[pcount] = tokens[i];
                         pcount++;
                     }
                 }
@@ -172,7 +199,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 success = true;
                 
                 // Выполнить команду                    
-                cmd_rr_motor_info(motor_name, params, pcount, reply_buffer);
+                cmd_rr_motor_info(motor_name, pnames, pcount, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_MOTOR_PIN_INFO) == 0) {
             // синтаксис:
@@ -185,6 +212,67 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 
                 // Выполнить команду                    
                 cmd_rr_motor_pin_info(motor_name, reply_buffer);
+            }
+        } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_MOTOR) == 0) {
+            // синтаксис:
+            //     rr_configure_motor motor_name [pulse_delay=val_pd] [distance_per_step=val_dps] \
+            //                                   [min_end_strategy=val_mes] [max_end_strategy=val_Mes] \
+            //                                   [min_pos=val_mp] [max_pos=val_Mp] [current_pos=val_cp]
+            if(tokensNum >= 3) {
+                char motor_name = tokens[1][0];
+                
+                int max_params = 7;
+                char* pnames[max_params];
+                char* pvalues[max_params];
+                int pcount = 0;
+                
+                char* pname;
+                char* pvalue;
+                for(int i = 2; i < tokensNum; i++) {                
+                    parseParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < max_params) {
+                        pnames[pcount] = pname;
+                        pvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_configure_motor(motor_name, pnames, pvalues, pcount, reply_buffer);
+            }
+        } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_MOTOR_PINS) == 0) {
+            // синтаксис:
+            //     rr_configure_motor motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=val] \
+            //                                   [pin_min=val] [pin_max=val]
+            if(tokensNum >= 3) {
+                char motor_name = tokens[1][0];
+                
+                int max_params = 6;
+                char* pnames[max_params];
+                char* pvalues[max_params];
+                int pcount = 0;
+                
+                char* pname;
+                char* pvalue;
+                for(int i = 2; i < tokensNum; i++) {                
+                    parseParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < max_params) {
+                        pnames[pcount] = pname;
+                        pvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_configure_motor_pins(motor_name, pnames, pvalues, pcount, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
             // синтаксис:
@@ -212,7 +300,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 char pname;
                 double pvalue;
                 for(int i = 1; i < tokensNum; i++) {                
-                    parseParam(tokens[i], &pname, &pvalue);
+                    parseGcodeParam(tokens[i], &pname, &pvalue);
                     
                     if(pcount < 3) {
                         motor_names[pcount] = pname;
@@ -244,7 +332,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 char pname;
                 double pvalue;
                 for(int i = 1; i < tokensNum; i++) {
-                    parseParam(tokens[i], &pname, &pvalue);
+                    parseGcodeParam(tokens[i], &pname, &pvalue);
                     
                     if(pname == GCODE_PARAM_F) {
                         f = pvalue;
@@ -303,7 +391,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
  *
  * @buffer - входные данные, строка
  * @buffer_size - размер входных данных
- * @reply_buffer - ответ, строка, оканчивающаяся нулём
+ * @reply_buffer - ответ: строка, оканчивающаяся нулём
  * @return размер ответа в байтах (0, чтобы не отправлять ответ)
  */
 int handleInput(char* buffer, int buffer_size, char* reply_buffer) {

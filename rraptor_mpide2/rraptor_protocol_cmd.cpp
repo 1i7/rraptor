@@ -207,7 +207,7 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
 
 /**
  * Информация о выбранном моторе.
- * На входе: список запрашиваемых параметров через пробел.
+ * На входе: список запрашиваемых параметров через пробел (не указывать, чтобы получить все параметры).
  * На выходе: список значений запрошенный параметров через пробел в 
  * порядке, указанном на входе.
  *
@@ -216,7 +216,7 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
  * ответ: 0 300000 12083
  *
  * @param motor_name имя мотора.
- * @param params запрашиваемые параметры (через пробел):
+ * @param pnames имена запрашиваемых параметров:
  *     pulse_delay
  *     distance_per_step
  *     min_end_strategy
@@ -227,14 +227,14 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
  * @param pcount количество параметров (если 0, вывести все параметры).
  * @param reply_buffer ссылка на буфер для записи результата.
  */
-int cmd_rr_motor_info(char motor_name, char* params[], int pcount, char* reply_buffer) {
+int cmd_rr_motor_info(char motor_name, char* pnames[], int pcount, char* reply_buffer) {
     #ifdef DEBUG_SERIAL
         Serial.print("cmd_rr_motor_info: ");
         Serial.print(motor_name);
         Serial.print(" ");
         
         for(int i = 0; i < pcount; i++) {
-            Serial.print(params[i]);
+            Serial.print(pnames[i]);
             Serial.print(" ");
         }
         Serial.println();
@@ -302,6 +302,208 @@ int cmd_rr_motor_pin_info(char motor_name, char* reply_buffer) {
     
     return strlen(reply_buffer);
 }
+
+/**
+ * Установить параметры для выбранного мотора.
+ * 
+ * На входе список параметров и значений в формате
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ *
+ * например:
+ * min_pos=0 max_pos=200000
+ *
+ * @param motor_name имя мотора.
+ * @param pnames имена устанавливаемых параметров:
+ *     pulse_delay
+ *     distance_per_step
+ *     min_end_strategy
+ *     max_end_strategy
+ *     min_pos
+ *     max_pos
+ *     current_pos
+ * @param pvalues значения параметров в виде строк
+ * @param pcount количество параметров
+ * @param reply_buffer ссылка на буфер для записи результата.
+ */
+int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int  pcount, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_configure_motor: ");
+        Serial.print(motor_name);
+        Serial.print(" ");
+        
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(pnames[i]);
+            Serial.print("=");
+            Serial.print(pvalues[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
+    if(is_cycle_running()) {
+        // устройство занято
+        strcpy(reply_buffer, REPLY_BUSY);
+    } else {
+        stepper *sm = stepper_by_id(motor_name);
+        
+        if(sm != NULL) {
+            // мотор нашелся, проверить корректность имен параметров 
+            // (некорректные значения числовых параметров обнулятся при работе atoi и atof)
+            bool params_valid = true;
+            for(int i = 0; i < pcount && params_valid; i++) {
+                if( strcmp(pnames[i], MOTOR_INFO_PARAM_PULSE_DELAY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_DISTANCE_PER_STEP) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_END_STRATEGY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_END_STRATEGY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_POS) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_POS) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_CURRENT_POS) != 0 ) {
+                    
+                    // неизвестное имя параметра
+                    params_valid = false;
+                }
+            }
+            
+            // имена параметров верны
+            if(params_valid) {
+                // установить нужные значения, некорректные значения числовых параметров 
+                // обнулятся при работе atoi и atof
+                for(int i = 0; i < pcount && params_valid; i++) {
+              
+                    if( strcmp(pnames[i], MOTOR_INFO_PARAM_PULSE_DELAY) == 0 ) {
+                        sm->pulse_delay = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_DISTANCE_PER_STEP) == 0 ) {
+                        sm->distance_per_step = atof(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_END_STRATEGY) == 0 ) {
+                        // TODO
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_END_STRATEGY) == 0 ) {
+                        // TODO
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_POS) == 0 ) {
+                        sm->min_pos = atof(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_POS) == 0 ) {
+                        sm->max_pos = atof(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_CURRENT_POS) == 0 ) {
+                        sm->current_pos = atof(pvalues[i]);
+                    } else {
+                        // неизвестное имя параметра
+                        params_valid = false;
+                    }
+                }
+                
+                // команда выполнена
+                strcpy(reply_buffer, REPLY_OK);
+            } else {
+                // ошибка - некорректные имена параметров
+                strcpy(reply_buffer, REPLY_ERROR);
+            }
+        } else {
+            // ошибка - не нашли нужный мотор
+            strcpy(reply_buffer, REPLY_ERROR);
+        }
+    }
+    
+    return strlen(reply_buffer);  
+}
+
+/**
+ * Установить информацию о подключении выбранного мотора: 
+ * номера ножек драйвера step/dir и концевых датчиков.
+ * 
+ * На входе список параметров и значений в формате: 
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ *
+ * например:
+ * pin_step=5 pin_dir=6 pin_en=7 dir_inv=-1 pin_min=1 pin_max=2
+ *
+ * @param motor_name имя мотора.
+ * @param pnames имена устанавливаемых параметров:
+ *     pin_step
+ *     pin_dir
+ *     pin_en
+ *     dir_inv
+ *     pin_min
+ *     pin_max
+ * @param pvalues значения параметров в виде строк
+ * @param pcount количество параметров
+ * @param reply_buffer ссылка на буфер для записи результата.
+ */
+int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[], int  pcount, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_configure_motor_pins: ");
+        Serial.print(motor_name);
+        Serial.print(" ");
+        
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(pnames[i]);
+            Serial.print("=");
+            Serial.print(pvalues[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
+    #endif // DEBUG_SERIAL
+    
+    if(is_cycle_running()) {
+        // устройство занято
+        strcpy(reply_buffer, REPLY_BUSY);
+    } else {
+        stepper *sm = stepper_by_id(motor_name);
+        
+        if(sm != NULL) {
+            // мотор нашелся, проверить корректность имен параметров 
+            // (некорректные значения числовых параметров обнулятся при работе atoi и atof)
+            bool params_valid = true;
+            for(int i = 0; i < pcount && params_valid; i++) {
+                if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_STEP) != 0 &&
+                    strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_DIR) != 0 &&
+                    strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_EN) != 0 &&
+                    strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_DIR_INV) != 0 &&
+                    strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MIN) != 0 &&
+                    strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MAX) != 0 ) {
+                    
+                    // неизвестное имя параметра
+                    params_valid = false;
+                }
+            }
+            
+            // имена параметров верны
+            if(params_valid) {
+                // установить нужные значения, некорректные значения числовых параметров 
+                // обнулятся при работе atoi и atof
+                for(int i = 0; i < pcount && params_valid; i++) {
+              
+                    if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_STEP) == 0 ) {
+                        sm->pin_step = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_DIR) == 0 ) {
+                        sm->pin_dir = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_EN) == 0 ) {
+                        sm->pin_en = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_DIR_INV) == 0 ) {
+                        sm->dir_inv = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MIN) == 0 ) {
+                        sm->pin_min = atoi(pvalues[i]);
+                    } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MAX) == 0 ) {
+                        sm->pin_max = atoi(pvalues[i]);
+                    } else {
+                        // неизвестное имя параметра
+                        params_valid = false;
+                    }
+                }
+                
+                // команда выполнена
+                strcpy(reply_buffer, REPLY_OK);
+            } else {
+                // ошибка - некорректные имена параметров
+                strcpy(reply_buffer, REPLY_ERROR);
+            }
+        } else {
+            // ошибка - не нашли нужный мотор
+            strcpy(reply_buffer, REPLY_ERROR);
+        }
+    }
+    
+    return strlen(reply_buffer);
+}
+
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
