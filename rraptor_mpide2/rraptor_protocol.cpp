@@ -174,6 +174,18 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // Выполнить команду                    
                 cmd_rr_motor_info(motor_name, params, pcount, reply_buffer);
             }
+        } else if(strcmp(tokens[0], CMD_RR_MOTOR_PIN_INFO) == 0) {
+            // синтаксис:
+            //     rr_motor_pin_info motor_name
+            if(tokensNum >= 2) {
+                char motor_name = tokens[1][0];
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_motor_pin_info(motor_name, reply_buffer);
+            }
         } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
             // синтаксис:
             //     rr_calibrate motor_name speed

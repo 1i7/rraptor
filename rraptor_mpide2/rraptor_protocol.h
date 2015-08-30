@@ -43,6 +43,8 @@ static const char* CMD_RR_CURRENT_POSITION = "rr_current_pos";
 
 /** Получить информацию о моторе */
 static const char* CMD_RR_MOTOR_INFO = "rr_motor_info";
+/** Получить информацию о подключении мотора */
+static const char* CMD_RR_MOTOR_PIN_INFO = "rr_motor_pin_info";
 
 // Команды
 /** Остановить все моторы */
@@ -217,11 +219,25 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer);
  *     mp (min_pos)
  *     Mp (max_pos)
  *     cp (current_pos)
- * @param pcount количество параметров.
- * @reply_buffer ссылка на буфер для записи результата
+ * @param pcount количество параметров (если 0, вывести все параметры).
+ * @param reply_buffer ссылка на буфер для записи результата.
  */
 int cmd_rr_motor_info(char motor_name, char* params[], int  pcount, char* reply_buffer);
 
+/**
+ * Информация о подключении выбранного мотора: 
+ * номера ножек драйвера step/dir и концевых датчиков.
+ * 
+ * Результат - строка в формате: 
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ *
+ * например:
+ * pin_step=5 pin_dir=6 pin_en=7 dir_inv=-1 pin_min=1 pin_max=2
+ *
+ * @param motor_name имя мотора.
+ * @param reply_buffer ссылка на буфер для записи результата.
+ */
+int cmd_rr_motor_pin_info(char motor_name, char* reply_buffer);
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 

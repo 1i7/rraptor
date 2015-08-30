@@ -265,6 +265,43 @@ int cmd_rr_motor_info(char motor_name, char* params[], int pcount, char* reply_b
     return strlen(reply_buffer);
 }
 
+/**
+ * Информация о подключении выбранного мотора: 
+ * номера ножек драйвера step/dir и концевых датчиков.
+ * 
+ * Результат - строка в формате: 
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ *
+ * например:
+ * pin_step=5 pin_dir=6 pin_en=7 dir_inv=-1 pin_min=1 pin_max=2
+ *
+ * @param motor_name имя мотора.
+ * @param reply_buffer ссылка на буфер для записи результата.
+ */
+int cmd_rr_motor_pin_info(char motor_name, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_motor_pin_info: ");
+        Serial.print(motor_name);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+    
+    stepper *sm = stepper_by_id(motor_name);
+    if(sm != NULL) {
+        sprintf(reply_buffer, "pin_step=%d pin_dir=%d pin_en=%d dir_inv=%d pin_min=%d pin_max=%d", 
+            sm->pin_step,
+            sm->pin_dir,
+            sm->pin_en,
+            sm->dir_inv,
+            sm->pin_min,
+            sm->pin_max
+        );
+    } else {
+        // ошибка - не нашли нужный мотор
+        strcpy(reply_buffer, REPLY_ERROR);
+    }
+    
+    return strlen(reply_buffer);
+}
 
 /** 
  * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
