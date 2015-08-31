@@ -135,7 +135,7 @@ static const char* MOTOR_INFO_PARAM_CURRENT_POS = "current_pos";
 // Параметры управления Wifi
 
 /** info: параметры подключения Wifi */
-static const char* WIFI_PARAM_STATUS = "status";
+static const char* WIFI_PARAM_INFO = "info";
 /** status: получить статус подключения Wifi */
 static const char* WIFI_PARAM_STATUS = "status";
 /** start: подключиться к Wifi */
