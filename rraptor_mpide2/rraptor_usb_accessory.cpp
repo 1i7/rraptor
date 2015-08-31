@@ -33,8 +33,17 @@ static void* deviceHandle = NULL;
 static BOOL readInProgress = FALSE;
 static BOOL writeInProgress = FALSE;
 
-static char read_buffer[128];
-static char write_buffer[128];
+// Размеры буферов для чтения команд и записи ответов 
+#ifndef CMD_READ_BUFFER_SIZE
+#define CMD_READ_BUFFER_SIZE 128
+#endif
+
+#ifndef CMD_WRITE_BUFFER_SIZE
+#define CMD_WRITE_BUFFER_SIZE 512
+#endif
+
+static char read_buffer[CMD_READ_BUFFER_SIZE];
+static char write_buffer[CMD_WRITE_BUFFER_SIZE];
 static int write_size;
 
 BOOL USBEventHandlerApplication( uint8_t address, USB_EVENT event, void *data, DWORD size ) {

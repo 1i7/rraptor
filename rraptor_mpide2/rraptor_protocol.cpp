@@ -3,6 +3,15 @@
 #include "rraptor_config.h"
 #include "rraptor_protocol.h"
 
+// Размеры буферов для чтения команд и записи ответов 
+#ifndef CMD_READ_BUFFER_SIZE
+#define CMD_READ_BUFFER_SIZE 128
+#endif
+
+#ifndef CMD_WRITE_BUFFER_SIZE
+#define CMD_WRITE_BUFFER_SIZE 512
+#endif
+
 /**
  * Разбить параметр в формате "имя=значение" на отдельные составляющие "имя" и "значение".
  * 
@@ -410,8 +419,8 @@ int handleInput(char* buffer, int buffer_size, char* reply_buffer) {
     // обнулим ответ
     reply_buffer[0] = 0;
     
-    char cmd_buffer[128];
-    char cmd_reply_buffer[128];
+    char cmd_buffer[CMD_READ_BUFFER_SIZE];
+    char cmd_reply_buffer[CMD_WRITE_BUFFER_SIZE];
         
     // Разобьем входящую строку на куски по разделителю команд ';'
     char* token;

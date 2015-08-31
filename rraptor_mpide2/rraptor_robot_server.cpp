@@ -31,9 +31,18 @@ static int conectionId = DWIFIcK::INVALID_CONNECTION_ID;
 // TCP-клиент - подключение к серверу
 static TcpClient tcpClient;
 
+// Размеры буферов для чтения команд и записи ответов 
+#ifndef CMD_READ_BUFFER_SIZE
+#define CMD_READ_BUFFER_SIZE 128
+#endif
+
+#ifndef CMD_WRITE_BUFFER_SIZE
+#define CMD_WRITE_BUFFER_SIZE 512
+#endif
+
 // Буферы для обмена данными с сервером
-static char read_buffer[128];
-static char write_buffer[128];
+static char read_buffer[CMD_READ_BUFFER_SIZE];
+static char write_buffer[CMD_WRITE_BUFFER_SIZE];
 static int write_size;
 
 /**

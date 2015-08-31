@@ -22,5 +22,10 @@ static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 // Аксессуар USB Android
 //#define RR_USB_ACCESSORY
 
+
+// Размеры буферов для чтения команд и записи ответов 
+#define CMD_READ_BUFFER_SIZE 128
+#define CMD_WRITE_BUFFER_SIZE 1024
+
 #endif // RRAPTOR_CONFIG_H
 

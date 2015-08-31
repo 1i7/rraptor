@@ -4,9 +4,18 @@
 #include "rraptor_config.h"
 #include "rraptor_protocol.h"
 
+// Размеры буферов для чтения команд и записи ответов 
+#ifndef CMD_READ_BUFFER_SIZE
+#define CMD_READ_BUFFER_SIZE 128
+#endif
+
+#ifndef CMD_WRITE_BUFFER_SIZE
+#define CMD_WRITE_BUFFER_SIZE 512
+#endif
+
 // Буферы для обмена данными с компьютером через последовательный порт
-static char read_buffer[128];
-static char write_buffer[128];
+static char read_buffer[CMD_READ_BUFFER_SIZE];
+static char write_buffer[CMD_WRITE_BUFFER_SIZE];
 static int write_size;
 
 /**
