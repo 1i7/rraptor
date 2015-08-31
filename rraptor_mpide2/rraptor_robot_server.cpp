@@ -37,6 +37,32 @@ static char write_buffer[128];
 static int write_size;
 
 /**
+ * Подключиться к открытой сети WiFi.
+ */
+static int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("SSID: ");
+        Serial.println(ssid);
+    #endif // DEBUG_SERIAL
+      
+    return DWIFIcK::connect(ssid, netStatus);   
+}
+
+/**
+ * Подключиться к сети WiFi, защищенной WPA2 с паролем.
+ */
+static int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, DNETcK::STATUS *netStatus) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("SSID: ");
+        Serial.print(ssid);
+        Serial.print(", WPA2 passphrase: ");
+        Serial.println(passphrase);
+    #endif // DEBUG_SERIAL
+        
+    return DWIFIcK::connect(ssid, passphrase, netStatus);
+}
+
+/**
  * Подлключиться к сети Wifi.
  */
 static int connectWifi(DNETcK::STATUS *netStatus) {

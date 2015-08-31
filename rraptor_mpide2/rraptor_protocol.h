@@ -61,6 +61,11 @@ static const char* CMD_RR_GO = "rr_go";
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
  */
 static const char* CMD_RR_CALIBRATE = "rr_calibrate";
+
+// Вспомогательное рабочее окружение
+
+/** Задать настройки подключения мотора */
+static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
   
 /**************************************/
 // Команды G-кода

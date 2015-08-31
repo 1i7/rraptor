@@ -5,31 +5,6 @@
 
 #include "rraptor_config.h"
 
-/**
- * Подключиться к открытой сети WiFi.
- */
-int connectWifiOpen(const char* ssid, DNETcK::STATUS *netStatus) {
-    #ifdef DEBUG_SERIAL
-        Serial.print("SSID: ");
-        Serial.println(ssid);
-    #endif // DEBUG_SERIAL
-      
-    return DWIFIcK::connect(ssid, netStatus);   
-}
-
-/**
- * Подключиться к сети WiFi, защищенной WPA2 с паролем.
- */
-int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, DNETcK::STATUS *netStatus) {
-    #ifdef DEBUG_SERIAL
-        Serial.print("SSID: ");
-        Serial.print(ssid);
-        Serial.print(", WPA2 passphrase: ");
-        Serial.println(passphrase);
-    #endif // DEBUG_SERIAL
-        
-    return DWIFIcK::connect(ssid, passphrase, netStatus);
-}
 
 void printIPAddress(IPv4 *ipAddress) {
     Serial.print(ipAddress->rgbIP[0], DEC);
@@ -84,8 +59,6 @@ void printNetworkStatus() {
         Serial.println("Subnet mask not assigned");
     }
 }
-
-
 
 void printTcpClientStatus(TcpClient *tcpClient) {
     IPEndPoint remoteEndPoint;
