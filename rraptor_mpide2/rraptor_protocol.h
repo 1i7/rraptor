@@ -69,7 +69,7 @@ static const char* CMD_RR_CALIBRATE = "rr_calibrate";
 
 /** Задать настройки подключения Wifi */
 static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
-/** Управление Wifi: status/start/stop/restart */
+/** Управление Wifi: info/status/start/stop/restart */
 static const char* CMD_RR_WIFI = "rr_wifi";
   
 /**************************************/
@@ -134,6 +134,8 @@ static const char* MOTOR_INFO_PARAM_CURRENT_POS = "current_pos";
 /**************************************/
 // Параметры управления Wifi
 
+/** info: параметры подключения Wifi */
+static const char* WIFI_PARAM_STATUS = "status";
 /** status: получить статус подключения Wifi */
 static const char* WIFI_PARAM_STATUS = "status";
 /** start: подключиться к Wifi */

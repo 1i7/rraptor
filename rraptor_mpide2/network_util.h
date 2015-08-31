@@ -1,6 +1,9 @@
 #ifndef NETWORK_UTIL_H
 #define NETWORK_UTIL_H
 
+#include <DNETcK.h>
+#include <DWIFIcK.h>
+
 void printIPAddress(IPv4 *ipAddress);
 
 void printNetworkStatus();
