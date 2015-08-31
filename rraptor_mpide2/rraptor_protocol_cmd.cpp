@@ -286,10 +286,11 @@ int cmd_rr_motor_info(char motor_name, char* pnames[], int pcount, char* reply_b
     
     stepper *sm = stepper_by_id(motor_name);
     if(sm != NULL) {
-        if(pcount == 0) {
-            // конвертировать min/max_end_strategy в строки
-            const char *end_strategy_names[] = { "CONST", "AUTO", "INF" };
+      
+        // конвертировать min/max_end_strategy в строки
+        const char *end_strategy_names[] = { "CONST", "AUTO", "INF" };
             
+        if(pcount == 0) {    
             sprintf(reply_buffer, "pulse_delay=%d distance_per_step=%f min_end_strategy=%s max_end_strategy=%s min_pos=%f max_pos=%f current_pos=%f",
                 sm->pulse_delay,
                 sm->distance_per_step,
@@ -300,7 +301,52 @@ int cmd_rr_motor_info(char motor_name, char* pnames[], int pcount, char* reply_b
                 sm->current_pos
             );
         } else {
-            // TODO: реализовать запрос отдельных параметров
+            // запрос отдельных параметров
+        
+            // проверить корректность имен параметров 
+            // (некорректные значения числовых параметров обнулятся при работе atoi и atof)
+            bool params_valid = true;
+            for(int i = 0; i < pcount && params_valid; i++) {
+                if( strcmp(pnames[i], MOTOR_INFO_PARAM_PULSE_DELAY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_DISTANCE_PER_STEP) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_END_STRATEGY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_END_STRATEGY) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_POS) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_POS) != 0 &&
+                    strcmp(pnames[i], MOTOR_INFO_PARAM_CURRENT_POS) != 0 ) {
+                    
+                    // неизвестное имя параметра
+                    params_valid = false;
+                }
+            }
+            
+            // имена параметров верны
+            if(params_valid) {
+                for(int i = 0; i < pcount && params_valid; i++) {
+                    if(i > 0) {
+                        sprintf(reply_buffer+strlen(reply_buffer), " ");
+                    }
+                    
+                    if( strcmp(pnames[i], MOTOR_INFO_PARAM_PULSE_DELAY) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "pulse_delay=%d", sm->pulse_delay);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_DISTANCE_PER_STEP) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "distance_per_step=%f", sm->distance_per_step);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_END_STRATEGY) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "min_end_strategy=%", end_strategy_names[sm->min_end_strategy]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_END_STRATEGY) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "max_end_strategy=%s", end_strategy_names[sm->max_end_strategy]);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MIN_POS) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "min_pos=%f", sm->min_pos);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_MAX_POS) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "max_pos=%f", sm->max_pos);
+                    } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_CURRENT_POS) == 0 ) {
+                        sprintf(reply_buffer+strlen(reply_buffer), "current_pos=%f", sm->current_pos);
+                    }
+                }
+            } else {
+                // ошибка - некорректные имена параметров
+                strcpy(reply_buffer, REPLY_ERROR);
+            }
         }
     } else {
         // ошибка - не нашли нужный мотор
@@ -443,9 +489,6 @@ int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int
                         sm->max_pos = atof(pvalues[i]);
                     } else if( strcmp(pnames[i], MOTOR_INFO_PARAM_CURRENT_POS) == 0 ) {
                         sm->current_pos = atof(pvalues[i]);
-                    } else {
-                        // неизвестное имя параметра
-                        params_valid = false;
                     }
                 }
                 
@@ -542,9 +585,6 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
                         sm->pin_min = atoi(pvalues[i]);
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MAX) == 0 ) {
                         sm->pin_max = atoi(pvalues[i]);
-                    } else {
-                        // неизвестное имя параметра
-                        params_valid = false;
                     }
                 }
                 
