@@ -141,7 +141,9 @@ void rraptorUSBAccessoryTasks() {
             #ifdef DEBUG_SERIAL
                 Serial.print("Write: ");
                 Serial.print(write_buffer);
-                Serial.println();
+                Serial.print(" (size=");
+                Serial.print(write_size);
+                Serial.println(")");
             #endif // DEBUG_SERIAL
           
             writeSize = write_size;

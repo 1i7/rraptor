@@ -258,7 +258,9 @@ void rraptorRobotServerTasks() {
             #ifdef DEBUG_SERIAL
                 Serial.print("Write: ");
                 Serial.print(write_buffer);
-                Serial.println();
+                Serial.print(" (size=");
+                Serial.print(write_size);
+                Serial.println(")");
             #endif // DEBUG_SERIAL
                         
             tcpClient.writeStream((const byte*)write_buffer, write_size);

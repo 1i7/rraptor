@@ -58,10 +58,13 @@ void rraptorSerialTasks() {
         #ifdef DEBUG_SERIAL
             Serial.print("Write: ");
             Serial.print(write_buffer);
-            Serial.println();
+            Serial.print(" (size=");
+            Serial.print(write_size);
+            Serial.println(")");
         #endif // DEBUG_SERIAL
             
         Serial.println(write_buffer);
         write_size = 0;
     }
 }
+
