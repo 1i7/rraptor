@@ -27,6 +27,9 @@ static const char* CMD_URI = "uri";
 // Команды
 /** Проверить доступность устройства */
 static const char* CMD_PING = "ping";
+/** Вывести список команд */
+static const char* CMD_HELP = "help";
+
 
 /**************************************/
 // Команды Rraptor
@@ -64,8 +67,6 @@ static const char* CMD_RR_CALIBRATE = "rr_calibrate";
 
 // Вспомогательное рабочее окружение
 
-/** Задать настройки подключения мотора */
-static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
   
 /**************************************/
 // Команды G-кода
@@ -181,6 +182,12 @@ int cmd_uri(char* reply_buffer);
  * Проверить доступность устройства.
  */
 int cmd_ping(char* reply_buffer);
+
+/** 
+ * Вывести список команд.
+ */
+int cmd_help(char* reply_buffer);
+
 
 /** 
  * Получить размер рабочей области в формате:

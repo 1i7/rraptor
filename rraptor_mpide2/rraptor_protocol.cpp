@@ -132,6 +132,14 @@ static int handleCommand(char* buffer, char* reply_buffer) {
           
             // Проверить доступность устройства.
             cmd_ping(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_HELP) == 0) {
+            // синтаксис:
+            //     help
+            // Команда корректна
+            success = true;
+            
+            // Выполнить команду
+            cmd_help(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_WORKING_AREA_DIM) == 0) {
             // синтаксис:
             //     rr_working_area_dim

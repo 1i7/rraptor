@@ -122,6 +122,41 @@ int cmd_ping(char* reply_buffer) {
 }
 
 /** 
+ * Вывести список команд.
+ */
+int cmd_help(char* reply_buffer) {
+    sprintf(reply_buffer, "Rraptor commands: \n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_HELP); strcat(reply_buffer, "\n"); 
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_NAME); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MODEL); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_SERIAL_NUMBER); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_DESCRIPTION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_VERSION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MANUFACTURER); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_URI); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_PING); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WORKING_AREA_DIM); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STATUS); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CURRENT_POSITION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_INFO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_PIN_INFO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR_PINS); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STOP); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_GO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CALIBRATE); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_WIFI); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WIFI); strcat(reply_buffer, "\n");
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G0); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G01); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G02); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G03); strcat(reply_buffer, "\n");
+        
+    return strlen(reply_buffer);
+}
+
+/** 
  * Получить размер рабочей области в формате:
  * max_x max_y max_z
  */
