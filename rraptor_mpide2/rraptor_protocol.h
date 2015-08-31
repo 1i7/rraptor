@@ -8,7 +8,13 @@
 /**************************************/
 // Универсальные команды (для Сервера Роботов)
 
-// Постоянные свойства
+// Команды
+/** Вывести список команд */
+static const char* CMD_HELP = "help";
+/** Проверить доступность устройства */
+static const char* CMD_PING = "ping";
+
+// Постоянные свойства устройства
 /** Получить собственное имя устройства */
 static const char* CMD_NAME = "name";
 /** Получить модель устройства */
@@ -24,23 +30,13 @@ static const char* CMD_MANUFACTURER = "manufacturer";
 /** Получить ссылку на страницу устройства */
 static const char* CMD_URI = "uri";
 
-// Команды
-/** Проверить доступность устройства */
-static const char* CMD_PING = "ping";
-/** Вывести список команд */
-static const char* CMD_HELP = "help";
-
-
 /**************************************/
 // Команды Rraptor
 
-// Постоянные свойства
-/** Получить размер рабочей области */
-static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
-
-// Динамические свойства
 /** Получить статус устройства */
 static const char* CMD_RR_STATUS = "rr_status";
+/** Получить размер рабочей области */
+static const char* CMD_RR_WORKING_AREA_DIM = "rr_working_area_dim";
 /** Получить текущее положение печатающего блока */
 static const char* CMD_RR_CURRENT_POSITION = "rr_current_pos";
 
@@ -60,13 +56,21 @@ static const char* CMD_RR_STOP = "rr_stop";
 /** Запустить мотор с заданной скоростью на непрерывное вращение */
 static const char* CMD_RR_GO = "rr_go";
 /** 
- * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
- * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
+ * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение 
+ * в режиме калибровки (не проверяя выход за границы рабочей области и сбрасывая значение 
+ * текущей позиции в 0).
  */
 static const char* CMD_RR_CALIBRATE = "rr_calibrate";
 
 // Вспомогательное рабочее окружение
 
+/**************************************/
+// Модуль rraptor_tcp (Wifi)
+
+/** Задать настройки подключения Wifi */
+static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
+/** Управление Wifi: status/start/stop/restart */
+static const char* CMD_RR_WIFI = "rr_wifi";
   
 /**************************************/
 // Команды G-кода
@@ -127,6 +131,17 @@ static const char* MOTOR_INFO_PARAM_MAX_POS = "max_pos";
 /** current_pos */
 static const char* MOTOR_INFO_PARAM_CURRENT_POS = "current_pos";
 
+/**************************************/
+// Параметры управления Wifi
+
+/** status: получить статус подключения Wifi */
+static const char* WIFI_PARAM_STATUS = "status";
+/** start: подключиться к Wifi */
+static const char* WIFI_PARAM_START = "start";
+/** stop: Отключиться от Wifi */
+static const char* WIFI_PARAM_STOP = "stop";
+/** restart: перезапустить подключение Wifi */
+static const char* WIFI_PARAM_RESTART = "restart";
 
 /**
  * Установить информацию об устройстве. 
@@ -142,6 +157,17 @@ void init_device_motors(stepper *sm_x, stepper *sm_y, stepper *sm_z);
 
 /**************************************/
 // Обработчики команд
+
+/** 
+ * Вывести список команд.
+ */
+int cmd_help(char* reply_buffer);
+
+/** 
+ * Проверить доступность устройства.
+ */
+int cmd_ping(char* reply_buffer);
+
 
 /** 
  * Получить собственное имя устройства.
@@ -177,16 +203,6 @@ int cmd_manufacturer(char* reply_buffer);
  * Получить ссылку на страницу устройства.
  */
 int cmd_uri(char* reply_buffer);
-
-/** 
- * Проверить доступность устройства.
- */
-int cmd_ping(char* reply_buffer);
-
-/** 
- * Вывести список команд.
- */
-int cmd_help(char* reply_buffer);
 
 
 /** 
@@ -309,6 +325,25 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
  */
 int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer);
+
+/** 
+ * Задать настройки подключения Wifi.
+ * На входе список параметров и значений в формате: 
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ */
+int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* reply_buffer);
+
+/** 
+ * Управление подключением Wifi
+ * 
+ * @param wifi_cmd дополнительная операция
+ *     status: вывести текущий статус подключения
+ *     start: подключиться к Wifi
+ *     stop:  отключиться от Wifi
+ *     restart: перезапустить подключение Wifi
+ */
+int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer);
+
 
 /** 
  * Команда G-code G0 - прямая линия.

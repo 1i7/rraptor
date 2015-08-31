@@ -77,7 +77,23 @@ static int handleCommand(char* buffer, char* reply_buffer) {
     
     // Определим, с какой командой имеем дело    
     if(tokensNum > 0) {
-        if(strcmp(tokens[0], CMD_NAME) == 0) {
+        if(strcmp(tokens[0], CMD_HELP) == 0) {
+            // синтаксис:
+            //     help
+            // Команда корректна
+            success = true;
+            
+            // Выполнить команду
+            cmd_help(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_PING) == 0) {
+            // синтаксис:
+            //     ping
+            // Команда корректна
+            success = true;
+          
+            // Проверить доступность устройства.
+            cmd_ping(reply_buffer);
+        } else if(strcmp(tokens[0], CMD_NAME) == 0) {
             // синтаксис:
             //     name
             // Команда корректна
@@ -133,22 +149,6 @@ static int handleCommand(char* buffer, char* reply_buffer) {
           
             // Выполнить команду
             cmd_uri(reply_buffer);
-        } else if(strcmp(tokens[0], CMD_PING) == 0) {
-            // синтаксис:
-            //     ping
-            // Команда корректна
-            success = true;
-          
-            // Проверить доступность устройства.
-            cmd_ping(reply_buffer);
-        } else if(strcmp(tokens[0], CMD_HELP) == 0) {
-            // синтаксис:
-            //     help
-            // Команда корректна
-            success = true;
-            
-            // Выполнить команду
-            cmd_help(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_WORKING_AREA_DIM) == 0) {
             // синтаксис:
             //     rr_working_area_dim
@@ -304,6 +304,46 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // Выполнить команду - запустить моторы в постоянную работу 
                 // до прихода команды на остановку в режиме калибровки                
                 cmd_rr_calibrate(motor_name, spd, reply_buffer);
+            }
+        } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_WIFI) == 0) {
+            // синтаксис:
+            //     rr_configure_wifi [ssid=val] [password=val] [static_ip=val]
+            if(tokensNum >= 2) {
+                
+                int max_params = 3;
+                char* pnames[max_params];
+                char* pvalues[max_params];
+                int pcount = 0;
+                
+                char* pname;
+                char* pvalue;
+                for(int i = 1; i < tokensNum; i++) {                
+                    parseParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < max_params) {
+                        pnames[pcount] = pname;
+                        pvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_configure_wifi(pnames, pvalues, pcount, reply_buffer);
+            }
+        } else if(strcmp(tokens[0], CMD_RR_WIFI) == 0) {
+            // синтаксис:
+            //     rr_wifi status/start/stop/restart
+            if(tokensNum >= 2) {
+                char* wifi_cmd = tokens[1];
+                
+                // Команда корректна
+                success = true;
+                
+                // Выполнить команду                    
+                cmd_rr_wifi(wifi_cmd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_GCODE_G0) == 0) {
             // синтаксис:

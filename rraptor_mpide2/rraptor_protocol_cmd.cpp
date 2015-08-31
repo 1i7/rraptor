@@ -56,6 +56,56 @@ static stepper* stepper_by_id(char id) {
     }
 }
 
+
+/** 
+ * Вывести список команд.
+ */
+int cmd_help(char* reply_buffer) {
+    sprintf(reply_buffer, "Rraptor commands: \n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_HELP); strcat(reply_buffer, "\n"); 
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_NAME); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MODEL); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_SERIAL_NUMBER); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_DESCRIPTION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_VERSION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MANUFACTURER); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_URI); strcat(reply_buffer, "\n");
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_PING); strcat(reply_buffer, "\n");
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WORKING_AREA_DIM); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STATUS); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CURRENT_POSITION); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_INFO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_PIN_INFO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR_PINS); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STOP); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_GO); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CALIBRATE); strcat(reply_buffer, "\n");
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_WIFI); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WIFI); strcat(reply_buffer, "\n");
+    
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G0); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G01); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G02); strcat(reply_buffer, "\n");
+    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G03); strcat(reply_buffer, "\n");
+        
+    return strlen(reply_buffer);
+}
+
+
+/** 
+ * Проверить доступность устройства.
+ */
+int cmd_ping(char* reply_buffer) {
+    // команда выполнена
+    strcpy(reply_buffer, REPLY_OK);
+    return strlen(reply_buffer);
+}
+
 /** 
  * Получить собственное имя устройства.
  */
@@ -112,49 +162,7 @@ int cmd_uri(char* reply_buffer) {
     return strlen(reply_buffer);
 }
 
-/** 
- * Проверить доступность устройства.
- */
-int cmd_ping(char* reply_buffer) {
-    // команда выполнена
-    strcpy(reply_buffer, REPLY_OK);
-    return strlen(reply_buffer);
-}
 
-/** 
- * Вывести список команд.
- */
-int cmd_help(char* reply_buffer) {
-    sprintf(reply_buffer, "Rraptor commands: \n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_HELP); strcat(reply_buffer, "\n"); 
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_NAME); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MODEL); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_SERIAL_NUMBER); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_DESCRIPTION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_VERSION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MANUFACTURER); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_URI); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_PING); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WORKING_AREA_DIM); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STATUS); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CURRENT_POSITION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_INFO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_PIN_INFO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR_PINS); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STOP); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_GO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CALIBRATE); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_WIFI); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WIFI); strcat(reply_buffer, "\n");
-    
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G0); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G01); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G02); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G03); strcat(reply_buffer, "\n");
-        
-    return strlen(reply_buffer);
-}
 
 /** 
  * Получить размер рабочей области в формате:
@@ -591,6 +599,46 @@ int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
     }
     return strlen(reply_buffer);
 }
+
+
+
+/** 
+ * Задать настройки подключения Wifi.
+ * На входе список параметров и значений в формате: 
+ * имя_параметра1=значение_параметра1 [имя_параметра2=значение_параметра2]
+ */
+int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_configure_wifi: ");
+        
+        for(int i = 0; i < pcount; i++) {
+            Serial.print(pnames[i]);
+            Serial.print("=");
+            Serial.print(pvalues[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
+    #endif // DEBUG_SERIAL
+    
+}
+
+/** 
+ * Управление подключением Wifi
+ * 
+ * @param wifi_cmd дополнительная операция
+ *     status: вывести текущий статус подключения
+ *     start: подключиться к Wifi
+ *     stop:  отключиться от Wifi
+ *     restart: перезапустить подключение Wifi
+ */
+int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_wifi: ");
+        Serial.print(wifi_cmd);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+}
+
 
 //static int prevTime1 = 0;
 
