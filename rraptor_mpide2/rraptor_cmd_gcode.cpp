@@ -11,9 +11,6 @@ extern stepper *_sm_x, *_sm_y, *_sm_z;
 extern stepper* stepper_by_id(char id);
 
 
-
-//static int prevTime1 = 0;
-
 /** 
  * Команда G-code G0 - прямая линия.
  * 
@@ -64,23 +61,8 @@ int cmd_gcode_g0(char motor_names[], double cvalues[], int  pcount, char* reply_
             // запустить шаги
             start_stepper_cycle();
             
-            // команда выполнена
+            // команда выполнена (но работа моторов только началась!)
             strcpy(reply_buffer, REPLY_OK);
-                    
-            // Заблокируем на время рисования (TODO: убрать)
-//            int currTime = millis();
-//            while(is_cycle_running()) {
-//                if( (currTime - prevTime1) >= 1000) {
-//                    prevTime1 = currTime;
-//                    Serial.print("X.pos=");
-//                    Serial.print(_sm_x->current_pos, DEC);
-//                    Serial.print(", Y.pos=");
-//                    Serial.print(_sm_y->current_pos, DEC);
-//                    Serial.print(", Z.pos=");
-//                    Serial.print(_sm_z->current_pos, DEC);
-//                    Serial.println();
-//                }
-//            }
         } else {
             // ошибка - не нашли нужные моторы
             strcpy(reply_buffer, REPLY_ERROR);
@@ -137,23 +119,8 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f, c
             // запустить шаги
             start_stepper_cycle();
             
-            // команда выполнена
+            // команда выполнена (но работа моторов только началась!)
             strcpy(reply_buffer, REPLY_OK);
-                    
-            // Заблокируем на время рисования (TODO: убрать)
-//            int currTime = millis();
-//            while(is_cycle_running()) {
-//                if( (currTime - prevTime1) >= 1000) {
-//                    prevTime1 = currTime;
-//                    Serial.print("X.pos=");
-//                    Serial.print(_sm_x->current_pos, DEC);
-//                    Serial.print(", Y.pos=");
-//                    Serial.print(_sm_y->current_pos, DEC);
-//                    Serial.print(", Z.pos=");
-//                    Serial.print(_sm_z->current_pos, DEC);
-//                    Serial.println();
-//                }
-//            }
         } else {
             // ошибка - не нашли нужные моторы
             strcpy(reply_buffer, REPLY_ERROR);
