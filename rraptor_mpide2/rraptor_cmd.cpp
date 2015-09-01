@@ -62,37 +62,65 @@ static stepper* stepper_by_id(char id) {
  * Вывести список команд.
  */
 int cmd_help(char* reply_buffer) {
+    // TODO: по умолчанию выводить только список команд без параметров,
+    // описание команды и подробности выводить по help cmd_name
+    
     sprintf(reply_buffer, "Rraptor commands: \n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_HELP); strcat(reply_buffer, "\n"); 
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_HELP);
+    sprintf(reply_buffer+strlen(reply_buffer), "    List available commands\n");  
     
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_NAME); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MODEL); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_SERIAL_NUMBER); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_DESCRIPTION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_VERSION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_MANUFACTURER); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_URI); strcat(reply_buffer, "\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_NAME);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device name\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_MODEL);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device model\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_SERIAL_NUMBER);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device serial number\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_DESCRIPTION);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device description\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_VERSION);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device version\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_MANUFACTURER);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device manufacturer\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_URI);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device url\n");
     
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_PING); strcat(reply_buffer, "\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_PING);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Check device online\n");
     
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WORKING_AREA_DIM); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STATUS); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CURRENT_POSITION); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_INFO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_MOTOR_PIN_INFO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_MOTOR_PINS); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_STOP); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_GO); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CALIBRATE); strcat(reply_buffer, "\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_WORKING_AREA_DIM);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Working area dimensions\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_STATUS);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Device status\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_CURRENT_POSITION);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Current position of the tooling\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_MOTOR_INFO, "motor_name [pulse_delay] [distance_per_step]\n        [min_end_strategy] [max_end_strategy]\n        [min_pos] [max_pos] [current_pos]");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Info about the motor\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_MOTOR_PIN_INFO, "motor_name");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Info about motor pinout\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR, "motor_name [pulse_delay=val_pd] [distance_per_step=val_dps] \n        [min_end_strategy=val_mes] [max_end_strategy=val_Mes] \n        [min_pos=val_mp] [max_pos=val_Mp] [current_pos=val_cp]");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Configure motor\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR_PINS, "motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=val] \n        [pin_min=val] [pin_max=val]");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Configure motor pinout\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_STOP);
+    sprintf(reply_buffer+strlen(reply_buffer), "    Stop motors\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_GO, "motor_name speed");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Start selected motor rotation\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CALIBRATE, "motor_name speed");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Calibrate motor\n");
     
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_CONFIGURE_WIFI); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_RR_WIFI); strcat(reply_buffer, "\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_WIFI, "[ssid=val] [password=val] [static_ip=val]");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Configure wifi connection\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_WIFI, "status/start/stop/restart");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Control wifi connection\n");
     
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G0); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G01); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G02); strcat(reply_buffer, "\n");
-    strcat(reply_buffer, "    "); strcat(reply_buffer, CMD_GCODE_G03); strcat(reply_buffer, "\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_GCODE_G0, "[Xv1] [Yv] [Zv3]");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Move tooling to provided postion with maximum speed\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_GCODE_G01, "[Xv1] [Yv2] [Zv3] Fv4");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Draw line\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_GCODE_G02, "N/A");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Draw ark clockwise\n");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_GCODE_G03, "N/A");
+    sprintf(reply_buffer+strlen(reply_buffer), "    Draw ark counterclockwise\n");
         
     return strlen(reply_buffer);
 }
@@ -236,6 +264,43 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
             
             // подготовить вращение
             prepare_whirl(sm, dir, 0, NONE);
+            // запустить шаги
+            start_stepper_cycle();
+            
+            // команда выполнена
+            strcpy(reply_buffer, REPLY_OK);
+        } else {
+            // ошибка - не нашли нужный мотор
+            strcpy(reply_buffer, REPLY_ERROR);
+        }
+    }
+    return strlen(reply_buffer);
+}
+
+/** 
+ * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
+ * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
+ */
+int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
+    #ifdef DEBUG_SERIAL
+        Serial.print("cmd_rr_calibrate: ");
+        Serial.print(motor_name);
+        Serial.print(", speed=");
+        Serial.print(spd, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
+        
+    if(is_cycle_running()) {
+        // устройство занято
+        strcpy(reply_buffer, REPLY_BUSY);
+    } else {
+        stepper *sm = stepper_by_id(motor_name);
+        if(sm != NULL) {
+            int dir = spd > 0 ? 1 : -1;
+            int step_delay = spd > 0 ? spd : -spd;
+            
+            // подготовить вращение
+            prepare_whirl(sm, dir, 0, CALIBRATE_START_MIN_POS);
             // запустить шаги
             start_stepper_cycle();
             
@@ -602,43 +667,4 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
     
     return strlen(reply_buffer);
 }
-
-
-/** 
- * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
- * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
- */
-int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
-    #ifdef DEBUG_SERIAL
-        Serial.print("cmd_rr_calibrate: ");
-        Serial.print(motor_name);
-        Serial.print(", speed=");
-        Serial.print(spd, DEC);
-        Serial.println();
-    #endif // DEBUG_SERIAL
-        
-    if(is_cycle_running()) {
-        // устройство занято
-        strcpy(reply_buffer, REPLY_BUSY);
-    } else {
-        stepper *sm = stepper_by_id(motor_name);
-        if(sm != NULL) {
-            int dir = spd > 0 ? 1 : -1;
-            int step_delay = spd > 0 ? spd : -spd;
-            
-            // подготовить вращение
-            prepare_whirl(sm, dir, 0, CALIBRATE_START_MIN_POS);
-            // запустить шаги
-            start_stepper_cycle();
-            
-            // команда выполнена
-            strcpy(reply_buffer, REPLY_OK);
-        } else {
-            // ошибка - не нашли нужный мотор
-            strcpy(reply_buffer, REPLY_ERROR);
-        }
-    }
-    return strlen(reply_buffer);
-}
-
 

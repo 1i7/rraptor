@@ -195,6 +195,20 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // до прихода команды на остановку               
                 cmd_rr_go(motor_name, spd, reply_buffer);
             }
+        } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
+            // синтаксис:
+            //     rr_calibrate motor_name speed
+            if(tokensNum >= 3) {
+                char motor_name = tokens[1][0];
+                int spd = atoi(tokens[2]);
+        
+                // Команда корректна
+                success = true;
+                  
+                // Выполнить команду - запустить моторы в постоянную работу 
+                // до прихода команды на остановку в режиме калибровки                
+                cmd_rr_calibrate(motor_name, spd, reply_buffer);
+            }
         } else if(strcmp(tokens[0], CMD_RR_MOTOR_INFO) == 0) {
             // синтаксис:
             //     rr_motor_info motor_name [pulse_delay] [distance_per_step] [min_end_strategy] [max_end_strategy] [min_pos] [max_pos] [current_pos]
@@ -263,7 +277,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_MOTOR_PINS) == 0) {
             // синтаксис:
-            //     rr_configure_motor motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=val] \
+            //     rr_configure_motor_pins motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=val] \
             //                                   [pin_min=val] [pin_max=val]
             if(tokensNum >= 3) {
                 char motor_name = tokens[1][0];
@@ -290,20 +304,6 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 
                 // Выполнить команду                    
                 cmd_rr_configure_motor_pins(motor_name, pnames, pvalues, pcount, reply_buffer);
-            }
-        } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
-            // синтаксис:
-            //     rr_calibrate motor_name speed
-            if(tokensNum >= 3) {
-                char motor_name = tokens[1][0];
-                int spd = atoi(tokens[2]);
-        
-                // Команда корректна
-                success = true;
-                  
-                // Выполнить команду - запустить моторы в постоянную работу 
-                // до прихода команды на остановку в режиме калибровки                
-                cmd_rr_calibrate(motor_name, spd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_WIFI) == 0) {
             // синтаксис:

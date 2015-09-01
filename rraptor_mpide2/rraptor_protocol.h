@@ -234,6 +234,13 @@ int cmd_rr_stop(char* reply_buffer);
  */
 int cmd_rr_go(char motor_name, int spd, char* reply_buffer);
 
+/** 
+ * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
+ * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
+ */
+int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer);
+
+
 /**
  * Информация о выбранном моторе.
  * На входе: список запрашиваемых параметров через пробел (не указывать, чтобы получить все параметры).
@@ -322,11 +329,6 @@ int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int
 int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[], int  pcount, char* reply_buffer);
 
 
-/** 
- * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
- * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
- */
-int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer);
 
 /** 
  * Задать настройки подключения Wifi.
