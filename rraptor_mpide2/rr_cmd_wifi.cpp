@@ -51,7 +51,7 @@ int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* re
     
     // обязательно указать только имя сети
     if(ssid != NULL) {
-        configureWifi(ssid, password, static_ip_en, static_ip);
+        wifi_configure(ssid, password, static_ip_en, static_ip);
         
         // команда выполнена
         strcpy(reply_buffer, REPLY_OK);
@@ -79,9 +79,24 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         Serial.print(wifi_cmd);
         Serial.println();
     #endif // DEBUG_SERIAL
-    
-    if( strcmp(wifi_cmd, "status") == 0 ) {
+
+    if( strcmp(wifi_cmd, WIFI_PARAM_INFO) == 0 ) {
         printNetworkStatus();
+        
+        // команда выполнена
+        strcpy(reply_buffer, REPLY_OK);
+    } else if( strcmp(wifi_cmd, WIFI_PARAM_STATUS) == 0 ) {
+        printNetworkStatus();
+        
+        // команда выполнена
+        strcpy(reply_buffer, REPLY_OK);
+    } else if( strcmp(wifi_cmd, WIFI_PARAM_START) == 0 ) {
+        wifi_start();
+        
+        // команда выполнена
+        strcpy(reply_buffer, REPLY_OK);
+    } else if( strcmp(wifi_cmd, WIFI_PARAM_STOP) == 0 ) {
+        wifi_stop();
         
         // команда выполнена
         strcpy(reply_buffer, REPLY_OK);

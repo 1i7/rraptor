@@ -49,6 +49,19 @@ IPv4 parseIPAddress(char* ipv4_str) {
 
 /**
  * Получить строковое представление адреса DNETcK::IPv4
+ *
+ * @param dest строка-назначение, не меньше 16 символов (включая 0 на конце)
+ * @param ipv4_addr ip-адрес
+ */
+void sprintfIPAddress(char* dest, IPv4 *ipv4_addr) {
+    sprintf(dest, "%d.%d.%d.%d", 
+        ipv4_addr->rgbIP[0], ipv4_addr->rgbIP[1], 
+        ipv4_addr->rgbIP[2], ipv4_addr->rgbIP[3]);
+}
+
+/**
+ * Напечатать строковое представление адреса DNETcK::IPv4 
+ * в отладочный порт.
  */
 void printIPAddress(IPv4 *ipAddress) {
     Serial.print(ipAddress->rgbIP[0], DEC);

@@ -11,6 +11,11 @@
 // Пин статуса подключения к Wifi
 #define WIFI_STATUS_PIN 13
 
+/**
+ * Включить/выключить Wifi
+ */
+static bool wifi_on = true;
+
 // Значения для подключений
 
 // Точка доступа ВайФай
@@ -78,13 +83,36 @@ static int write_size;
  * @param static_ip желаемый статический IP-адрес текущего устройства - 
  *     попросим у точки Wifi, если static_ip_en=true
  */
-void configureWifi(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip) {
+void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip) {
     wifi_ssid = ssid;
     wifi_wpa2_passphrase = wpa2_passphrase;
     wifi_static_ip_en = static_ip_en;
     wifi_static_ip = parseIPAddress(static_ip);
 }
 
+/**
+ * Подключиться к сети Wifi.
+ */
+void wifi_start() {
+    #ifdef DEBUG_SERIAL
+        Serial.println("Starting wifi...");
+    #endif // DEBUG_SERIAL
+    
+    // процесс подключения запустится на следующей итерации rraptorTcpTasks()
+    wifi_on = true;
+}
+
+/**
+ * Разорвать подключение Wifi.
+ */
+void wifi_stop() {
+    #ifdef DEBUG_SERIAL
+        Serial.println("Stopping wifi...");
+    #endif // DEBUG_SERIAL
+    
+    // процесс отключения запустится на следующей итерации rraptorTcpTasks()
+    wifi_on = false;
+}
 
 /**
  * Вывести статус сервера: адрес:порт.
@@ -162,13 +190,22 @@ void rraptorTcpTasks() {
     int readSize;
     int writeSize;
     
-    // не будет менять значение между вызовами текущего метода
+    // static не будет менять значение между вызовами текущего метода
     static bool postConnectDone = false;
     
     // Держим Tcp-стек в живом состоянии
     DNETcK::periodicTasks();
-        
-    if(!DWIFIcK::isConnected(conectionId, &networkStatus)) {
+    
+    
+    if(!wifi_on) {
+        // Если были и пришел запрос отключиться, завершим стек Wifi и Tcp
+        if(DWIFIcK::isConnected(conectionId)) {
+            DNETcK::end();
+            DWIFIcK::disconnect(conectionId);
+            conectionId = DWIFIcK::INVALID_CONNECTION_ID;
+            postConnectDone = false;
+        }
+    } else if(!DWIFIcK::isConnected(conectionId, &networkStatus)) {
         // Не подключены к WiFi - выключим лампочку
         digitalWrite(WIFI_STATUS_PIN, LOW);
         

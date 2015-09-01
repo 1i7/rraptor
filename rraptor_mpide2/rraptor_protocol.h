@@ -69,7 +69,7 @@ static const char* CMD_RR_CALIBRATE = "rr_calibrate";
 
 /** Задать настройки подключения Wifi */
 static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
-/** Управление Wifi: info/status/start/stop/restart */
+/** Управление Wifi: info/status/start/stop */
 static const char* CMD_RR_WIFI = "rr_wifi";
   
 /**************************************/
@@ -152,8 +152,6 @@ static const char* WIFI_PARAM_STATUS = "status";
 static const char* WIFI_PARAM_START = "start";
 /** stop: Отключиться от Wifi */
 static const char* WIFI_PARAM_STOP = "stop";
-/** restart: перезапустить подключение Wifi */
-static const char* WIFI_PARAM_RESTART = "restart";
 
 /**
  * Установить информацию об устройстве. 

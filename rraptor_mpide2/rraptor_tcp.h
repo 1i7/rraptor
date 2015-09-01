@@ -14,7 +14,18 @@
  * @param static_ip желаемый статический IP-адрес текущего устройства - 
  *     попросим у точки Wifi, если static_ip_en=true
  */
-void configureWifi(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip);
+void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip);
+
+/**
+ * Подключиться к сети Wifi.
+ */
+void wifi_start();
+
+/**
+ * Разорвать подключение Wifi.
+ */
+void wifi_stop();
+
 
 /**
  * Инициализировать канал связи Tcp.
