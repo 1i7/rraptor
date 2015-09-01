@@ -226,10 +226,10 @@ void rraptorTcpTasks() {
             Serial.print("Start listening connection from Pult...");
         #endif // DEBUG_SERIAL
         tcpServer.startListening(tcp_server_port);
-        // Подождем, пока сокет начнет слушать подключения
+        // Подождем, пока сокет начнет слушать подключения (выполняется быстро, 
+        // если бы долго, можно было бы сделать неблокирующим)
         bool starting = true;
         while(starting) {
-            Serial.print(".");
             if(tcpServer.isListening(&networkStatus)) {
                 // Начали слушать
                 startedListening = true;
