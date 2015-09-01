@@ -17,6 +17,23 @@ static const char* device_uri;
 stepper *_sm_x, *_sm_y, *_sm_z;
 
 /**
+ * Получить шаговый двигатель по уникальному имени.
+ *
+ * @param id - имя мотора, состоит из одной буквы, регистр не учитывается.
+ */
+stepper* stepper_by_id(char id) {
+    if(id == 'x' || id == 'X') {
+        return _sm_x;
+    } else if(id == 'y' || id == 'Y') {
+        return _sm_y;
+    } else if(id == 'z' || id == 'Z') {
+        return _sm_z;
+    } else {
+        return NULL;
+    }
+}
+
+/**
  * Установить информацию об устройстве. 
  */
 void init_device_info(const char* name, const char* model, const char* serial_number, 
@@ -39,24 +56,6 @@ void init_device_motors(stepper *sm_x, stepper *sm_y, stepper *sm_z) {
     _sm_y = sm_y;
     _sm_z = sm_z;
 }
-
-/**
- * Получить шаговый двигатель по уникальному имени.
- *
- * @param id - имя мотора, состоит из одной буквы, регистр не учитывается.
- */
-static stepper* stepper_by_id(char id) {
-    if(id == 'x' || id == 'X') {
-        return _sm_x;
-    } else if(id == 'y' || id == 'Y') {
-        return _sm_y;
-    } else if(id == 'z' || id == 'Z') {
-        return _sm_z;
-    } else {
-        return NULL;
-    }
-}
-
 
 /** 
  * Вывести список команд.

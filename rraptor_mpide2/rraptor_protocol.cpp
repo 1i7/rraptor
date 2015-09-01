@@ -80,6 +80,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         if(strcmp(tokens[0], CMD_HELP) == 0) {
             // синтаксис:
             //     help
+            
             // Команда корректна
             success = true;
             
@@ -88,14 +89,16 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_PING) == 0) {
             // синтаксис:
             //     ping
+            
             // Команда корректна
             success = true;
           
-            // Проверить доступность устройства.
+            // Выполнить команду
             cmd_ping(reply_buffer);
         } else if(strcmp(tokens[0], CMD_NAME) == 0) {
             // синтаксис:
             //     name
+            
             // Команда корректна
             success = true;
             
@@ -104,6 +107,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_MODEL) == 0) {
             // синтаксис:
             //     model
+            
             // Команда корректна
             success = true;
           
@@ -112,6 +116,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_SERIAL_NUMBER) == 0) {
             // синтаксис:
             //     sn
+            
             // Команда корректна
             success = true;
           
@@ -120,6 +125,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_DESCRIPTION) == 0) {
             // синтаксис:
             //     description
+            
             // Команда корректна
             success = true;
           
@@ -128,6 +134,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_VERSION) == 0) {
             // синтаксис:
             //     version
+            
             // Команда корректна
             success = true;
           
@@ -136,6 +143,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_MANUFACTURER) == 0) {
             // синтаксис:
             //     manufacturer
+            
             // Команда корректна
             success = true;
           
@@ -144,6 +152,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_URI) == 0) {
             // синтаксис:
             //     uri
+            
             // Команда корректна
             success = true;
           
@@ -152,6 +161,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_RR_WORKING_AREA_DIM) == 0) {
             // синтаксис:
             //     rr_working_area_dim
+            
             // Команда корректна
             success = true;
           
@@ -160,6 +170,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
             // синтаксис:
             //     rr_status
+            
             // Команда корректна
             success = true;
           
@@ -168,6 +179,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_RR_CURRENT_POSITION) == 0) {
             // синтаксис:
             //     rr_current_pos
+            
             // Команда корректна
             success = true;
           
@@ -176,6 +188,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_RR_STOP) == 0) {
             // синтаксис:
             //     rr_stop
+            
             // Команда корректна
             success = true;
           
@@ -191,8 +204,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // Команда корректна
                 success = true;
                   
-                // Выполнить команду - запустить моторы в постоянную работу 
-                // до прихода команды на остановку               
+                // Выполнить команду           
                 cmd_rr_go(motor_name, spd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_CALIBRATE) == 0) {
@@ -205,8 +217,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
                 // Команда корректна
                 success = true;
                   
-                // Выполнить команду - запустить моторы в постоянную работу 
-                // до прихода команды на остановку в режиме калибровки                
+                // Выполнить команду
                 cmd_rr_calibrate(motor_name, spd, reply_buffer);
             }
         } else if(strcmp(tokens[0], CMD_RR_MOTOR_INFO) == 0) {

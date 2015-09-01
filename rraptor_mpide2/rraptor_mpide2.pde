@@ -35,9 +35,9 @@
 #endif // RR_USB_ACCESSORY
 
 // Шаговые моторы
-stepper sm_x, sm_y, sm_z;
+static stepper sm_x, sm_y, sm_z;
 
-void prepare_line1() {
+static void prepare_line1() {
     //prepare line: dx=30.0000000000, dy=20.0000000000, dt=8.0000000000
     //steps_x=4000, steps_y=2666
     //step_delay_x(1)=1000, step_delay_y(1)=2000
@@ -57,7 +57,7 @@ void prepare_line1() {
     prepare_line_2d(&sm_x, &sm_y, 30, 20, 8);
 }
 
-void prepare_line2() {
+static void prepare_line2() {
     // 1142*18666+18666000=39982572
     // 14003*2666+2666000 =39997998
     // Finished motor=x: 50924
