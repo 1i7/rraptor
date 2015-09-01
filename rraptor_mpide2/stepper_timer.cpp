@@ -183,9 +183,9 @@ void prepare_whirl(stepper *smotor, int dir, int step_delay, calibrate_mode_t ca
     cstatuses[sm_i].step_delay = step_delay;
     
     // режим калибровки
-    cstatuses[sm_i].calibrate_mode = NONE;
+    cstatuses[sm_i].calibrate_mode = calibrate_mode;
   
-    // Взводим счетчики
+    // взводим счетчики
     cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay + cstatuses[sm_i].step_delay;
     
     // на всякий случай обнулим
@@ -276,7 +276,7 @@ void handle_interrupts(int timer) {
                 cstatuses[i].cycle_status = HARD_END_MAX;
             }
             
-        } else if( cstatuses[i].calibrate_mode != NONE && 
+        } else if( cstatuses[i].calibrate_mode == NONE && 
                 (cstatuses[i].dir > 0 ? smotors[i]->current_pos + smotors[i]->distance_per_step > smotors[i]->max_pos :
                                         smotors[i]->current_pos - smotors[i]->distance_per_step < smotors[i]->min_pos) ) {
             // не в режиме калибровки и собираемся выйти за виртуальные границы во время предстоящего шага - завершаем вращение для этого мотора
