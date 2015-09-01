@@ -26,6 +26,41 @@ int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* re
         Serial.println();
     #endif // DEBUG_SERIAL
     
+    // для опущенных параметров использовать значения по умолчанию
+    char* ssid = NULL;
+    char* password = NULL;
+    bool static_ip_en = false;
+    char* static_ip = NULL;
+
+    // достанем значения из параметров
+    for(int i = 0; i < pcount; i++) {
+        if( strcmp(pnames[i], CONFIGURE_WIFI_PARAM_SSID) == 0 ) {
+            ssid = pvalues[i];
+        } else if( strcmp(pnames[i], CONFIGURE_WIFI_PARAM_PASSWORD) == 0 ) {
+            password = pvalues[i];
+        } else if( strcmp(pnames[i], CONFIGURE_WIFI_PARAM_STATIC_IP_EN) == 0 ) {
+            if( strcmp(pvalues[i], "true") || strcmp(pvalues[i], "TRUE") ) {
+                static_ip_en = true;
+            } else {
+                static_ip_en = false;
+            }
+        } else if( strcmp(pnames[i], CONFIGURE_WIFI_PARAM_STATIC_IP) == 0 ) {
+            static_ip = pvalues[i];
+        }
+    }
+    
+    // обязательно указать только имя сети
+    if(ssid != NULL) {
+        configureWifi(ssid, password, static_ip_en, static_ip);
+        
+        // команда выполнена
+        strcpy(reply_buffer, REPLY_OK);
+    } else {
+        // ошибка - не задано имя сети
+        strcpy(reply_buffer, REPLY_ERROR);
+    }
+    
+    return strlen(reply_buffer);
 }
 
 /** 
@@ -51,7 +86,6 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         // команда выполнена
         strcpy(reply_buffer, REPLY_OK);
     }
-    
     
     return strlen(reply_buffer);
 }

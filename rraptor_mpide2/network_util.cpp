@@ -5,7 +5,51 @@
 
 #include "rraptor_config.h"
 
+/**
+ * Конвертировать строковое представление адреса IPv4
+ * в объект DNETcK::IPv4
+ * @param ipv4_str срока с адресом ipv4 в формате "192.168.1.27".
+ * @return адрес DNETcK::IPv4; DNETcK::zIPv4 (IPv4-адрес, заполенный нулями) 
+ *     в случае ошибки парсинга строки.
+ */
+IPv4 parseIPAddress(char* ipv4_str) {
+    char* ip_elem_str[4];
+    int ip_elem[4];
+    
+    // указатель на строку для внутренних нужд strtok_r, позволяет
+    // одновременно обрабатывать несколько строк (strtok может работать 
+    // только с одной строкой за раз)
+    char* last;
+    
+    // разобьем строку на куски по символу '.'
+    if(ipv4_str != NULL) {
+        ip_elem_str[0] = strtok_r(ipv4_str, ".", &last);
+        ip_elem_str[1] = strtok_r(NULL, ".", &last);
+        ip_elem_str[2] = strtok_r(NULL, ".", &last);
+        ip_elem_str[3] = strtok_r(NULL, ".", &last);
+    }
+    IPv4 res;
+    if(ipv4_str == NULL || ip_elem_str[0] == NULL || ip_elem_str[1] == NULL || 
+            ip_elem_str[2] == NULL || ip_elem_str[3] == NULL) {
+        // адрес некорректный, вернем нули
+        res = DNETcK::zIPv4;
+    } else {
+        // конвертируем куски строки в целые числа
+        ip_elem[0] = atoi(ip_elem_str[0]);
+        ip_elem[1] = atoi(ip_elem_str[1]);
+        ip_elem[2] = atoi(ip_elem_str[2]);
+        ip_elem[3] = atoi(ip_elem_str[3]);
 
+        // и склеим из них ip-адрес
+        IPv4 ipv4 = {ip_elem[0],ip_elem[1],ip_elem[2],ip_elem[3]};
+        res = ipv4;
+    }    
+    return res;
+}
+
+/**
+ * Получить строковое представление адреса DNETcK::IPv4
+ */
 void printIPAddress(IPv4 *ipAddress) {
     Serial.print(ipAddress->rgbIP[0], DEC);
     Serial.print(".");
@@ -16,6 +60,9 @@ void printIPAddress(IPv4 *ipAddress) {
     Serial.print(ipAddress->rgbIP[3], DEC);
 }
 
+/**
+ * Вывести текущий статус сети.
+ */
 void printNetworkStatus() {
     IPv4 ipAddress;
     
@@ -60,6 +107,9 @@ void printNetworkStatus() {
     }
 }
 
+/**
+ * Вывести статус клиента TCP.
+ */
 void printTcpClientStatus(TcpClient *tcpClient) {
     IPEndPoint remoteEndPoint;
     if(tcpClient->getRemoteEndPoint(&remoteEndPoint)) {
@@ -72,6 +122,9 @@ void printTcpClientStatus(TcpClient *tcpClient) {
     }
 }
 
+/**
+ * Вывести название статуса DNETcK::STATUS в виде строки.
+ */
 void printDNETcKStatus(DNETcK::STATUS status) {
     switch(status) {
         case DNETcK::None:                           // = 0,

@@ -19,11 +19,23 @@ static const char* wifi_wpa2_passphrase = "robotguest";
 //static const char* wifi_ssid = "helen";
 //static const char* wifi_wpa2_passphrase = "13april1987";
 
-// статический IP-адрес для текущего хоста - попросим у 
-// точки Wifi (иначе Пульт не узнает, куда подключаться)
-//IPv4 host_ip = {192,168,115,115};
-static IPv4 host_ip = {192,168,43,115};
-//static IPv4 host_ip = {192,168,1,115};
+/**
+ * Какой адрес использовать при подключении к точке Wifi:
+ *   true - использовать статический
+ *   false - динамический
+ * (при прямом управлении с Пульта лучше использовать статический, 
+ * иначе Пульт не узнает, куда подключаться)
+ */
+static bool wifi_static_ip_en = true;
+
+/**
+ * Желаемый статический IP-адрес текущего устройства - 
+ * попросим у точки Wifi, если static_ip_en=true
+ */
+//IPv4 wifi_static_ip = {192,168,115,115};
+static IPv4 wifi_static_ip = {192,168,43,115};
+//static IPv4 wifi_static_ip = {192,168,1,115};
+//IPv4 wifi_static_ip = DNETcK::zIPv4;
 
 // Порт для tcp-сервера
 static const int tcp_server_port = DNETcK::iPersonalPorts44 + 114;
@@ -34,6 +46,7 @@ static TcpServer tcpServer;
 static TcpClient tcpClient;
 
 // Таймаут неактивности подключенного клиента, миллисекунды
+// (отключаем клиента, если он давно не присылал никакие команды)
 static int CLIENT_IDLE_TIMEOUT = 10000;
 static int clientIdleStart = 0;
 
@@ -51,13 +64,42 @@ static char read_buffer[CMD_READ_BUFFER_SIZE];
 static char write_buffer[CMD_WRITE_BUFFER_SIZE];
 static int write_size;
 
-static void printTcpServerStatus() {
-    printIPAddress(&host_ip);
-    Serial.print(":");
-    Serial.println(tcp_server_port);
+
+/**
+ * Задать настройки для подключения к сети Wifi
+ *
+ * @param ssid имя беспроводной сети
+ * @param wpa2_passphrase пароль для подключения (NULL для подключения к открытой сети)
+ * @param static_ip_en какой IP-адрес использовать при подключении к точке Wifi:
+ *     true - использовать статический
+ *     false - динамический
+ *   (при прямом управлении с Пульта лучше использовать статический, 
+ *   иначе Пульт не узнает, куда подключаться)
+ * @param static_ip желаемый статический IP-адрес текущего устройства - 
+ *     попросим у точки Wifi, если static_ip_en=true
+ */
+void configureWifi(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip) {
+    wifi_ssid = ssid;
+    wifi_wpa2_passphrase = wpa2_passphrase;
+    wifi_static_ip_en = static_ip_en;
+    wifi_static_ip = parseIPAddress(static_ip);
 }
 
 
+/**
+ * Вывести статус сервера: адрес:порт.
+ */
+static void printTcpServerStatus() {
+    IPv4 host_ip;
+    
+    if( DNETcK::getMyIP(&host_ip) ) { 
+        printIPAddress(&host_ip);
+        Serial.print(":");
+        Serial.println(tcp_server_port);
+    } else {
+        Serial.println("IP not assigned");
+    }
+}
 /**
  * Подключиться к открытой сети WiFi.
  */
@@ -89,9 +131,13 @@ static int connectWifiWPA2Passphrase(const char* ssid, const char* passphrase, D
  */
 static int connectWifi(DNETcK::STATUS *netStatus) {
     int conId = DWIFIcK::INVALID_CONNECTION_ID;
-    // Выбрать способ подключения - раскомментировать нужную строку.    
-//    conId = connectWifiOpen(wifi_ssid, netStatus);
-    conId = connectWifiWPA2Passphrase(wifi_ssid, wifi_wpa2_passphrase, netStatus);
+    if(wifi_wpa2_passphrase == NULL) {
+        // подключиться к открытой сети
+        conId = connectWifiOpen(wifi_ssid, netStatus);
+    } else {
+        // подключиться к сети с паролем WPA2
+        conId = connectWifiWPA2Passphrase(wifi_ssid, wifi_wpa2_passphrase, netStatus);
+    }
     return conId;
 }
 
@@ -106,7 +152,6 @@ void rraptorTcpSetup() {
     DNETcK::setDefaultBlockTime(DNETcK::msImmediate);
 }
 
-bool postConnectDone = false;
 
 /**
  * Работа канала связи Tcp, запускать в loop. При получении
@@ -116,6 +161,9 @@ void rraptorTcpTasks() {
     DNETcK::STATUS networkStatus;
     int readSize;
     int writeSize;
+    
+    // не будет менять значение между вызовами текущего метода
+    static bool postConnectDone = false;
     
     // Держим Tcp-стек в живом состоянии
     DNETcK::periodicTasks();
@@ -149,8 +197,13 @@ void rraptorTcpTasks() {
                     Serial.println("Initializing IP stack...");
                 #endif // DEBUG_SERIAL
             
-                // Подключимся со статическим ip-адресом
-                DNETcK::begin(host_ip);
+                if(wifi_static_ip_en) {
+                    // Подключимся со статическим ip-адресом
+                    DNETcK::begin(wifi_static_ip);
+                } else {
+                    // Подключимся с динамическим ip-адресом
+                    DNETcK::begin();
+                }
             }
         } else if(DNETcK::isStatusAnError(networkStatus)) {
             // Не подключились к сети из-за ошибки
@@ -260,11 +313,7 @@ void rraptorTcpTasks() {
             // Вернем TCP-сервер в исходное состояние
             tcpServer.close();
             
-            // Немного подождем и попробуем переподключиться на следующей итерации
-//            #ifdef DEBUG_SERIAL
-//                Serial.println("Retry after 4 seconds...");
-//            #endif // DEBUG_SERIAL
-//            delay(4000);
+            // будем пробовать переподключиться на следующей итерации
         }
     } else if(!tcpClient.isConnected()) {
         // Подождем подключения клиента
@@ -322,6 +371,7 @@ void rraptorTcpTasks() {
             clientIdleStart = millis();
         }
         
+        // Отключаем клиента, если он давно не присылал никакие команды
         if( (millis() - clientIdleStart) > CLIENT_IDLE_TIMEOUT ) {
             Serial.println("Close connection on timeout");
             tcpClient.close();

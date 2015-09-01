@@ -9,7 +9,7 @@ static const char* DEVICE_VERSION = "0.2-devel";
 static const char* DEVICE_MANUFACTURER = "Rraptor team";
 static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 
-//#define DEBUG_SERIAL
+#define DEBUG_SERIAL
 
 // Включить/выключить нужные каналы связи
 // Последовательный порт Serial (при машинном чтении ответов не 

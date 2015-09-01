@@ -132,9 +132,19 @@ static const char* MOTOR_INFO_PARAM_MAX_POS = "max_pos";
 static const char* MOTOR_INFO_PARAM_CURRENT_POS = "current_pos";
 
 /**************************************/
-// Параметры управления Wifi
+// Параметры настройки и управления Wifi
 
-/** info: параметры подключения Wifi */
+/** Имя точки доступа Wifi */
+static const char* CONFIGURE_WIFI_PARAM_SSID = "ssid";
+/** Пароль точки доступа */
+static const char* CONFIGURE_WIFI_PARAM_PASSWORD = "password";
+/** Режим статического адреса */
+static const char* CONFIGURE_WIFI_PARAM_STATIC_IP_EN = "static_ip_en";
+/** Статический адрес */
+static const char* CONFIGURE_WIFI_PARAM_STATIC_IP = "static_ip";
+
+
+/** info: показать параметры подключения Wifi */
 static const char* WIFI_PARAM_INFO = "info";
 /** status: получить статус подключения Wifi */
 static const char* WIFI_PARAM_STATUS = "status";

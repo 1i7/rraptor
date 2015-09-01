@@ -318,10 +318,10 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_RR_CONFIGURE_WIFI) == 0) {
             // синтаксис:
-            //     rr_configure_wifi [ssid=val] [password=val] [static_ip=val]
+            //     rr_configure_wifi ssid=val [password=val] [static_ip_en=true/false] [static_ip=ip]
             if(tokensNum >= 2) {
                 
-                int max_params = 3;
+                int max_params = 4;
                 char* pnames[max_params];
                 char* pvalues[max_params];
                 int pcount = 0;
