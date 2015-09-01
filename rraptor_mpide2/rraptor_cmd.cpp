@@ -231,8 +231,8 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
         stepper *sm = stepper_by_id(motor_name);
         
         if(sm != NULL) {
-            int dir = spd > 0 ? 1 : -1;
-            int step_delay = spd > 0 ? spd : -spd;
+            int dir = spd >= 0 ? 1 : -1;
+            int step_delay = spd >= 0 ? spd : -spd;
             
             // подготовить вращение
             prepare_whirl(sm, dir, 0, NONE);
