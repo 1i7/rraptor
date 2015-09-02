@@ -23,10 +23,8 @@ static bool _wifi_restart = false;
 // Значения для подключений
 
 // Точка доступа ВайФай
-static const char* wifi_ssid = "lasto4ka";
-static const char* wifi_wpa2_passphrase = "robotguest";
-//static const char* wifi_ssid = "helen";
-//static const char* wifi_wpa2_passphrase = "13april1987";
+static char wifi_ssid[128];
+static char wifi_wpa2_passphrase[128];
 
 /**
  * Какой адрес использовать при подключении к точке Wifi:
@@ -41,10 +39,7 @@ static bool wifi_static_ip_en = true;
  * Желаемый статический IP-адрес текущего устройства - 
  * попросим у точки Wifi, если static_ip_en=true
  */
-//IPv4 wifi_static_ip = {192,168,115,115};
-static IPv4 wifi_static_ip = {192,168,43,115};
-//static IPv4 wifi_static_ip = {192,168,1,115};
-//IPv4 wifi_static_ip = DNETcK::zIPv4;
+static IPv4 wifi_static_ip;
 
 // Порт для tcp-сервера
 static const int tcp_server_port = DNETcK::iPersonalPorts44 + 114;
@@ -88,8 +83,8 @@ static int write_size;
  *     попросим у точки Wifi, если static_ip_en=true
  */
 void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip) {
-    wifi_ssid = ssid;
-    wifi_wpa2_passphrase = wpa2_passphrase;
+    strcpy(wifi_ssid, ssid);
+    strcpy(wifi_wpa2_passphrase, wpa2_passphrase);
     wifi_static_ip_en = static_ip_en;
     wifi_static_ip = parseIPAddress(static_ip);
 }
@@ -195,8 +190,16 @@ void rraptorTcpSetup() {
     // не блокировать вызовы DNETcK::isInitialized, чтобы другие 
     // модули нормально работали во время подключения к вайфаю
     DNETcK::setDefaultBlockTime(DNETcK::msImmediate);
+    
+    // сеть wifi по умолчанию 
+    strcpy(wifi_ssid, "lasto4ka");
+    strcpy(wifi_wpa2_passphrase, "robotguest");
+    wifi_static_ip_en = true;
+    IPv4 defaultIp = {192,168,43,115};
+    //defaultIp = {192,168,1,115};
+    //defaultIp = DNETcK::zIPv4;
+    wifi_static_ip = defaultIp;
 }
-
 
 /**
  * Работа канала связи Tcp, запускать в loop. При получении
