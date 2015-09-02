@@ -23,7 +23,7 @@ static bool _wifi_restart = false;
 // Значения для подключений
 
 // Точка доступа ВайФай
-static char wifi_ssid[128];
+static char wifi_ssid[DWIFIcK:: WF_MAX_SSID_LENGTH]; // 32 символа
 static char wifi_wpa2_passphrase[128];
 
 /**
@@ -93,7 +93,7 @@ void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* 
  * Получить информацию о настройках подключения к сети Wifi. Значения записываются в переменные,
  * переданные по указалям в параметрах.
  * 
- * @param ssid ссылка на массив символов для записи имени сети (128 символов)
+ * @param ssid ссылка на массив символов для записи имени сети (32 символа)
  * @param wpa2_passphrase ссылка на массив символов для записи пароля (128 символов)
  * @param static_ip_en ссылка на флаг режима использования статического IP-адреса
  * @param static_ip ссылка на массив символов для записи желаемого статического IP-адреса (16 символов)
@@ -102,7 +102,7 @@ void wifi_info(char* ssid, char* wpa2_passphrase, bool* static_ip_en, char* stat
     strcpy(ssid, wifi_ssid);
     strcpy(wpa2_passphrase, wifi_wpa2_passphrase);
     *static_ip_en = wifi_static_ip_en;
-    sprintfIPAddress(static_ip, &wifi_static_ip);
+    sprintf_ip_address(static_ip, &wifi_static_ip);
 }
 
 /**

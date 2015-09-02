@@ -19,7 +19,12 @@ IPv4 parseIPAddress(char* ipv4_str);
  * @param dest строка-назначение, не меньше 16 символов (включая 0 на конце)
  * @param ipv4_addr ip-адрес
  */
-void sprintfIPAddress(char* dest, IPv4 *ipv4_addr);
+void sprintf_ip_address(char* dest, IPv4 *ipv4_addr);
+
+/**
+ * Вывести текущий статус сети в строку.
+ */
+void sprintf_network_status(char* dest);
 
 /**
  * Получить строковое представление адреса DNETcK::IPv4

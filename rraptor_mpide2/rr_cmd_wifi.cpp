@@ -81,7 +81,7 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
     #endif // DEBUG_SERIAL
 
     if( strcmp(wifi_cmd, WIFI_PARAM_INFO) == 0 ) {
-        char ssid[128];
+        char ssid[32]; // DWIFIcK:: WF_MAX_SSID_LENGTH
         char password[128];
         bool static_ip_en;
         char static_ip[16];
@@ -98,21 +98,23 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         if(static_ip_en) {
             sprintf(reply_buffer+strlen(reply_buffer), " %s=%s", CONFIGURE_WIFI_PARAM_STATIC_IP, static_ip);
         }
+        // команда выполнена
         
     } else if( strcmp(wifi_cmd, WIFI_PARAM_STATUS) == 0 ) {
-        printNetworkStatus();
-        
+        sprintf_network_status(reply_buffer);
         // команда выполнена
-        strcpy(reply_buffer, REPLY_OK);
+        
     } else if( strcmp(wifi_cmd, WIFI_PARAM_START) == 0 ) {
         wifi_start();
         
         // команда выполнена
         strcpy(reply_buffer, REPLY_OK);
+        
     } else if( strcmp(wifi_cmd, WIFI_PARAM_STOP) == 0 ) {
         wifi_stop();
         
         strcpy(reply_buffer, REPLY_OK);
+        
     } else if( strcmp(wifi_cmd, WIFI_PARAM_RESTART) == 0 ) {
         wifi_restart();
         

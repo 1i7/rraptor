@@ -53,10 +53,55 @@ IPv4 parseIPAddress(char* ipv4_str) {
  * @param dest строка-назначение, не меньше 16 символов (включая 0 на конце)
  * @param ipv4_addr ip-адрес
  */
-void sprintfIPAddress(char* dest, IPv4 *ipv4_addr) {
+void sprintf_ip_address(char* dest, IPv4 *ipv4_addr) {
     sprintf(dest, "%d.%d.%d.%d", 
         ipv4_addr->rgbIP[0], ipv4_addr->rgbIP[1], 
         ipv4_addr->rgbIP[2], ipv4_addr->rgbIP[3]);
+}
+
+
+/**
+ * Вывести текущий статус сети в строку.
+ */
+void sprintf_network_status(char* dest) {
+    dest[0] = 0;
+    IPv4 ip_addr;
+    char ip_str[16];
+    
+    if( DNETcK::getMyIP(&ip_addr) ) {
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    sprintf(dest + strlen(dest),"ipv4_address=%s", ip_str);
+    
+    if( DNETcK::getDns1(&ip_addr) ) {
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    sprintf(dest + strlen(dest)," dns1=%s", ip_str);
+    
+    if( DNETcK::getDns2(&ip_addr) ) { 
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    sprintf(dest + strlen(dest)," dns2=%s", ip_str);
+    
+    if( DNETcK::getGateway(&ip_addr) ) {
+        sprintf_ip_address(ip_str,&ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    sprintf(dest + strlen(dest)," gateway=%s", ip_str);
+        
+    if( DNETcK::getSubnetMask(&ip_addr) ) {
+        sprintf_ip_address(ip_str,&ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    sprintf(dest + strlen(dest)," subnet_mask=%s", ip_str);
 }
 
 /**
