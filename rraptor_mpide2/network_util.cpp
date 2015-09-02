@@ -64,7 +64,6 @@ void sprintf_ip_address(char* dest, IPv4 *ipv4_addr) {
  * Вывести текущий статус сети в строку.
  */
 void sprintf_network_status(char* dest) {
-    dest[0] = 0;
     IPv4 ip_addr;
     char ip_str[16];
     
@@ -73,7 +72,7 @@ void sprintf_network_status(char* dest) {
     } else {
         sprintf(ip_str, "not_assigned");
     }
-    sprintf(dest + strlen(dest),"ipv4_address=%s", ip_str);
+    sprintf(dest,"ipv4_address=%s", ip_str);
     
     if( DNETcK::getDns1(&ip_addr) ) {
         sprintf_ip_address(ip_str, &ip_addr);

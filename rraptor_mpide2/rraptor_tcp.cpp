@@ -11,15 +11,6 @@
 // Пин статуса подключения к Wifi
 #define WIFI_STATUS_PIN 13
 
-/**
- * Включить/выключить Wifi
- */
-static bool wifi_on = true;
-/**
- * Перезапустить Wifi
- */
-static bool _wifi_restart = false;
-
 // Значения для подключений
 
 // Точка доступа ВайФай
@@ -44,9 +35,27 @@ static IPv4 wifi_static_ip;
 // Порт для tcp-сервера
 static const int tcp_server_port = DNETcK::iPersonalPorts44 + 114;
 
-static int conectionId = DWIFIcK::INVALID_CONNECTION_ID;
 
+/**
+ * Включить/выключить Wifi
+ */
+static bool wifi_on = true;
+/**
+ * Перезапустить Wifi
+ */
+static bool _wifi_restart = false;
+
+/** Имя сети Wifi, к которой удачно подключились */
+static char connectionSsid[DWIFIcK:: WF_MAX_SSID_LENGTH]; // 32 символа
+
+/** Внутренний id подключения */
+static int conectionId = DWIFIcK::INVALID_CONNECTION_ID;
+/** Флаг для единовременных выполнения операций после удачного подключения */
+static bool postConnectDone = false;
+
+// Сервер, принимает подключения от Пульта
 static TcpServer tcpServer;
+// Подключенный клиент (Пульт)
 static TcpClient tcpClient;
 
 // Таймаут неактивности подключенного клиента, миллисекунды
@@ -63,7 +72,7 @@ static int clientIdleStart = 0;
 #define CMD_WRITE_BUFFER_SIZE 512
 #endif
 
-// Буфер для чтения ввода и записи вывода
+// Буферы для чтения ввода и записи вывода
 static char read_buffer[CMD_READ_BUFFER_SIZE];
 static char write_buffer[CMD_WRITE_BUFFER_SIZE];
 static int write_size;
@@ -103,6 +112,58 @@ void wifi_info(char* ssid, char* wpa2_passphrase, bool* static_ip_en, char* stat
     strcpy(wpa2_passphrase, wifi_wpa2_passphrase);
     *static_ip_en = wifi_static_ip_en;
     sprintf_ip_address(static_ip, &wifi_static_ip);
+}
+
+/**
+ * Получить информацию о текущем подключении к сети Wifi.
+ *
+ * @param ssid имя сети
+ * @param host_ip ip-адрес
+ * @param dns1 DNS1
+ * @param dns2 DNS2
+ * @param gateway основной шлюз
+ * @param subnet_mask маска подсети
+ */
+void wifi_status(char* ssid, char* host_ip, char* dns1, char* dns2, char* gateway, char* subnet_mask) {
+    IPv4 ip_addr;
+    char ip_str[16];
+    
+    strcpy(ssid, connectionSsid);
+    
+    if( DNETcK::getMyIP(&ip_addr) ) {
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    strcpy(host_ip, ip_str);
+    
+    if( DNETcK::getDns1(&ip_addr) ) {
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    strcpy(dns1, ip_str);
+    
+    if( DNETcK::getDns2(&ip_addr) ) { 
+        sprintf_ip_address(ip_str, &ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    strcpy(dns2, ip_str);
+    
+    if( DNETcK::getGateway(&ip_addr) ) {
+        sprintf_ip_address(ip_str,&ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    strcpy(gateway, ip_str);
+        
+    if( DNETcK::getSubnetMask(&ip_addr) ) {
+        sprintf_ip_address(ip_str,&ip_addr);
+    } else {
+        sprintf(ip_str, "not_assigned");
+    }
+    strcpy(subnet_mask, ip_str);
 }
 
 /**
@@ -214,7 +275,8 @@ void rraptorTcpSetup() {
     IPv4 defaultIp = {192,168,43,115};
     //defaultIp = {192,168,1,115};
     //defaultIp = DNETcK::zIPv4;
-    wifi_static_ip = defaultIp;
+    wifi_static_ip = defaultIp;            
+    connectionSsid[0] = 0;
 }
 
 /**
@@ -225,10 +287,7 @@ void rraptorTcpTasks() {
     DNETcK::STATUS networkStatus;
     int readSize;
     int writeSize;
-    
-    // static не будет менять значение между вызовами текущего метода
-    static bool postConnectDone = false;
-    
+        
     // Держим Tcp-стек в живом состоянии
     DNETcK::periodicTasks();
     
@@ -239,6 +298,7 @@ void rraptorTcpTasks() {
         if(DWIFIcK::isConnected(conectionId) || _wifi_restart) {
             DNETcK::end();
             DWIFIcK::disconnect(conectionId);
+            connectionSsid[0] = 0;
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             postConnectDone = false;
             
@@ -296,6 +356,7 @@ void rraptorTcpTasks() {
             // иметь возможность переподключиться на следующей итерации
             DNETcK::end();
             DWIFIcK::disconnect(conectionId);
+            connectionSsid[0] = 0;
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             postConnectDone = false;
         } // else {
@@ -327,6 +388,7 @@ void rraptorTcpTasks() {
             // иметь возможность переподключиться на следующей итерации
             DNETcK::end();
             DWIFIcK::disconnect(conectionId);
+            connectionSsid[0] = 0;
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             postConnectDone = false;
         } // else {
@@ -339,6 +401,9 @@ void rraptorTcpTasks() {
             Serial.println("Connected to wifi");
             printNetworkStatus();
         #endif // DEBUG_SERIAL
+        
+        // Запомним имя сети с удачным подключением
+        strcpy(connectionSsid, wifi_ssid);
                         
         // включим лампочку
         digitalWrite(WIFI_STATUS_PIN, HIGH);

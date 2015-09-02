@@ -28,6 +28,18 @@ void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* 
 void wifi_info(char* ssid, char* wpa2_passphrase, bool* static_ip_en, char* static_ip);
 
 /**
+ * Получить информацию о текущем подключении к сети Wifi.
+ *
+ * @param ssid имя сети
+ * @param host_ip ip-адрес
+ * @param dns1 DNS1
+ * @param dns2 DNS2
+ * @param gateway основной шлюз
+ * @param subnet_mask маска подсети
+ */
+void wifi_status(char* ssid, char* host_ip, char* dns1, char* dns2, char* gateway, char* subnet_mask);
+
+/**
  * Подключиться к сети Wifi.
  */
 void wifi_start();

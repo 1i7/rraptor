@@ -5,7 +5,6 @@
 #include "rraptor_protocol.h"
 
 #include "rraptor_tcp.h"
-#include "network_util.h"
 
 
 /** 
@@ -101,7 +100,18 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         // команда выполнена
         
     } else if( strcmp(wifi_cmd, WIFI_PARAM_STATUS) == 0 ) {
-        sprintf_network_status(reply_buffer);
+        char ssid[32]; // DWIFIcK:: WF_MAX_SSID_LENGTH
+        char host_ip[16];
+        char dns1[16];
+        char dns2[16];
+        char gateway[16];
+        char subnet_mask[16];
+      
+        wifi_status(ssid, host_ip, dns1, dns2, gateway, subnet_mask);
+      
+        sprintf(reply_buffer,"ssid=%s ipv4_address=%s dns1=%s dns2=%s gatewy=%s subnet_mask=%s", 
+            ssid, host_ip, dns1, dns2, gateway, subnet_mask);
+        
         // команда выполнена
         
     } else if( strcmp(wifi_cmd, WIFI_PARAM_START) == 0 ) {
