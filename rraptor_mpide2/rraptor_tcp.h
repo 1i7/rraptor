@@ -26,6 +26,11 @@ void wifi_start();
  */
 void wifi_stop();
 
+/**
+ * Перезапустить подключение Wifi.
+ */
+void wifi_restart();
+
 
 /**
  * Инициализировать канал связи Tcp.

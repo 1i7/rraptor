@@ -15,6 +15,10 @@
  * Включить/выключить Wifi
  */
 static bool wifi_on = true;
+/**
+ * Перезапустить Wifi
+ */
+static bool _wifi_restart = false;
 
 // Значения для подключений
 
@@ -115,6 +119,19 @@ void wifi_stop() {
 }
 
 /**
+ * Перезапустить подключение Wifi.
+ */
+void wifi_restart() {
+    #ifdef DEBUG_SERIAL
+        Serial.println("Restarting wifi...");
+    #endif // DEBUG_SERIAL
+    
+    // процесс переподключения запустится на следующей итерации rraptorTcpTasks()
+    wifi_on = false;
+    _wifi_restart = true;
+}
+
+/**
  * Вывести статус сервера: адрес:порт.
  */
 static void printTcpServerStatus() {
@@ -197,13 +214,19 @@ void rraptorTcpTasks() {
     DNETcK::periodicTasks();
     
     
-    if(!wifi_on) {
-        // Если были и пришел запрос отключиться, завершим стек Wifi и Tcp
-        if(DWIFIcK::isConnected(conectionId)) {
+    if(!wifi_on || _wifi_restart) {
+        // Если были подключены и пришел запрос отключиться, завершим стек Wifi и Tcp,
+        // если перезапускаем сеть, то завершим все стеки в любом случае на всякий случай
+        if(DWIFIcK::isConnected(conectionId) || _wifi_restart) {
             DNETcK::end();
             DWIFIcK::disconnect(conectionId);
             conectionId = DWIFIcK::INVALID_CONNECTION_ID;
             postConnectDone = false;
+            
+            if(_wifi_restart) {
+                _wifi_restart = false;
+                wifi_on = true;
+            }
         }
     } else if(!DWIFIcK::isConnected(conectionId, &networkStatus)) {
         // Не подключены к WiFi - выключим лампочку

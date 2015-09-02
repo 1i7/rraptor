@@ -100,6 +100,11 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         
         // команда выполнена
         strcpy(reply_buffer, REPLY_OK);
+    } else if( strcmp(wifi_cmd, WIFI_PARAM_RESTART) == 0 ) {
+        wifi_restart();
+        
+        // команда выполнена
+        strcpy(reply_buffer, REPLY_OK);
     }
     
     return strlen(reply_buffer);
