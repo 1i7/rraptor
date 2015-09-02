@@ -96,9 +96,9 @@ int cmd_help(char* reply_buffer) {
     sprintf(reply_buffer+strlen(reply_buffer), "    Info about the motor\n");
     sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_MOTOR_PIN_INFO, "motor_name");
     sprintf(reply_buffer+strlen(reply_buffer), "    Info about motor pinout\n");
-    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR, "motor_name [pulse_delay=val_pd] [distance_per_step=val_dps] \n        [min_end_strategy=val_mes] [max_end_strategy=val_Mes] \n        [min_pos=val_mp] [max_pos=val_Mp] [current_pos=val_cp]");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR, "motor_name [pulse_delay=us] [distance_per_step=um] \n        [min_end_strategy=CONST/AUTO/INF] [max_end_strategy=CONST/AUTO/INF] \n        [min_pos=um] [max_pos=um] [current_pos=um]");
     sprintf(reply_buffer+strlen(reply_buffer), "    Configure motor\n");
-    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR_PINS, "motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=val] \n        [pin_min=val] [pin_max=val]");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_MOTOR_PINS, "motor_name [pin_step=val] [pin_dir=val] [pin_en=val] [dir_inv=1/-1] \n        [pin_min=val] [pin_max=val]");
     sprintf(reply_buffer+strlen(reply_buffer), "    Configure motor pinout\n");
     sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_STOP);
     sprintf(reply_buffer+strlen(reply_buffer), "    Stop motors\n");
@@ -666,4 +666,5 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
     
     return strlen(reply_buffer);
 }
+
 

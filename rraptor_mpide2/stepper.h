@@ -119,12 +119,14 @@ typedef struct {
     /*************************************************************/
     
     /**
-     * Стратегия определения конечного положения для минимальной позиции координаты.
+     * Стратегия определения конечного положения для минимальной позиции координаты:
+     * CONST/AUTO/INF
      */
     end_strategy_t min_end_strategy;
     
     /**
-     * Стратегия определения конечного положения для максимальной позиции координаты.
+     * Стратегия определения конечного положения для максимальной позиции координаты:
+     * CONST/AUTO/INF
      */
     end_strategy_t max_end_strategy;
     
@@ -245,4 +247,5 @@ void prepare_line(stepper *sm, double dl, double spd=0);
 void prepare_line_2d(stepper *sm1, stepper *sm2, double dl1, double dl2, double spd=0);
 
 #endif // STEPPER_H
+
 
