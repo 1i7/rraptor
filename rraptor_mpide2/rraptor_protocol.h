@@ -69,7 +69,7 @@ static const char* CMD_RR_CALIBRATE = "rr_calibrate";
 
 /** Задать настройки подключения Wifi */
 static const char* CMD_RR_CONFIGURE_WIFI = "rr_configure_wifi";
-/** Управление Wifi: info/status/start/stop */
+/** Управление Wifi: info/status/start/stop/restart */
 static const char* CMD_RR_WIFI = "rr_wifi";
   
 /**************************************/

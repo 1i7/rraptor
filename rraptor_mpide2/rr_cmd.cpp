@@ -109,7 +109,7 @@ int cmd_help(char* reply_buffer) {
     
     sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_CONFIGURE_WIFI, "[ssid=val] [password=val] [static_ip=val]");
     sprintf(reply_buffer+strlen(reply_buffer), "    Configure wifi connection\n");
-    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_WIFI, "status/start/stop/restart");
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_WIFI, "info/status/start/stop/restart");
     sprintf(reply_buffer+strlen(reply_buffer), "    Control wifi connection\n");
     
     sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_GCODE_G0, "[Xv1] [Yv] [Zv3]");

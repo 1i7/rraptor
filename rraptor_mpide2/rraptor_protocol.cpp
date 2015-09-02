@@ -346,7 +346,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_RR_WIFI) == 0) {
             // синтаксис:
-            //     rr_wifi status/start/stop/restart
+            //     rr_wifi info/status/start/stop/restart
             if(tokensNum >= 2) {
                 char* wifi_cmd = tokens[1];
                 
