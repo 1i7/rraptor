@@ -150,9 +150,9 @@ static const char* WIFI_PARAM_INFO = "info";
 static const char* WIFI_PARAM_STATUS = "status";
 /** start: подключиться к Wifi */
 static const char* WIFI_PARAM_START = "start";
-/** stop: Отключиться от Wifi */
+/** stop: отключиться от Wifi */
 static const char* WIFI_PARAM_STOP = "stop";
-/** stop: Перезапустить Wifi */
+/** stop: перезапустить Wifi */
 static const char* WIFI_PARAM_RESTART = "restart";
 
 /**

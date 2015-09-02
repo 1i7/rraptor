@@ -15,6 +15,14 @@ IPv4 parseIPAddress(char* ipv4_str);
 
 /**
  * Получить строковое представление адреса DNETcK::IPv4
+ *
+ * @param dest строка-назначение, не меньше 16 символов (включая 0 на конце)
+ * @param ipv4_addr ip-адрес
+ */
+void sprintfIPAddress(char* dest, IPv4 *ipv4_addr);
+
+/**
+ * Получить строковое представление адреса DNETcK::IPv4
  */
 void printIPAddress(IPv4 *ipAddress);
 

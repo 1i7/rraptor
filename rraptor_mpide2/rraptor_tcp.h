@@ -17,6 +17,17 @@
 void wifi_configure(char* ssid, char* wpa2_passphrase, bool static_ip_en, char* static_ip);
 
 /**
+ * Получить информацию о настройках подключения к сети Wifi. Значения записываются в переменные,
+ * переданные по указалям в параметрах.
+ * 
+ * @param ssid ссылка на массив символов для записи имени сети (128 символов)
+ * @param wpa2_passphrase ссылка на массив символов для записи пароля (128 символов)
+ * @param static_ip_en ссылка на флаг режима использования статического IP-адреса
+ * @param static_ip ссылка на массив символов для записи желаемого статического IP-адреса (16 символов)
+ */
+void wifi_info(char* ssid, char* wpa2_passphrase, bool* static_ip_en, char* static_ip);
+
+/**
  * Подключиться к сети Wifi.
  */
 void wifi_start();

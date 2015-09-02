@@ -81,10 +81,24 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
     #endif // DEBUG_SERIAL
 
     if( strcmp(wifi_cmd, WIFI_PARAM_INFO) == 0 ) {
-        printNetworkStatus();
+        char ssid[128];
+        char password[128];
+        bool static_ip_en;
+        char static_ip[16];
         
-        // команда выполнена
-        strcpy(reply_buffer, REPLY_OK);
+        // получим актуальные значения из модуля wifi
+        wifi_info(ssid, password, &static_ip_en, static_ip);
+        
+        //
+        sprintf(reply_buffer, "%s=%s", CONFIGURE_WIFI_PARAM_SSID, ssid);
+        if(password != NULL && strlen(password) > 0) {
+            sprintf(reply_buffer+strlen(reply_buffer), " %s=%s", CONFIGURE_WIFI_PARAM_PASSWORD, password);
+        }
+        sprintf(reply_buffer+strlen(reply_buffer), " %s=%s", CONFIGURE_WIFI_PARAM_STATIC_IP_EN, static_ip_en ? "true" : "false");
+        if(static_ip_en) {
+            sprintf(reply_buffer+strlen(reply_buffer), " %s=%s", CONFIGURE_WIFI_PARAM_STATIC_IP, static_ip);
+        }
+        
     } else if( strcmp(wifi_cmd, WIFI_PARAM_STATUS) == 0 ) {
         printNetworkStatus();
         
@@ -98,7 +112,6 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
     } else if( strcmp(wifi_cmd, WIFI_PARAM_STOP) == 0 ) {
         wifi_stop();
         
-        // команда выполнена
         strcpy(reply_buffer, REPLY_OK);
     } else if( strcmp(wifi_cmd, WIFI_PARAM_RESTART) == 0 ) {
         wifi_restart();
