@@ -639,16 +639,31 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
               
                     if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_STEP) == 0 ) {
                         sm->pin_step = atoi(pvalues[i]);
+                        if(sm->pin_step != -1) {
+                            pinMode(sm->pin_step, OUTPUT);
+                        }
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_DIR) == 0 ) {
                         sm->pin_dir = atoi(pvalues[i]);
+                        if(sm->pin_dir != -1) {
+                            pinMode(sm->pin_dir, OUTPUT);
+                        }
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_EN) == 0 ) {
                         sm->pin_en = atoi(pvalues[i]);
+                        if(sm->pin_en != -1) {
+                            pinMode(sm->pin_en, OUTPUT);
+                        }
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_DIR_INV) == 0 ) {
                         sm->dir_inv = atoi(pvalues[i]);
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MIN) == 0 ) {
                         sm->pin_min = atoi(pvalues[i]);
+                        if(sm->pin_min != -1) {
+                            pinMode(sm->pin_min, INPUT);
+                        }
                     } else if( strcmp(pnames[i], MOTOR_PIN_INFO_PARAM_PIN_MAX) == 0 ) {
                         sm->pin_max = atoi(pvalues[i]);
+                        if(sm->pin_max != -1) {
+                            pinMode(sm->pin_max, INPUT);
+                        }
                     }
                 }
                 
@@ -666,5 +681,4 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
     
     return strlen(reply_buffer);
 }
-
 
