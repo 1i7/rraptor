@@ -383,6 +383,10 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f, c
 
 /** 
  * Команда G-code G02 - дуга по часовой стрелке.
+ * синтаксис:
+ *     G02 [Xfval Yfval] [Zfval] Rfval Ffval
+ *     G02 [Xfval Yfval] [Zfval] Ifval Jfval Ffval
+ *
  * @param pnames имена устанавливаемых параметров:
  *     X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
  *     Z - если указано, пройти по спирали, смещаясь по оси  Z
@@ -397,6 +401,10 @@ int cmd_gcode_g02(char pnames[], double pvalues[], int pcount, char* reply_buffe
 
 /** 
  * Команда G-code G03 - дуга против часовой стрелки.
+ * синтаксис:
+ *     G03 [Xfval Yfval] [Zfval] Rfval Ffval
+ *     G03 [Xfval Yfval] [Zfval] Ifval Jfval Ffval
+ *
  * @param pnames имена устанавливаемых параметров:
  *     X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
  *     Z - если указано, пройти по спирали, смещаясь по оси  Z
