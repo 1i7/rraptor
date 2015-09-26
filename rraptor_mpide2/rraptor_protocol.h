@@ -100,6 +100,9 @@ static const char GCODE_PARAM_X = 'X';
 static const char GCODE_PARAM_Y = 'Y';
 static const char GCODE_PARAM_Z = 'Z';
 static const char GCODE_PARAM_F = 'F';
+static const char GCODE_PARAM_R = 'R';
+static const char GCODE_PARAM_I = 'I';
+static const char GCODE_PARAM_J = 'J';
 
 /**************************************/
 // Параметры информации о моторе
@@ -380,13 +383,31 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int  pcount, double f, c
 
 /** 
  * Команда G-code G02 - дуга по часовой стрелке.
+ * @param pnames имена устанавливаемых параметров:
+ *     X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
+ *     Z - если указано, пройти по спирали, смещаясь по оси  Z
+ *     R - радиус окружности (R>0 - проход по меньшей дуге<180гр, R<0 - проход по большей дуге>180гр), мм
+ *     I, J - координаты центра окружностиv (если задан R, игнорируются), мм
+ *     F - скорость перемещения, мм/с
+ * @param pvalues значения параметров в виде строк
+ * @param pcount количество параметров
+ * @param reply_buffer ссылка на буфер для записи результата
  */
-void cmd_gcode_g02();
+int cmd_gcode_g02(char pnames[], double pvalues[], int pcount, char* reply_buffer);
 
 /** 
  * Команда G-code G03 - дуга против часовой стрелки.
+ * @param pnames имена устанавливаемых параметров:
+ *     X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
+ *     Z - если указано, пройти по спирали, смещаясь по оси  Z
+ *     R - радиус окружности (R>0 - проход по меньшей дуге<180гр, R<0 - проход по большей дуге>180гр), мм
+ *     I, J - координаты центра окружностиv (если задан R, игнорируются), мм
+ *     F - скорость перемещения, мм/с
+ * @param pvalues значения параметров в виде строк
+ * @param pcount количество параметров
+ * @param reply_buffer ссылка на буфер для записи результата
  */
-void cmd_gcode_g03();
+int cmd_gcode_g03(char pnames[], double pvalues[], int pcount, char* reply_buffer);
 
 
 /**

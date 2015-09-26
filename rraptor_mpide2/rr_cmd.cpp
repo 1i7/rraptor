@@ -478,7 +478,7 @@ int cmd_rr_motor_pin_info(char motor_name, char* reply_buffer) {
  *     current_pos
  * @param pvalues значения параметров в виде строк
  * @param pcount количество параметров
- * @param reply_buffer ссылка на буфер для записи результата.
+ * @param reply_buffer ссылка на буфер для записи результата
  */
 int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int  pcount, char* reply_buffer) {
     #ifdef DEBUG_SERIAL

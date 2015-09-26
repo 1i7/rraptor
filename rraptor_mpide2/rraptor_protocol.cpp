@@ -358,8 +358,8 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
         } else if(strcmp(tokens[0], CMD_GCODE_G0) == 0) {
             // синтаксис:
-            //     G0 [Xv1] [Yv] [Zv3]
-            // v1, v2, v3 - значения перемещения для координаты, мм
+            //     G0 [Xv1] [Yv2] [Zv3]
+            // X, Y, Z - значения перемещения для координаты, мм
             if(tokensNum >= 2) {
                 char motor_names[3];
                 double cvalues[3];
@@ -388,8 +388,8 @@ static int handleCommand(char* buffer, char* reply_buffer) {
         } else if(strcmp(tokens[0], CMD_GCODE_G01) == 0) {
             // синтаксис:
             //     G01 [Xv1] [Yv2] [Zv3] Fv4
-            // v1, v2, v3 - значения перемещения для координаты, мм
-            // v4 - скорость перемещения, мм/с
+            // X, Y, Z - значения перемещения для координаты, мм
+            // F - скорость перемещения, мм/с
             if(tokensNum >= 3) {
                 char motor_names[3];
                 double cvalues[3];
@@ -423,11 +423,81 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             }
             
         } else if(strcmp(tokens[0], CMD_GCODE_G02) == 0) {
-            // TODO: implement G02
-            cmd_gcode_g02();
+            // синтаксис:
+            //     G02 [Xfval Yfval] [Zfval] Rfval Ffval
+            //     G02 [Xfval Yfval] [Zfval] Ifval Jfval Ffval
+            // X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
+            // Z - если указано, пройти по спирали, смещаясь по оси  Z
+            // R - радиус окружности (R>0 - проход по меньшей дуге<180гр, R<0 - проход по большей дуге>180гр), мм
+            // I, J - координаты центра окружностиv (если задан R, игнорируются), мм
+            // F - скорость перемещения, мм/с
+            
+            // http://www.cnccookbook.com/CCCNCGCodeArcsG02G03.htm
+            // http://cncmaster.org/emc2_g-code_table_g02g03
+            
+            if(tokensNum >= 8) {
+                char pnames[7];
+                double pvalues[7];
+                int pcount = 0;
+                
+                char pname;
+                double pvalue;
+                for(int i = 1; i < tokensNum; i++) {
+                    parseGcodeParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < 7) {
+                        pnames[pcount] = pname;
+                        pvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                if(pcount > 0) {
+                    // Команда корректна
+                    success = true;
+                    
+                    // Выполнить команду
+                    cmd_gcode_g02(pnames, pvalues, pcount, reply_buffer);
+                }
+            }
         } else if(strcmp(tokens[0], CMD_GCODE_G03) == 0) {
-            // TODO: implement G03
-            cmd_gcode_g03();
+            // синтаксис:
+            //     G03 [Xfval Yfval] [Zfval] Rfval Ffval
+            //     G03 [Xfval Yfval] [Zfval] Ifval Jfval Ffval
+            // X, Y - координаты точки-назначения (если не указаны, пройти полную окружность), мм
+            // Z - если указано, пройти по спирали, смещаясь по оси  Z
+            // R - радиус окружности (R>0 - проход по меньшей дуге<180гр, R<0 - проход по большей дуге>180гр), мм
+            // I, J - координаты центра окружностиv (если задан R, игнорируются), мм
+            // F - скорость перемещения, мм/с
+            
+            // http://www.cnccookbook.com/CCCNCGCodeArcsG02G03.htm
+            // http://cncmaster.org/emc2_g-code_table_g02g03
+            
+            if(tokensNum >= 8) {
+                char pnames[7];
+                double pvalues[7];
+                int pcount = 0;
+                
+                char pname;
+                double pvalue;
+                for(int i = 1; i < tokensNum; i++) {
+                    parseGcodeParam(tokens[i], &pname, &pvalue);
+                    
+                    if(pcount < 7) {
+                        pnames[pcount] = pname;
+                        pvalues[pcount] = pvalue;
+                        pcount++;
+                    }
+                }
+                
+                if(pcount > 0) {
+                    // Команда корректна
+                    success = true;
+                    
+                    // Выполнить команду
+                    cmd_gcode_g03(pnames, pvalues, pcount, reply_buffer);
+                }
+            }
         }
     }
     if(!success) {
