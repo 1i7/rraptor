@@ -133,14 +133,19 @@ void prepare_steps(stepper *smotor, int step_count, int step_delay) {
     cstatuses[sm_i].step_count = step_count > 0 ? step_count : -step_count;
     
     // скорость вращения
-    cstatuses[sm_i].step_delay = step_delay;
+    if(step_delay <= smotors[sm_i]->pulse_delay) {
+        // не будем делать шаги чаще, чем может мотор
+        cstatuses[sm_i].step_delay = smotors[sm_i]->pulse_delay;
+    } else {
+        cstatuses[sm_i].step_delay = step_delay;
+    }
     
     // выключить режим калибровки
     cstatuses[sm_i].calibrate_mode = NONE;
   
     // Взводим счетчики
     cstatuses[sm_i].step_counter = cstatuses[sm_i].step_count;
-    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay + cstatuses[sm_i].step_delay;
+    cstatuses[sm_i].step_timer = cstatuses[sm_i].step_delay;
     
     // ожидаем пуска
     cstatuses[sm_i].cycle_status = IDLE;
@@ -180,13 +185,18 @@ void prepare_whirl(stepper *smotor, int dir, int step_delay, calibrate_mode_t ca
     cstatuses[sm_i].non_stop = true;
     
     // скорость вращения
-    cstatuses[sm_i].step_delay = step_delay;
+    if(step_delay <= smotors[sm_i]->pulse_delay) {
+        // не будем делать шаги чаще, чем может мотор
+        cstatuses[sm_i].step_delay = smotors[sm_i]->pulse_delay;
+    } else {
+        cstatuses[sm_i].step_delay = step_delay;
+    }
     
     // режим калибровки
     cstatuses[sm_i].calibrate_mode = calibrate_mode;
   
     // взводим счетчики
-    cstatuses[sm_i].step_timer = smotors[sm_i]->pulse_delay + cstatuses[sm_i].step_delay;
+    cstatuses[sm_i].step_timer = cstatuses[sm_i].step_delay;
     
     // на всякий случай обнулим
     cstatuses[sm_i].step_count = 0;
@@ -209,21 +219,30 @@ void start_stepper_cycle() {
         digitalWrite(smotors[i]->pin_en, LOW);
     }
     
-    // для частоты 1 микросекунда (1млн операций в секунду):
+    // частота ядра PIC32MX - 80МГц=80млн операций в секунду
+    // берем базовый TIMER_PRESCALER_1_8, дальше подбираем 
+    // частоту под нужный период
+    
+    // для периода 1 микросекунда (1млн вызовов в секунду):
     // 80000000/8/1000000=10=0xA
-    // (уже подкглючивает)
+    // (уже подглючивает)
 //    timer_freq_us = 1;
 //    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 0xA);
     
-    // для частоты 5 микросекунд (500000 операций в секунду):
-    // 80000000/8/500000=20
+    // для периода 5 микросекунд (200тыс вызовов в секунду):
+    // 80000000/8/200000=50
 //    timer_freq_us = 5;
-//    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 20);
+//    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 50);
     
-    // Запустим таймер с периодом 10 микросекунд (100тыс операций в секунду):
+    // Запустим таймер с периодом 10 микросекунд (100тыс вызовов в секунду):
     // 80000000/8/100000=100=0x64
-    timer_freq_us = 10;
-    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 0x64);
+//    timer_freq_us = 10;
+//    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 0x64);
+    
+    // Запустим таймер с периодом 20 микросекунд (50тыс вызовов в секунду):
+    // 80000000/8/50000=200=0x64
+    timer_freq_us = 20;
+    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 200);
 }
 
 /**
@@ -257,6 +276,15 @@ bool is_cycle_running() {
 
 /**
  * Обработчик прерывания от таймера - дёргается каждые timer_freq_us микросекунд.
+ * Этот код должен быть максимально быстрым, каждая итерация должна обязательно уложиться 
+ * в значение timer_freq_us (10мкс на PIC32 без рисования дуг, т.е. без тригонометрии, - ок; 
+ * с тригонометрией для дуг таймер должен быть >15мкс) и еще оставить немного времени 
+ * на выполнение всяких других задач за пределами таймера из главного цикла программы.
+ * В целом, "тяжелые" вычисления будут происходить далеко не на каждой итерации таймера - 
+ * только в те моменты, когда нужно сделать очередной шаг мотором и произвести необходимые
+ * вычисления для следующего шага - это будет происходить не так часто (плюс-минус раз в 
+ * миллисекунду для обычного шагового мотора), большая часть остальных циклов таймера
+ * будет быстро проскакивать через серию проверок if.
  */
 void handle_interrupts(int timer) {
     // завершился ли цикл - все моторы закончили движение
@@ -265,7 +293,8 @@ void handle_interrupts(int timer) {
     for(int i = 0; i < stepper_count; i++) {
         cstatuses[i].step_timer -= timer_freq_us;
         
-        
+        // TODO: перенести проверку концевиков ниже к моменту перед поворотом мотора или сразу после поворота,
+        // чтобы digitalRead не ел процессор на каждой итерации таймера
         if( (smotors[i]->pin_min != -1 && digitalRead(smotors[i]->pin_min)) || (smotors[i]->pin_max != -1 && digitalRead(smotors[i]->pin_max)) ) {
             // сработал один из аппаратных концевых датчиков - завершаем вращение для этого мотора
             
@@ -318,6 +347,8 @@ void handle_interrupts(int timer) {
                 }
                 
                 if(cstatuses[i].calibrate_mode == NONE || cstatuses[i].calibrate_mode == CALIBRATE_BOUNDS_MAX_POS) {
+                    // не калибруем или калибруем ширину рабочего поля
+                  
                     // обновим текущее положение координаты
                     if(cstatuses[i].dir > 0) {
                         smotors[i]->current_pos += smotors[i]->distance_per_step;
@@ -350,7 +381,7 @@ void handle_interrupts(int timer) {
                 }
                 
                 // взведём таймер на новый шаг
-                cstatuses[i].step_timer = smotors[i]->pulse_delay + cstatuses[i].step_delay;
+                cstatuses[i].step_timer = cstatuses[i].step_delay;
             }
         }
     }

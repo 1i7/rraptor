@@ -53,13 +53,13 @@ void prepare_line(stepper *sm, double cvalue, double spd) {
     double dt = (dl / spd) * 1000;
     
     // задержка между 2мя шагами, микросекунды
-    step_delay = dt / mod_steps - sm->pulse_delay;
+    step_delay = dt / mod_steps;
     
     Serial.print("step_delay=");
     Serial.print(step_delay, DEC);
     Serial.println("us");
 
-    step_delay = step_delay > 0 ? step_delay : 0;
+    step_delay = step_delay >= sm->pulse_delay ? step_delay : 0;
     
     prepare_steps(sm, steps, step_delay);
 }
@@ -125,8 +125,8 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2,
     double dt = (dl / spd) * 1000;
     
     // задержка между 2мя шагами, микросекунды
-    step_delay_sm1 = dt / mod_steps_sm1 - sm1->pulse_delay;    
-    step_delay_sm2 = dt / mod_steps_sm2 - sm2->pulse_delay;
+    step_delay_sm1 = dt / mod_steps_sm1;    
+    step_delay_sm2 = dt / mod_steps_sm2;
     
     Serial.print("step_delay_x(1)=");
     Serial.print(step_delay_sm1, DEC);
@@ -134,8 +134,8 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2,
     Serial.print(step_delay_sm2, DEC);
     Serial.println();
 
-    step_delay_sm1 = step_delay_sm1 > 0 ? step_delay_sm1 : 0;
-    step_delay_sm2 = step_delay_sm2 > 0 ? step_delay_sm2 : 0;
+    step_delay_sm1 = step_delay_sm1 >= sm1->pulse_delay ? step_delay_sm1 : 0;
+    step_delay_sm2 = step_delay_sm2 >= sm2->pulse_delay ? step_delay_sm2 : 0;
     
     Serial.print("step_delay_x=");
     Serial.print(step_delay_sm1, DEC);
