@@ -1,0 +1,30 @@
+// радиус
+r=10;
+// скорость мм/с
+f=3;
+
+
+x=[-10:0.1:10];
+// 0 <= a <= pi
+plot(x, r/f*acos(x/r));
+// 0 <= a <= pi
+plot(x, r/f*(%pi*2-acos(x/r)));
+
+y1=[0:0.1:10];
+y2=[-10:0.1:0];
+// 0 <= a <= pi/2
+plot(y1, r/f*asin(y1/r));
+// pi/2 <= a <= pi
+plot(y1, r/f*(%pi-asin(y1/r)));
+// pi <= a <= 3*pi/4
+plot(y2, r/f*(%pi-asin(y2/r)));
+// 3*pi/4 <= a <= 2*pi
+plot(y2, r/f*(%pi*2+asin(y2/r)));
+
+
+// http://hkumath.hku.hk/~nkt/Scilab/IntroToScilab.html#Dealing
+tx2=[tx 0]
+tx2(1)=[]
+dtx=tx-tx2
+plot(x, dtx);
+
