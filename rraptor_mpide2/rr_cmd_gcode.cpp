@@ -156,14 +156,88 @@ int cmd_gcode_g02(char pnames[], double pvalues[], int pcount, char* reply_buffe
     } else {
         bool prepared = false;
         
-        if(pcount == 2) {
-//            stepper *sm1 = stepper_by_id(motor_names[0]);
-//            stepper *sm2 = stepper_by_id(motor_names[1]);
-//            
-//            prepare_circle(sm1, sm2, cvalues[0], cvalues[1], f);
-            prepared = true;
+        if(pcount >= 2) {
+            // рисуем в плоскости X,Y
+            stepper *sm1 = stepper_by_id('x');
+            stepper *sm2 = stepper_by_id('y');
+
+            double x;
+            bool x_def = false;
+            double y;
+            bool y_def = false;
+            double z;
+            bool z_def = false;
+            
+            double r;
+            bool r_def = false;
+            
+            double i;
+            bool i_def = false;
+            double j;
+            bool j_def = false;
+            
+            double f;
+            bool f_def = false;
+            
+            for(int ii = 0; ii < pcount; ii++) {
+                if(pnames[ii] == 'X' || pnames[ii] == 'x') {
+                    x = pvalues[ii];
+                    x_def = true;
+                } else if(pnames[ii] == 'Y' || pnames[ii] == 'y') {
+                    y = pvalues[ii];
+                    y_def = true;
+                } else if(pnames[ii] == 'Z' || pnames[ii] == 'z') {
+                    z = pvalues[ii];
+                    z_def = true;
+                } else if(pnames[ii] == 'R' || pnames[ii] == 'r') {
+                    r = pvalues[ii];
+                    r_def = true;
+                } else if(pnames[ii] == 'I' || pnames[ii] == 'i') {
+                    i = pvalues[ii];
+                    i_def = true;
+                } else if(pnames[ii] == 'J' || pnames[ii] == 'j') {
+                    j = pvalues[ii];
+                    j_def = true;
+                } else if(pnames[ii] == 'F' || pnames[ii] == 'f') {
+                    f = pvalues[ii];
+                    f_def = true;
+                }
+            }
+            // http://www.cnccookbook.com/CCCNCGCodeArcsG02G03.htm
+            
+            // без скорости никуда не поедем
+            if(f_def) {
+                 
+                if(r_def && x_def && y_def) {
+                    // если задан радиус и заданы координаты назначения, используем радиус
+                    
+                    prepare_arc(sm1, sm2, x, y, r, f);
+                    prepared = true;
+                } else if(i_def && j_def) {
+                    // иначе используем координаты центра окружности
+               
+                    if(x_def && y_def) {
+                       // идем в точку назначения
+                       prepare_arc(sm1, sm2, x, y, i, j, f);
+                       prepared = true;
+                    } else {
+                        // рисуем полную окружность
+                       prepare_circle(sm1, sm2, i, j, f);
+                       prepared = true;
+                    }
+                }// else {
+                    // информации недостаточно, команда некорректна
+                //}
+                
+                if(z_def) {
+                    // у нас еще есть и Z, подготовим линейное движение и по ней
+                    // (все вместе получится спуск/подъем по спирали)
+                    
+                    stepper *sm3 = stepper_by_id('z');
+                    //prepare_line(sm3, z, f);
+                }
+            }
         }
-        
         
         if(prepared) {
             // запустить шаги

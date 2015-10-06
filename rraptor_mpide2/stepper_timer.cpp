@@ -57,15 +57,49 @@ typedef struct {
     
     /** true: вращение без остановки, false: использовать step_count */
     bool non_stop;
-
+    
     /** Количество шагов в текущей серии (если non_stop=false) */
     int step_count;
     
+    /** 
+     * true: вращение с постоянной скоростью (использовать значение step_delay), 
+     * false: вращение с переменной скоростью (использовать next_step_delay)
+     */
+    bool const_speed;
+    
     /**
      * Задержка между 2мя шагами мотора (определяет скорость вращения, 
-     * 0 для максимальной скорости) 
+     * 0 для максимальной скорости), микросекунды
+     * 
+     * Используется при const_speed=true
      */
     int step_delay;
+    
+    /**
+     * Указатель на объект, содержащий всю необходимую информацию для вычисления
+     * времени до следующего шага (должен подходить для параметра curve_context 
+     * функции next_step_delay).
+     *
+     * Для встроенного алгоритма рисования дуги окружности тип curve_context будет circle_context_t
+     *
+     * Используется при const_speed=false
+     */
+    void* curve_context;
+    
+    /**
+     * Ссылка на функцию, вычисляющую динамическую задержку перед следующим шагом мотора 
+     * (определяет скорость вращения):
+     * - при постоянной задержке мотор движется с постоянной скоростью (рисование прямой линии)
+     * - при переменной задержке на 2х моторах движение инструмента криволинейно (рисование дуги окружности)
+     *
+     * Используется при const_speed=false
+     *
+     * @param curr_step - номер текущего шага
+     * @param curve_context - указатель на объект, содержащий всю необходимую информацию для вычисления
+     *     времени до следующего шага
+     * @return время до следующего шага, микросекунды
+     */
+    int (*next_step_delay)(int curr_step, void* curve_context);
     
     /** Режим калибровки */
     calibrate_mode_t calibrate_mode;
@@ -133,6 +167,7 @@ void prepare_steps(stepper *smotor, int step_count, int step_delay) {
     cstatuses[sm_i].step_count = step_count > 0 ? step_count : -step_count;
     
     // скорость вращения
+    cstatuses[sm_i].const_speed = true;
     if(step_delay <= smotors[sm_i]->pulse_delay) {
         // не будем делать шаги чаще, чем может мотор
         cstatuses[sm_i].step_delay = smotors[sm_i]->pulse_delay;
@@ -185,6 +220,7 @@ void prepare_whirl(stepper *smotor, int dir, int step_delay, calibrate_mode_t ca
     cstatuses[sm_i].non_stop = true;
     
     // скорость вращения
+    cstatuses[sm_i].const_speed = true;
     if(step_delay <= smotors[sm_i]->pulse_delay) {
         // не будем делать шаги чаще, чем может мотор
         cstatuses[sm_i].step_delay = smotors[sm_i]->pulse_delay;
@@ -201,6 +237,54 @@ void prepare_whirl(stepper *smotor, int dir, int step_delay, calibrate_mode_t ca
     // на всякий случай обнулим
     cstatuses[sm_i].step_count = 0;
     cstatuses[sm_i].step_counter = 0;
+    
+    // ожидаем пуска
+    cstatuses[sm_i].cycle_status = IDLE;
+}
+
+/**
+ * Подготовить мотор к запуску ограниченной серии шагов с переменной скоростью - задать нужное количество 
+ * шагов и указатель на функцию, вычисляющую задержку перед каждым шагом для регулирования скорости.
+ * 
+ * @param step_count количество шагов, знак задает направление вращения
+ * @param curve_context - указатель на объект, содержащий всю необходимую информацию для вычисления
+ *     времени до следующего шага
+ * @param next_step_delay указатель на функцию, вычисляющую задержка перед следующим шагом, микросекунды
+ */
+void prepare_curved_steps(stepper *smotor, int step_count, void* curve_context, int (*next_step_delay)(int curr_step, void* curve_context)) {
+    // резерв нового места на мотор в списке
+    int sm_i = stepper_count;
+    stepper_count++;
+    
+    // ссылка на мотор
+    smotors[sm_i] = smotor;
+        
+    // Подготовить движение
+  
+    // задать направление
+    cstatuses[sm_i].dir = step_count > 0 ? 1 : -1;
+    if(cstatuses[sm_i].dir * smotor->dir_inv > 0) {
+        digitalWrite(smotors[sm_i]->pin_dir, HIGH); // туда
+    } else {
+        digitalWrite(smotors[sm_i]->pin_dir, LOW); // обратно
+    }
+    
+    // шагаем ограниченное количество шагов
+    cstatuses[sm_i].non_stop = false;
+    // сделать step_count положительным
+    cstatuses[sm_i].step_count = step_count > 0 ? step_count : -step_count;
+    
+    // скорость вращения
+    cstatuses[sm_i].const_speed = false;
+    cstatuses[sm_i].curve_context = curve_context;
+    cstatuses[sm_i].next_step_delay = next_step_delay;
+    
+    // выключить режим калибровки
+    cstatuses[sm_i].calibrate_mode = NONE;
+  
+    // Взводим счетчики
+    cstatuses[sm_i].step_counter = cstatuses[sm_i].step_count;
+    cstatuses[sm_i].step_timer = cstatuses[sm_i].next_step_delay(0, cstatuses[sm_i].curve_context);
     
     // ожидаем пуска
     cstatuses[sm_i].cycle_status = IDLE;
@@ -381,7 +465,23 @@ void handle_interrupts(int timer) {
                 }
                 
                 // взведём таймер на новый шаг
-                cstatuses[i].step_timer = cstatuses[i].step_delay;
+                if(cstatuses[i].const_speed) {
+                    // координата движется с постоянной скоростью
+                    
+                    // взводим таймер на новый шаг
+                    cstatuses[i].step_timer = cstatuses[i].step_delay;
+                } else {
+                    // координата движется с переменной скоростью (например, рисуем дугу)
+                    
+                    // вычислим время до следующего шага
+                    int step_delay = cstatuses[i].next_step_delay(cstatuses[i].step_count - cstatuses[i].step_counter + 1, 
+                        cstatuses[i].curve_context);
+                    // не будем делать шаги чаще, чем может мотор
+                    step_delay = step_delay >= smotors[i]->pulse_delay ? step_delay : smotors[i]->pulse_delay;
+                    
+                    // взводим таймер на новый шаг
+                    cstatuses[i].step_timer = step_delay;
+                }
             }
         }
     }

@@ -435,7 +435,7 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             // http://www.cnccookbook.com/CCCNCGCodeArcsG02G03.htm
             // http://cncmaster.org/emc2_g-code_table_g02g03
             
-            if(tokensNum >= 8) {
+            if(tokensNum >= 3) {
                 char pnames[7];
                 double pvalues[7];
                 int pcount = 0;
