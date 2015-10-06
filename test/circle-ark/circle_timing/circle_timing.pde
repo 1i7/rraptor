@@ -4,6 +4,14 @@ void setup() {
     Serial.println("Circle timing calcs test");
 }
 
+double calc_tx(double k, double x, double r) {
+    return k*acos(x/r);
+}
+
+double calc_ty(double k, double y, double r) {
+    return k*asin(y/r);
+}
+
 void loop() {
     double r = 10;
     double x_1=-8, y_1=0;
@@ -27,8 +35,12 @@ void loop() {
         //tx = r/f*acos(x_1/r);
         //ty = r/f*asin(y_1/r);
         // хоть эдак - те же 13мкс
-        tx = k*acos(x_1/r);
-        ty = k*asin(y_1/r);
+        //tx = k*acos(x_1/r);
+        //ty = k*asin(y_1/r);
+        
+        // дополнительный вызов функции - все те же 13мкс
+        tx = calc_tx(k, x_1, r);
+        ty = calc_tx(k, y_1, r);
         
         // так 1-2мкс (вычисление ничего не значит)
         //tx = x_1/5;
@@ -36,12 +48,12 @@ void loop() {
         
         // типа концевые датчики (6 на 3 координаты): 
         // 4-5мкс на 6 чтений, 2-3мкс на 2 чтения, 1-2 на одно
-        digitalRead(13);
-        digitalRead(14);
-        digitalRead(15);
-        digitalRead(16);
-        digitalRead(17);
-        digitalRead(18);
+        //digitalRead(13);
+        //digitalRead(14);
+        //digitalRead(15);
+        //digitalRead(16);
+        //digitalRead(17);
+        //digitalRead(18);
         
         // если все вообще закоментить, то время между t1 и t2 будет 1-2мкс
         
