@@ -270,6 +270,9 @@ circle_context_t circle_context;
 void prepare_circle(stepper *sm1, stepper *sm2, double center_c1, double center_c2, double spd) {
 }
 
+void prepare_spiral_circle(stepper *sm1, stepper *sm2, stepper *sm3,double target_c3, double center_c1, double center_c2, double spd) {
+}
+
 /**
  * @param target_c1 - целевое значение координаты 1, мм
  * @param target_c2 - целевое значение координаты 2, мм
@@ -278,12 +281,16 @@ void prepare_circle(stepper *sm1, stepper *sm2, double center_c1, double center_
 void prepare_arc(stepper *sm1, stepper *sm2, double target_c1, double target_c2, double center_c1, double center_c2, double spd) {
 }
 
+void prepare_spiral_arc(stepper *sm1, stepper *sm2, stepper *sm3, double target_c1, double target_c2, double target_c3, double center_c1, double center_c2, double spd) {
+}
+
+
 /**
  * @param target_c1 - целевое значение координаты 1, мм
  * @param target_c2 - целевое значение координаты 2, мм
  * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  */
-void prepare_arc(stepper *sm1, stepper *sm2, double target_c1, double target_c2, double radius, double spd) {
+void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2, double radius, double spd) {
     Serial.print("prepare arc:");
     Serial.print(" (");
     Serial.print(sm1->name);
@@ -354,4 +361,6 @@ void prepare_arc(stepper *sm1, stepper *sm2, double target_c1, double target_c2,
     prepare_curved_steps(sm2, steps_sm2, &circle_context, next_step_delay_sm2);
 }
 
+void prepare_spiral_arc2(stepper *sm1, stepper *sm2, stepper *sm3, double target_c1, double target_c2, double target_c3, double radius, double spd) {
+}
 
