@@ -8,6 +8,7 @@
  *
  * @author Антон Моисеев
  */
+ #define DEBUG_SERIAL
  
 #include "WProgram.h"
 
@@ -144,6 +145,7 @@ bool cycle_running = false;
  * @param step_delay задержка между двумя шагами, микросекунды (0 для максимальной скорости).
  */
 void prepare_steps(stepper *smotor, int step_count, int step_delay) {
+  
     // резерв нового места на мотор в списке
     int sm_i = stepper_count;
     stepper_count++;
@@ -315,18 +317,36 @@ void start_stepper_cycle() {
     
     // для периода 5 микросекунд (200тыс вызовов в секунду):
     // 80000000/8/200000=50
-//    timer_freq_us = 5;
-//    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 50);
+    //timer_freq_us = 5;
+    //initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 50);
     
+    // ок для движения по линии, совсем не ок для движения по дуге (90мкс на acos/asin)
     // Запустим таймер с периодом 10 микросекунд (100тыс вызовов в секунду):
     // 80000000/8/100000=100=0x64
-//    timer_freq_us = 10;
-//    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 0x64);
+    //timer_freq_us = 10;
+    //initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 0x64);
     
     // Запустим таймер с периодом 20 микросекунд (50тыс вызовов в секунду):
-    // 80000000/8/50000=200=0x64
-    timer_freq_us = 20;
-    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 200);
+    // 80000000/8/50000=200
+    //timer_freq_us = 20;
+    //initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 200);
+    
+    // Запустим таймер с периодом 80 микросекунд (12.5тыс вызовов в секунду):
+    // 80000000/8/12500=200
+    //timer_freq_us = 80;
+    //initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 800);
+    
+    // Запустим таймер с периодом 100 микросекунд (12.5тыс вызовов в секунду):
+    // 80000000/8/10000=1000
+    //timer_freq_us = 100;
+    //initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 1000);
+    
+    
+    // ок для движения движения по дуге (90мкс на acos/asin)
+    // Запустим таймер с периодом 100 микросекунд (12.5тыс вызовов в секунду):
+    // 80000000/8/5000=2000
+    timer_freq_us = 200;
+    initTimerISR(TIMER3, TIMER_PRESCALER_1_8, 2000);
 }
 
 /**
@@ -371,6 +391,10 @@ bool is_cycle_running() {
  * будет быстро проскакивать через серию проверок if.
  */
 void handle_interrupts(int timer) {
+    #ifdef DEBUG_SERIAL
+        unsigned long cycle_start = micros();
+    #endif // DEBUG_SERIAL
+    
     // завершился ли цикл - все моторы закончили движение
     bool finished = true;
     
@@ -453,6 +477,8 @@ void handle_interrupts(int timer) {
                 if(!cstatuses[i].non_stop && cstatuses[i].step_counter == 0) {
                     cstatuses[i].cycle_status = FINISHED_OK;
                     
+                    /*
+                    // вывод сообщений занимает много времени => таймер выбивается из графика
                     #ifdef DEBUG_SERIAL
                         Serial.print("Finished motor=");
                         Serial.print(smotors[i]->name);
@@ -462,6 +488,7 @@ void handle_interrupts(int timer) {
                         Serial.print(millis(), DEC);
                         Serial.println("ms");
                     #endif // DEBUG_SERIAL
+                    */
                 }
                 
                 // взведём таймер на новый шаг
@@ -490,6 +517,19 @@ void handle_interrupts(int timer) {
         // все моторы сделали все шаги, цикл завершился
         finish_stepper_cycle();
     }
+    
+    #ifdef DEBUG_SERIAL
+        unsigned long cycle_finish = micros();
+        unsigned long cycle_time = cycle_finish - cycle_start;
+        if(cycle_time >= timer_freq_us) {
+            Serial.print("***ERROR: timer handler takes longer than timer period: ");
+            Serial.print("cycle time=");
+            Serial.print(cycle_time);
+            Serial.print("us, timer period=");
+            Serial.print(timer_freq_us);
+            Serial.println("us");
+        }
+    #endif // DEBUG_SERIAL
 }
 
 

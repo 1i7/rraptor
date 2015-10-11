@@ -189,6 +189,11 @@ typedef struct {
 } circle_context_t;
 
 int next_step_delay_circle_x(int curr_step, void* circle_context) {
+    #ifdef DEBUG_SERIAL
+        // время начала вычисления в микросекундах
+        unsigned long t1 = micros();
+    #endif // DEBUG_SERIAL
+        
     circle_context_t* context = (circle_context_t*)circle_context;
     
     // время до достижения целевого x из положения a=0 (x=r, y=0)
@@ -201,6 +206,8 @@ int next_step_delay_circle_x(int curr_step, void* circle_context) {
       
     // сколько ехать до новой точки из положения a=0
     tx = context->k*acos(x/context->r_mkm);
+    //tx=a;
+    //tx = context->k*x/context->r_mkm;
 
     // сколько ехать до новой точки из текущего положения
     dtx = tx - context->tx_prev;
@@ -224,10 +231,38 @@ int next_step_delay_circle_x(int curr_step, void* circle_context) {
     Serial.print(", dtx=");
     Serial.println(dtx);*/
     
+    
+    #ifdef DEBUG_SERIAL
+        // время конца вычисления в микросекундах 
+        // (в миллисекундах на PIC32 время вычисления будет 0)
+        unsigned long t2 = micros();
+        unsigned long dt = t2-t1;
+    
+        if(dt >= 100) {
+            Serial.print("#####X dt=");
+            Serial.print(dt);
+            Serial.print(", x=");
+            Serial.print(x);
+            Serial.print(", context->r_mkm=");
+            Serial.print(context->r_mkm);
+            Serial.print(", x/context->r_mkm=");
+            Serial.print(x/context->r_mkm);
+            Serial.print(", acos(x/context->r_mkm)=");
+            Serial.print(acos(x/context->r_mkm));
+            Serial.print(", curr_step=");
+            Serial.println(curr_step);
+        }
+    #endif // DEBUG_SERIAL
+    
     return dtx;
 }
 
 int next_step_delay_circle_y(int curr_step, void* circle_context) {
+    #ifdef DEBUG_SERIAL
+        // время начала вычисления в микросекундах
+        unsigned long t1 = micros();
+    #endif // DEBUG_SERIAL
+    
     circle_context_t* context = (circle_context_t*)circle_context;
     
     // время до достижения целевого y из положения a=0 (x=r, y=0)
@@ -262,6 +297,20 @@ int next_step_delay_circle_y(int curr_step, void* circle_context) {
     Serial.print(", dty=");
     Serial.println(dty);*/
     
+    #ifdef DEBUG_SERIAL
+        // время конца вычисления в микросекундах 
+        // (в миллисекундах на PIC32 время вычисления будет 0)
+        unsigned long t2 = micros();
+        unsigned long dt = t2-t1;
+    
+        if(dt >= 100) {
+            Serial.print("#####Y dt=");
+            Serial.print(dt);
+            Serial.print(", curr_step=");
+            Serial.println(curr_step);
+        }
+    #endif // DEBUG_SERIAL
+        
     return dty;
 }
 
@@ -291,26 +340,28 @@ void prepare_spiral_arc(stepper *sm1, stepper *sm2, stepper *sm3, double target_
  * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  */
 void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2, double radius, double spd) {
-    Serial.print("prepare arc:");
-    Serial.print(" (");
-    Serial.print(sm1->name);
-    Serial.print("1=");
-    Serial.print(sm1->current_pos / 1000, DEC);
-    Serial.print("mm, ");
-    Serial.print(sm2->name);
-    Serial.print("1=");
-    Serial.print(sm2->current_pos / 1000, DEC);
-    Serial.print("mm) -> (");
-    Serial.print(sm1->name);
-    Serial.print("2=");
-    Serial.print(target_c1, DEC);
-    Serial.print("mm, ");
-    Serial.print(sm2->name);
-    Serial.print("2=");
-    Serial.print(target_c2, DEC);
-    Serial.print("mm); speed=");
-    Serial.print(spd, DEC);
-    Serial.println("mm/s");
+    #ifdef DEBUG_SERIAL
+        Serial.print("prepare arc:");
+        Serial.print(" (");
+        Serial.print(sm1->name);
+        Serial.print("1=");
+        Serial.print(sm1->current_pos / 1000, DEC);
+        Serial.print("mm, ");
+        Serial.print(sm2->name);
+        Serial.print("1=");
+        Serial.print(sm2->current_pos / 1000, DEC);
+        Serial.print("mm) -> (");
+        Serial.print(sm1->name);
+        Serial.print("2=");
+        Serial.print(target_c1, DEC);
+        Serial.print("mm, ");
+        Serial.print(sm2->name);
+        Serial.print("2=");
+        Serial.print(target_c2, DEC);
+        Serial.print("mm); speed=");
+        Serial.print(spd, DEC);
+        Serial.println("mm/s");
+    #endif // DEBUG_SERIAL
       
     // радиус окружности, мм
     circle_context.r = radius;
@@ -346,11 +397,12 @@ void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2
     int steps_sm1 = circle_context.r_mkm / sm1->distance_per_step;
     int steps_sm2 = circle_context.r_mkm / sm2->distance_per_step;
     
-    
-    Serial.print("steps-sm1=");
-    Serial.print(steps_sm1);
-    Serial.print(", steps-sm2=");
-    Serial.println(steps_sm2);
+    #ifdef DEBUG_SERIAL
+        Serial.print("steps-sm1=");
+        Serial.print(steps_sm1);
+        Serial.print(", steps-sm2=");
+        Serial.println(steps_sm2);
+    #endif // DEBUG_SERIAL
     
     // колбэки для вычисления переменных промежутков между шагами
     int (*next_step_delay_sm1)(int, void*) = &next_step_delay_circle_x;
