@@ -21,17 +21,19 @@
  * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  */
 void prepare_line(stepper *sm, double cvalue, double spd) {
-    Serial.print("prepare line:");
-    Serial.print(sm->name);
-    Serial.print("1=");
-    Serial.print(sm->current_pos/1000, DEC);
-    Serial.print("mm, ");
-    Serial.print(sm->name);
-    Serial.print("2=");
-    Serial.print(cvalue, DEC);
-    Serial.print("mm, speed=");
-    Serial.print(spd, DEC);
-    Serial.println("mm/s");
+    #ifdef DEBUG_SERIAL
+        Serial.print("prepare line:");
+        Serial.print(sm->name);
+        Serial.print("1=");
+        Serial.print(sm->current_pos/1000, DEC);
+        Serial.print("mm, ");
+        Serial.print(sm->name);
+        Serial.print("2=");
+        Serial.print(cvalue, DEC);
+        Serial.print("mm, speed=");
+        Serial.print(spd, DEC);
+        Serial.println("mm/s");
+    #endif // DEBUG_SERIAL
     
     int steps;
     int mod_steps;
@@ -43,9 +45,12 @@ void prepare_line(stepper *sm, double cvalue, double spd) {
     steps = dl / sm->distance_per_step;
     mod_steps = steps >= 0 ? steps : -steps;
     
-    Serial.print("steps=");
-    Serial.print(steps, DEC);
-    Serial.println();
+    
+    #ifdef DEBUG_SERIAL
+        Serial.print("steps=");
+        Serial.print(steps, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
     
     if(spd == 0) {
         // посчитаем максимально возможнную скорость, мм/с
@@ -58,9 +63,12 @@ void prepare_line(stepper *sm, double cvalue, double spd) {
     // задержка между 2мя шагами, микросекунды
     step_delay = dt / mod_steps;
     
-    Serial.print("step_delay=");
-    Serial.print(step_delay, DEC);
-    Serial.println("us");
+    
+    #ifdef DEBUG_SERIAL
+        Serial.print("step_delay=");
+        Serial.print(step_delay, DEC);
+        Serial.println("us");
+    #endif // DEBUG_SERIAL
 
     step_delay = step_delay >= sm->pulse_delay ? step_delay : 0;
     
@@ -76,26 +84,28 @@ void prepare_line(stepper *sm, double cvalue, double spd) {
  * @param spd - скорость перемещения, мм/с, 0 для максимальное скорости
  */
 void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2, double spd) {
-    Serial.print("prepare line:");
-    Serial.print(" ");
-    Serial.print(sm1->name);
-    Serial.print("1=");
-    Serial.print(sm1->current_pos / 1000, DEC);
-    Serial.print("mm, ");
-    Serial.print(sm1->name);
-    Serial.print("2=");
-    Serial.print(cvalue1, DEC);
-    Serial.print("mm; ");
-    Serial.print(sm2->name);
-    Serial.print("1=");
-    Serial.print(sm2->current_pos / 1000, DEC);
-    Serial.print("mm, ");
-    Serial.print(sm2->name);
-    Serial.print("2=");
-    Serial.print(cvalue2, DEC);
-    Serial.print("mm; speed=");
-    Serial.print(spd, DEC);
-    Serial.println("mm/s");
+    #ifdef DEBUG_SERIAL
+        Serial.print("prepare line:");
+        Serial.print(" ");
+        Serial.print(sm1->name);
+        Serial.print("1=");
+        Serial.print(sm1->current_pos / 1000, DEC);
+        Serial.print("mm, ");
+        Serial.print(sm1->name);
+        Serial.print("2=");
+        Serial.print(cvalue1, DEC);
+        Serial.print("mm; ");
+        Serial.print(sm2->name);
+        Serial.print("1=");
+        Serial.print(sm2->current_pos / 1000, DEC);
+        Serial.print("mm, ");
+        Serial.print(sm2->name);
+        Serial.print("2=");
+        Serial.print(cvalue2, DEC);
+        Serial.print("mm; speed=");
+        Serial.print(spd, DEC);
+        Serial.println("mm/s");
+    #endif // DEBUG_SERIAL
     
     int steps_sm1;
     int steps_sm2;
@@ -114,11 +124,14 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2,
     mod_steps_sm1 = steps_sm1 >= 0 ? steps_sm1 : -steps_sm1;
     mod_steps_sm2 = steps_sm2 >= 0 ? steps_sm2 : -steps_sm2;
     
-    Serial.print("steps_x=");
-    Serial.print(steps_sm1, DEC);
-    Serial.print(", steps_y=");
-    Serial.print(steps_sm2, DEC);
-    Serial.println();
+    
+    #ifdef DEBUG_SERIAL
+        Serial.print("steps_x=");
+        Serial.print(steps_sm1, DEC);
+        Serial.print(", steps_y=");
+        Serial.print(steps_sm2, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
     
     // длина гипотенузы, микрометры
     double dl = sqrt(dl1*dl1 + dl2*dl2);
@@ -134,20 +147,26 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2,
     step_delay_sm1 = dt / mod_steps_sm1;    
     step_delay_sm2 = dt / mod_steps_sm2;
     
-    Serial.print("step_delay_x(1)=");
-    Serial.print(step_delay_sm1, DEC);
-    Serial.print(", step_delay_y(1)=");
-    Serial.print(step_delay_sm2, DEC);
-    Serial.println();
+    
+    #ifdef DEBUG_SERIAL
+        Serial.print("step_delay_x(1)=");
+        Serial.print(step_delay_sm1, DEC);
+        Serial.print(", step_delay_y(1)=");
+        Serial.print(step_delay_sm2, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
 
     step_delay_sm1 = step_delay_sm1 >= sm1->pulse_delay ? step_delay_sm1 : 0;
     step_delay_sm2 = step_delay_sm2 >= sm2->pulse_delay ? step_delay_sm2 : 0;
     
-    Serial.print("step_delay_x=");
-    Serial.print(step_delay_sm1, DEC);
-    Serial.print(", step_delay_y=");
-    Serial.print(step_delay_sm2, DEC);
-    Serial.println();
+    
+    #ifdef DEBUG_SERIAL
+        Serial.print("step_delay_x=");
+        Serial.print(step_delay_sm1, DEC);
+        Serial.print(", step_delay_y=");
+        Serial.print(step_delay_sm2, DEC);
+        Serial.println();
+    #endif // DEBUG_SERIAL
     
     prepare_steps(sm1, steps_sm1, step_delay_sm1);
     prepare_steps(sm2, steps_sm2, step_delay_sm2);
