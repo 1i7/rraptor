@@ -383,11 +383,10 @@ bool is_cycle_running() {
  * Отладочная информация о текущем цикле.
  */
 void cycle_status(char* status_str) {
-    sprintf(status_str, "stepper_count=%d", 
-        stepper_count);
+    sprintf(status_str, "stepper_count=%d", stepper_count);
     for(int i = 0; i < stepper_count; i++) {
         sprintf(status_str+strlen(status_str), 
-            "; cstatuses[%d]: step_count=%d, step_counter=%d, step_timer=%d; cstatuses[1]: step_count=%d, step_counter=%d, step_timer=%d",
+            "; cstatuses[%d]: step_count=%d, step_counter=%d, step_timer=%d",
             i, cstatuses[i].step_count, cstatuses[i].step_counter, cstatuses[i].step_timer);
     }
 }
