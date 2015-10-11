@@ -105,6 +105,11 @@ static const char GCODE_PARAM_I = 'I';
 static const char GCODE_PARAM_J = 'J';
 
 /**************************************/
+// Параметры текущего статуса
+/** debug */
+static const char* STATUS_PARAM_DEBUG = "debug";
+
+/**************************************/
 // Параметры информации о моторе
 /** pin_step */
 static const char* MOTOR_PIN_INFO_PARAM_PIN_STEP = "pin_step";
@@ -227,9 +232,13 @@ int cmd_uri(char* reply_buffer);
 int cmd_rr_working_area_dim(char* reply_buffer);
 
 /** 
- * Получить текущий статус устройства.
+ * Получить текущий статус устройства:
+ * idle - ожидает задания
+ * working - моторы работают
+ *
+ * @param debug вывести дополнительную отладочную информацию о ходе выполнения задания.
  */
-int cmd_rr_status(char* reply_buffer);
+int cmd_rr_status(bool debug, char* reply_buffer);
 
 /** 
  * Получить текущее положение печатающего блока в формате:
@@ -440,5 +449,6 @@ int cmd_gcode_g03(char pnames[], double pvalues[], int pcount, char* reply_buffe
 int handleInput(char* buffer, int buffer_size, char* reply_buffer);
 
 #endif // RRAPTOR_PROTOCOL_H
+
 
 

@@ -88,7 +88,7 @@ int cmd_help(char* reply_buffer) {
     
     sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_WORKING_AREA_DIM);
     sprintf(reply_buffer+strlen(reply_buffer), "    Working area dimensions\n");
-    sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_STATUS);
+    sprintf(reply_buffer+strlen(reply_buffer), "%s %s\n", CMD_RR_STATUS, "[debug]");
     sprintf(reply_buffer+strlen(reply_buffer), "    Device status\n");
     sprintf(reply_buffer+strlen(reply_buffer), "%s\n", CMD_RR_CURRENT_POSITION);
     sprintf(reply_buffer+strlen(reply_buffer), "    Current position of the tooling\n");
@@ -203,11 +203,19 @@ int cmd_rr_working_area_dim(char* reply_buffer) {
 }
 
 /** 
- * Получить текущий статус устройства.
+ * Получить текущий статус устройства:
+ * idle - ожидает задания
+ * working - моторы работают
+ *
+ * @param debug вывести дополнительную отладочную информацию о ходе выполнения задания.
  */
-int cmd_rr_status(char* reply_buffer) {
+int cmd_rr_status(bool debug, char* reply_buffer) {
     if(is_cycle_running()) {
-        strcpy(reply_buffer, STATUS_WORKING);
+        if(!debug) {
+            strcpy(reply_buffer, STATUS_WORKING);
+        } else {
+            cycle_status(reply_buffer);
+        }
     } else {
         strcpy(reply_buffer, STATUS_IDLE);
     }
@@ -681,4 +689,5 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
     
     return strlen(reply_buffer);
 }
+
 

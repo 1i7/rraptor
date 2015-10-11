@@ -239,6 +239,11 @@ void finish_stepper_cycle();
  */
 bool is_cycle_running();
 
+/**
+ * Отладочная информация о текущем цикле.
+ */
+void cycle_status(char* status_str);
+
 ////
 // Математика
 
@@ -287,5 +292,6 @@ void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2
 void prepare_spiral_arc2(stepper *sm1, stepper *sm2, stepper *sm3, double target_c1, double target_c2, double target_c3, double radius, double spd);
 
 #endif // STEPPER_H
+
 
 

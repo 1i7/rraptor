@@ -169,13 +169,20 @@ static int handleCommand(char* buffer, char* reply_buffer) {
             cmd_rr_working_area_dim(reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_STATUS) == 0) {
             // синтаксис:
-            //     rr_status
+            //     rr_status [debug]
             
+            bool debug = false;
+            if(tokensNum >= 2) {
+                if(strcmp(STATUS_PARAM_DEBUG, tokens[1]) == 0) {
+                    debug = true;
+                }
+            }
+          
             // Команда корректна
             success = true;
-          
+            
             // Выполнить команду
-            cmd_rr_status(reply_buffer);
+            cmd_rr_status(debug, reply_buffer);
         } else if(strcmp(tokens[0], CMD_RR_CURRENT_POSITION) == 0) {
             // синтаксис:
             //     rr_current_pos
