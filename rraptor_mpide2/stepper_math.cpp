@@ -12,6 +12,9 @@
 #include "WProgram.h"
 #include "stepper.h"
 
+/******************************************************************/
+/* Путешествие по линии */
+
 /**
  * Подготовить линейное перемещение из текущей позиции в заданную точку с заданной скоростью,
  * для одной координаты.
@@ -172,6 +175,12 @@ void prepare_line_2d(stepper *sm1, stepper *sm2, double cvalue1, double cvalue2,
     prepare_steps(sm2, steps_sm2, step_delay_sm2);
 }
 
+/******************************************************************/
+/* Путешествие по дуге окружости */
+
+/**
+ * Разная информация о процессе движения точки по дуге окружности.
+ */
 typedef struct {
     // радиус окружности, мм
     double r;
@@ -202,11 +211,21 @@ typedef struct {
     ////
     // Динамические значения
     // значение tx на предыдущей итерации
-    double tx_prev;
+    int tx_prev;
     // значение ty на предыдущей итерации
-    double ty_prev;    
+    int ty_prev;
+    // дополнительная задержка для tx (одноразовая, на старте)
+    int tx_delay;
+    // дополнительная задержка для ty (одноразовая, на старте)
+    int ty_delay;
 } circle_context_t;
 
+// контекст для текущей окружности
+circle_context_t circle_context;
+
+/**
+ * Время до следующего шага по оси X при путешествии по дуге окружности, микросекунды.
+ */
 int next_step_delay_circle_x(int curr_step, void* circle_context) {
     #ifdef DEBUG_SERIAL
         // время начала вычисления в микросекундах
@@ -215,21 +234,24 @@ int next_step_delay_circle_x(int curr_step, void* circle_context) {
         
     circle_context_t* context = (circle_context_t*)circle_context;
     
-    // время до достижения целевого x из положения a=0 (x=r, y=0)
-    double tx;
-    // время до достижения целевого x из текущего положения
-    double dtx;
+    // время до достижения целевого x из положения alpha=0 (x=r, y=0), микросекунды
+    int tx;
+    // время до достижения целевого x из текущего положения, микросекунды
+    int dtx;
     
-    // целовое положение координаты x
+    // целевое положение координаты x
     double x = context->r_mkm - context->dx*(curr_step + 1);
       
-    // сколько ехать до новой точки из положения a=0
+    // сколько ехать до новой точки из положения alpha=0, микросекунды
     tx = context->k*acos(x/context->r_mkm);
-    //tx=a;
-    //tx = context->k*x/context->r_mkm;
 
-    // сколько ехать до новой точки из текущего положения
+    // сколько ехать до новой точки из текущего положения, микросекунды
     dtx = tx - context->tx_prev;
+    // учтем одноразовую первоначальную задержку
+    if(context->tx_delay) {
+        dtx += context->tx_delay;
+        context->tx_delay = 0;
+    }
     
     // сохраним для следующей итерации (чтобы не вычислять два раза)
     context->tx_prev = tx;
@@ -276,6 +298,9 @@ int next_step_delay_circle_x(int curr_step, void* circle_context) {
     return dtx;
 }
 
+/**
+ * Время до следующего шага по оси Y при путешествии по дуге окружности, микросекунды.
+ */
 int next_step_delay_circle_y(int curr_step, void* circle_context) {
     #ifdef DEBUG_SERIAL
         // время начала вычисления в микросекундах
@@ -284,7 +309,7 @@ int next_step_delay_circle_y(int curr_step, void* circle_context) {
     
     circle_context_t* context = (circle_context_t*)circle_context;
     
-    // время до достижения целевого y из положения a=0 (x=r, y=0)
+    // время до достижения целевого y из положения alpha=0 (x=r, y=0)
     double ty;
     // время до достижения целевого y из текущего положения
     double dty;
@@ -292,11 +317,16 @@ int next_step_delay_circle_y(int curr_step, void* circle_context) {
     // целевое положение координаты y, микрометры
     double y = context->dy*(curr_step + 1);
       
-    // сколько ехать до новой точки из положения a=0
+    // сколько ехать до новой точки из положения alpha=0
     ty = context->k*asin(y/context->r_mkm);
 
     // сколько ехать до новой точки из текущего положения
     dty = ty - context->ty_prev;
+    // учтем одноразовую первоначальную задержку
+    if(context->ty_delay) {
+        dty += context->ty_delay;
+        context->ty_delay = 0;
+    }
     
     // сохраним для следующей итерации (чтобы не вычислять два раза)
     context->ty_prev = ty;
@@ -333,7 +363,6 @@ int next_step_delay_circle_y(int curr_step, void* circle_context) {
     return dty;
 }
 
-circle_context_t circle_context;
 
 void prepare_circle(stepper *sm1, stepper *sm2, double center_c1, double center_c2, double spd) {
 }
@@ -381,7 +410,27 @@ void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2
         Serial.print(spd, DEC);
         Serial.println("mm/s");
     #endif // DEBUG_SERIAL
-      
+    
+    // y |___
+    //   |    \
+    //   |     \
+    //   |______|_ x
+    
+    // определим координаты центра окружности, 
+    // шаговый мотор1 (мотор_x) sm1 будет x, шаговый мотор2 (мотор_y) sm2 будет y, мм
+    double center_x = xxx;
+    double center_y = yyy;
+    
+    // перейдем в декартову систему координат с центром в начале окружности, мм
+    double start_x = xxx - center_x;
+    double start_y = yyy - center_y;
+    
+    double target_x = target_c1 - center_x;
+    double target_y = target_c2 - center_y;
+    
+    // Заполним первоначальные значения полей для контекста, который будет использоваться 
+    // на множестве итераций в процессе рисования до завршения процесса
+    
     // радиус окружности, мм
     circle_context.r = radius;
     
@@ -389,32 +438,29 @@ void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2
     circle_context.f = spd;
     
     // начнем движение из крайней правой точки против часовой стрелки, мм
-    circle_context.x_0 = circle_context.r;
-    circle_context.y_0 = 0;
+    circle_context.x_0 = start_x;//circle_context.r;
+    circle_context.y_0 = start_y;//0;
     
     // завершим движение в верхней точке окружности, мм
-    circle_context.x_1 = 0;
-    circle_context.y_1 = circle_context.r;
+    circle_context.x_1 = target_x;//0;
+    circle_context.y_1 = target_y;//circle_context.r;
     
     // шаг по x и y, микрометры
     circle_context.dx = sm1->distance_per_step;
     circle_context.dy = sm2->distance_per_step;
-        
+    
     // 
     // вычисляемые значения
     // радиус в микрометрах
     circle_context.r_mkm = circle_context.r * 1000;
     // коэффициент для вычисления задежки, микросекунды
     circle_context.k = 1000000*circle_context.r/circle_context.f;
-    
-    // обнулим динамические значения
-    circle_context.tx_prev = 0;
-    circle_context.ty_prev = 0;
-    
+            
     ///
     // количество шагов по координате
-    int steps_sm1 = circle_context.r_mkm / sm1->distance_per_step;
-    int steps_sm2 = circle_context.r_mkm / sm2->distance_per_step;
+    // todo
+    int steps_sm1 = (target_x-start_x)*1000000 / sm1->distance_per_step;
+    int steps_sm2 = (target_y-start_y)*1000000 / sm2->distance_per_step;
     
     #ifdef DEBUG_SERIAL
         Serial.print("steps-sm1=");
@@ -423,6 +469,63 @@ void prepare_arc2(stepper *sm1, stepper *sm2, double target_c1, double target_c2
         Serial.println(steps_sm2);
     #endif // DEBUG_SERIAL
     
+    
+    // учтем возможность старта из произвольной точки дуги (alpha > 0)
+    // немного нетривиально: посчитаем, на каком шаге мы бы были, если
+    // бы начинали с нулевого угла, причем для x и y номера непройденных
+    // шагов будут отличаться; отсчет на запуск моторов начнется со сдвигом
+    // так, чтобы учесть их стартовое относительное положение
+    
+    // виртуальная шкала времени, как если бы движение началось t=0 из точки alpha=0
+    // стартовая позиция:
+    //     t_start_x
+    // ----------|
+    //                                t_start_y
+    // -----------------------------------|
+    // ----------|<-------ty_delay------->|
+    // 0--------------------------------------------------> t
+    
+    // первые шаги по осям
+    //       t_start_x   t_(start_x+dx)
+    // ----------|--------------|
+    //                               t_start_y   t_(start_y+dy)
+    // -----------------------------------|---------|
+    // ----------|<-------ty_delay------->|
+    // 0--------------------------------------------------> t
+    
+    // но т.к. мы начинаем реальное движение из точки start_x, start_y,
+    // первый шаг по x должен произойти через время dtx=t_(start_x+dx)-t_start_x
+    // первый шаг по y должен произойти через время dty=t_(start_y+dy)-t_start_y+ty_delay
+    // после того, как первый шаг по y будет сделан, значение ty_delay можно сбросить в 0
+    
+    // количество виртуальных шагов, "пройденных" до реальной стартовой точки
+    // todo
+    double start_step_x = start_x / sm1->distance_per_step;
+    double start_step_y = start_y / sm2->distance_per_step;;
+    
+    // время, за которое мотор_x должен попасть в положение start_x из положения alpha=0 (x=r, y=0)
+    int t_start_x = next_step_delay_circle_x(start_step_x, &circle_context);
+    // время, за которое мотор_y должен попасть в положение start_y из положения alpha=0 (x=r, y=0)
+    int t_start_y = next_step_delay_circle_y(start_step_y, &circle_context);
+    
+    // виртуальное время попадания в исходную позицию
+    circle_context.tx_prev = t_start_x;
+    circle_context.ty_prev = t_start_y;
+    
+    // если начинаем движение из стартовой точки alpha=0, то значения будут
+    //circle_context.tx_prev = 0;
+    //circle_context.ty_prev = 0;
+    
+    // берем за основу меньшее время и устанавливаем первоначальный сдвиг
+    if(t_start_x < t_start_y) {
+        // мотор_x на первой итерации пойдет сразу
+        circle_context.tx_delay = 0;
+        circle_context.ty_delay = t_start_y - t_start_x;
+    } else {
+        circle_context.tx_delay = t_start_x - t_start_y;
+        circle_context.ty_delay = 0;
+    }
+        
     // колбэки для вычисления переменных промежутков между шагами
     int (*next_step_delay_sm1)(int, void*) = &next_step_delay_circle_x;
     int (*next_step_delay_sm2)(int, void*) = &next_step_delay_circle_y;
