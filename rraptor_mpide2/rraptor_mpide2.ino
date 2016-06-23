@@ -7,30 +7,22 @@
 // (походу, они не добавляются к строке компилятора)
 
 // для последовательного порта Serial
-//#ifdef RR_SERIAL
+#ifdef RR_SERIAL
 #include "rraptor_serial.h"
-//#endif // RR_SERIAL
+#endif // RR_SERIAL
 
 // для TCP
-//#ifdef RR_TCP
-#include <WiFiShieldOrPmodWiFi_G.h>
-#include <DNETcK.h>
-#include <DWIFIcK.h>
+#ifdef RR_TCP
 #include "rraptor_tcp.h"
-//#endif // RR_TCP
+#endif // RR_TCP
 
 // для Сервера Роботов
-//#ifdef RR_ROBOT_SERVER
-#include <WiFiShieldOrPmodWiFi_G.h>
-#include <DNETcK.h>
-#include <DWIFIcK.h>
+#ifdef RR_ROBOT_SERVER
 #include "rraptor_robot_server.h"
-//#endif // RR_ROBOT_SERVER
+#endif // RR_ROBOT_SERVER
 
 // для USB Accessory
 #ifdef RR_USB_ACCESSORY
-#include <chipKITUSBHost.h>
-#include <chipKITUSBAndroidHost.h>
 #include "rraptor_usb_accessory.h"
 #endif // RR_USB_ACCESSORY
 
