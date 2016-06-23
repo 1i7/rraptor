@@ -1,5 +1,5 @@
 
-#include "WProgram.h"
+#include "Arduino.h"
 
 #include "rraptor_config.h"
 #include "rraptor_protocol.h"
