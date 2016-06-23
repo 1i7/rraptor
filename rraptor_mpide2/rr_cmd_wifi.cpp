@@ -4,7 +4,12 @@
 #include "rraptor_config.h"
 #include "rraptor_protocol.h"
 
+// для TCP
+#ifdef RR_TCP
 #include "rraptor_tcp.h"
+#else
+#pragma message( "RR_TCP module is not enabled, wifi configuration commands will not work" )
+#endif // RR_TCP
 
 
 /** 
@@ -24,7 +29,7 @@ int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* re
         }
         Serial.println();
     #endif // DEBUG_SERIAL
-    
+#ifdef RR_TCP    
     // для опущенных параметров использовать значения по умолчанию
     char* ssid = NULL;
     char* password = NULL;
@@ -60,6 +65,9 @@ int cmd_rr_configure_wifi(char* pnames[], char* pvalues[], int  pcount, char* re
     }
     
     return strlen(reply_buffer);
+#else
+    return 0;
+#endif // RR_TCP
 }
 
 /** 
@@ -78,7 +86,7 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
         Serial.print(wifi_cmd);
         Serial.println();
     #endif // DEBUG_SERIAL
-
+#ifdef RR_TCP
     if( strcmp(wifi_cmd, WIFI_PARAM_INFO) == 0 ) {
         char ssid[32]; // DWIFIcK:: WF_MAX_SSID_LENGTH
         char password[128];
@@ -133,6 +141,9 @@ int cmd_rr_wifi(char* wifi_cmd, char* reply_buffer) {
     }
     
     return strlen(reply_buffer);
+#else
+    return 0;
+#endif // RR_TCP
 }
 
 
