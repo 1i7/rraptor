@@ -9,14 +9,14 @@ static const char* DEVICE_VERSION = "0.2-devel";
 static const char* DEVICE_MANUFACTURER = "Rraptor team";
 static const char* DEVICE_URI = "http://rraptor.lasto4ka.su";
 
-//#define DEBUG_SERIAL
+#define DEBUG_SERIAL
 
 // Включить/выключить нужные каналы связи
 // Последовательный порт Serial (при машинном чтении ответов не 
 // использовать вместе с DEBUG_SERIAL)
 #define RR_SERIAL
 // Прямое управление через беспроводной канал WiFi
-#define RR_TCP
+//#define RR_TCP
 // Сервер Роботов
 //#define RR_ROBOT_SERVER
 // Аксессуар USB Android
