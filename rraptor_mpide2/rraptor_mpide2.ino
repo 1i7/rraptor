@@ -1,6 +1,8 @@
 #include "rraptor_config.h"
 #include "rraptor_protocol.h"
+
 #include "stepper.h"
+#include "stepper_math.h"
 
 // без прямого импорта здесь эти библиотеки не находят импорты 
 // в других cpp-файлах и при компиляции происходят ошибки
@@ -76,14 +78,14 @@ void setup() {
 //    init_stepper_ends(stepper* smotor,
 //        end_strategy min_end_strategy, end_strategy max_end_strategy,
 //        double min_pos, double max_pos);
-    // X - синий драйвер
-    init_stepper(&sm_x, 'x', 8, 9, 10, 1, 1000, 7.5); 
+    // Драйвер 1 (X - синий драйвер)
+    init_stepper(&sm_x, 'x', 11, 10, 14, 1, 1000, 7.5); 
     init_stepper_ends(&sm_x, -1, -1, CONST, CONST, 0, 300000);
-    // Y - желтый драйвер
-    init_stepper(&sm_y, 'y', 5, 6, 7, -1, 1000, 7.5);
+    // Драйвер 2 (Y - желтый драйвер)
+    init_stepper(&sm_y, 'y', 6, 7, 14, 1, 1000, 7.5);
     init_stepper_ends(&sm_y, -1, -1, CONST, CONST, 0, 216000);
-    // Z - черный драйвер
-    init_stepper(&sm_z, 'z', 2, 3, 4, -1, 1000, 7.5);
+    // Драйвер 3 (Z - черный драйвер)
+    init_stepper(&sm_z, 'z', 4, 5, 14, 1, 1000, 7.5);
     init_stepper_ends(&sm_z, -1, -1, CONST, CONST, 0, 100000);
     
     init_device_motors(&sm_x, &sm_y, &sm_z);
@@ -92,7 +94,7 @@ void setup() {
     // Модули связи
     #ifdef RR_SERIAL
         #ifdef DEBUG_SERIAL
-            Serial.println("Enable Serial communicatin module");
+            Serial.println("Enable Serial communication module");
         #endif // DEBUG_SERIAL
         
         rraptorSerialSetup();
@@ -100,7 +102,7 @@ void setup() {
     
     #ifdef RR_TCP
         #ifdef DEBUG_SERIAL
-            Serial.println("Enable TCP communicatin module");
+            Serial.println("Enable TCP communication module");
         #endif // DEBUG_SERIAL
         
         rraptorTcpSetup();
@@ -108,7 +110,7 @@ void setup() {
     
     #ifdef RR_ROBOT_SERVER
         #ifdef DEBUG_SERIAL
-            Serial.println("Enable Robot Server communicatin module");
+            Serial.println("Enable Robot Server communication module");
         #endif // DEBUG_SERIAL
         
         rraptorTcpSetup();
@@ -116,7 +118,7 @@ void setup() {
 
     #ifdef RR_USB_ACCESSORY
         #ifdef DEBUG_SERIAL
-            Serial.println("Enable Android USB Accessory communicatin module");
+            Serial.println("Enable Android USB Accessory communication module");
         #endif // DEBUG_SERIAL
         
         rraptorUSBAccessorySetup();
@@ -128,7 +130,7 @@ void setup() {
 
 void loop1() {
 
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         Serial.print("X.pos=");
         Serial.print(sm_x.current_pos, DEC);
         Serial.print(", Y.pos=");

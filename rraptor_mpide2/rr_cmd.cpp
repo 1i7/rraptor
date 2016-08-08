@@ -210,11 +210,11 @@ int cmd_rr_working_area_dim(char* reply_buffer) {
  * @param debug вывести дополнительную отладочную информацию о ходе выполнения задания.
  */
 int cmd_rr_status(bool debug, char* reply_buffer) {
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         if(!debug) {
             strcpy(reply_buffer, STATUS_WORKING);
         } else {
-            cycle_status(reply_buffer);
+            cycle_debug_status(reply_buffer);
         }
     } else {
         strcpy(reply_buffer, STATUS_IDLE);
@@ -249,6 +249,7 @@ int cmd_rr_stop(char* reply_buffer) {
 
 /** 
  * Запустить мотор с заданной скоростью на непрерывное вращение.
+ * @param spd: 1 - вращать в одну сторону, -1 - в другую (TODO: конвертировать в реальную скорость)
  */
 int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
     #ifdef DEBUG_SERIAL
@@ -259,7 +260,7 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
         Serial.println();
     #endif // DEBUG_SERIAL
         
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -285,8 +286,9 @@ int cmd_rr_go(char motor_name, int spd, char* reply_buffer) {
 }
 
 /** 
- * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки - 
+ * Калибровать координату - запустить мотор с заданной скоростью на непрерывное вращение в режиме калибровки, 
  * не проверяя выход за границы рабочей области и сбрасывая значение текущей позиции в 0.
+ * @param spd: 1 - вращать в одну сторону, -1 - в другую (TODO: конвертировать в реальную скорость)
  */
 int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
     #ifdef DEBUG_SERIAL
@@ -297,7 +299,7 @@ int cmd_rr_calibrate(char motor_name, int spd, char* reply_buffer) {
         Serial.println();
     #endif // DEBUG_SERIAL
         
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -503,7 +505,7 @@ int cmd_rr_configure_motor(char motor_name, char* pnames[], char* pvalues[], int
         Serial.println();
     #endif // DEBUG_SERIAL
         
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -616,7 +618,7 @@ int cmd_rr_configure_motor_pins(char motor_name, char* pnames[], char* pvalues[]
         Serial.println();
     #endif // DEBUG_SERIAL
     
-    if(is_cycle_running()) {
+    if(is_stepper_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
