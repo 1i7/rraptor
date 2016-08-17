@@ -79,14 +79,14 @@ void setup() {
 //        end_strategy min_end_strategy, end_strategy max_end_strategy,
 //        double min_pos, double max_pos);
     // Драйвер 1 (X - синий драйвер)
-    init_stepper(&sm_x, 'x', 11, 10, 14, 1, 1000, 7.5); 
-    init_stepper_ends(&sm_x, -1, -1, CONST, CONST, 0, 300000);
+    init_stepper(&sm_x, 'x', 11, 10, NO_PIN, false, 1000, 7.5); 
+    init_stepper_ends(&sm_x, NO_PIN, NO_PIN, CONST, CONST, 0, 300000);
     // Драйвер 2 (Y - желтый драйвер)
-    init_stepper(&sm_y, 'y', 6, 7, 14, 1, 1000, 7.5);
-    init_stepper_ends(&sm_y, -1, -1, CONST, CONST, 0, 216000);
+    init_stepper(&sm_y, 'y', 6, 7, NO_PIN, false, 1000, 7.5);
+    init_stepper_ends(&sm_y, NO_PIN, NO_PIN, CONST, CONST, 0, 216000);
     // Драйвер 3 (Z - черный драйвер)
-    init_stepper(&sm_z, 'z', 4, 5, 14, 1, 1000, 7.5);
-    init_stepper_ends(&sm_z, -1, -1, CONST, CONST, 0, 100000);
+    init_stepper(&sm_z, 'z', 4, 5, NO_PIN, false, 1000, 7.5);
+    init_stepper_ends(&sm_z, NO_PIN, NO_PIN, CONST, CONST, 0, 100000);
     
     init_device_motors(&sm_x, &sm_y, &sm_z);
     
