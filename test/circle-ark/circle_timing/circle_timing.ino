@@ -1,9 +1,4 @@
 
-void setup() {
-    Serial.begin(9600);
-    Serial.println("Circle timing calcs test");
-}
-
 double calc_tx(double k, double x, double r) {
     return k*acos(x/r);
 }
@@ -11,6 +6,12 @@ double calc_tx(double k, double x, double r) {
 double calc_ty(double k, double y, double r) {
     return k*asin(y/r);
 }
+
+void setup() {
+    Serial.begin(9600);
+    Serial.println("Circle timing calcs test");
+}
+
 
 void loop() {
     double r = 10;
@@ -76,7 +77,7 @@ void loop() {
         Serial.print(t2-t1);
         
         // если не обратиться здесь к вычисленным tx и ty, компилятор сделает так, что
-        // они вообще-то не будут вычисляться и замеренное время будет некорректно
+        // они вообще не будут вычисляться и замеренное время будет некорректно
         Serial.print("; tx=");
         Serial.print(tx);
         Serial.print("; ty=");
@@ -161,7 +162,7 @@ void loop2() {
             Serial.print(x_1);
             
             // если не обратиться здесь к вычисленным tx и ty, компилятор сделает так, что
-            // они вообще-то не будут вычисляться и замеренное время будет некорректно
+            // они вообще- не будут вычисляться и замеренное время будет некорректно
             Serial.print("; tx=");
             Serial.print(tx);
             Serial.print("; ty=");
@@ -175,4 +176,5 @@ void loop2() {
     
     Serial.println("finish");
 }
+
 
