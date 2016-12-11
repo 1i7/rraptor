@@ -68,7 +68,7 @@ void setup() {
     // Информация о текущем устройстве
     init_device_info(DEVICE_NAME, DEVICE_MODEL, DEVICE_SERIAL_NUMBER, 
         DEVICE_DESCRIPTION, DEVICE_VERSION,
-        DEVICE_MANUFACTURER, DEVICE_URI);    
+        DEVICE_MANUFACTURER, DEVICE_URI);
 
     // информация о подключенных моторах
     // init_stepper(stepper* smotor,  char* name, 
@@ -130,7 +130,7 @@ void setup() {
 
 void loop1() {
 
-    if(is_stepper_cycle_running()) {
+    if(stepper_is_cycle_running()) {
         Serial.print("X.pos=");
         Serial.print(sm_x.current_pos, DEC);
         Serial.print(", Y.pos=");

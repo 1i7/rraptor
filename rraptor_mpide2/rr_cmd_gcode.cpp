@@ -31,7 +31,7 @@ int cmd_gcode_g0(char motor_names[], double cvalues[], int pcount, char* reply_b
         Serial.println();
     #endif // DEBUG_SERIAL
         
-    if(is_stepper_cycle_running()) {
+    if(stepper_is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -59,7 +59,7 @@ int cmd_gcode_g0(char motor_names[], double cvalues[], int pcount, char* reply_b
         
         if(prepared) {
             // запустить шаги
-            start_stepper_cycle();
+            stepper_start_cycle();
             
             // команда выполнена (но работа моторов только началась!)
             strcpy(reply_buffer, REPLY_OK);
@@ -94,7 +94,7 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int pcount, double f, ch
         Serial.println();
     #endif // DEBUG_SERIAL
         
-    if(is_stepper_cycle_running()) {
+    if(stepper_is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -117,7 +117,7 @@ int cmd_gcode_g01(char motor_names[], double cvalues[], int pcount, double f, ch
         
         if(prepared) {
             // запустить шаги
-            start_stepper_cycle();
+            stepper_start_cycle();
             
             // команда выполнена (но работа моторов только началась!)
             strcpy(reply_buffer, REPLY_OK);
@@ -150,7 +150,7 @@ int cmd_gcode_g02(char pnames[], double pvalues[], int pcount, char* reply_buffe
         Serial.println("cmd_gcode_g02");
     #endif // DEBUG_SERIAL
     
-    if(is_stepper_cycle_running()) {
+    if(stepper_is_cycle_running()) {
         // устройство занято
         strcpy(reply_buffer, REPLY_BUSY);
     } else {
@@ -258,7 +258,7 @@ int cmd_gcode_g02(char pnames[], double pvalues[], int pcount, char* reply_buffe
         
         if(prepared) {
             // запустить шаги
-            start_stepper_cycle();
+            stepper_start_cycle();
             
             // команда выполнена (но работа моторов только началась!)
             strcpy(reply_buffer, REPLY_OK);
